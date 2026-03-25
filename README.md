@@ -1,4 +1,4 @@
-# UMARV Navigation Stack 2025-2026
+# UMARV Maverick 2025-2026
 
 ## Warning: Intellisense
 Always build with `--symlink-install`. Without it, control-clicking a dependency in VSCode will take you to a copy
@@ -18,25 +18,25 @@ You can install all dependencies by running
 ## Running the stack
 Run each of these commands in separate terminals:
 ```bash
-ros2 launch nav_bringup base.launch.py mode:=<mode> [simulation:=true] [course:=<course>]
+ros2 launch bringup base.launch.py mode:=<mode> [simulation:=true] [course:=<course>]
 ```
 ```bash
-ros2 launch nav_bringup teleop.launch.py controller:=<ps4/xbox>
+ros2 launch bringup teleop.launch.py controller:=<ps4/xbox>
 ```
 and / or
 ```bash
-ros2 launch nav_bringup navigation.launch.py mode:=<mode> [course:=<course>]
+ros2 launch bringup navigation.launch.py mode:=<mode> [course:=<course>]
 ```
 
 ### Mode and Course Configuration
-See [nav_bringup/README.md](nav_bringup/README.md) for mode and course configuration 
+See [bringup/README.md](bringup/README.md) for mode and course configuration 
 details.
 
 
 ### Visualization
 Run in a separate terminal:
 ```bash
-ros2 launch nav_bringup visualization.launch.py
+ros2 launch bringup visualization.launch.py
 ```
 This sends robot data to Foxglove. Then open [Foxglove Studio](https://foxglove.dev/download) and connect to 
 `ws://localhost:8765`.
