@@ -1,3 +1,3 @@
-[submodule "vectornav"]
-	path = vectornav
+[submodule "src/hardware/vectornav"]
+	path = src/hardware/vectornav
 	url = git@github.com:umigv/vectornav.git
