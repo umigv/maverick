@@ -16,18 +16,6 @@ fi
 
 echo "==> Creating ROS 2 Python package: $PKG_NAME"
 
-export ROS_VERSION=2
-export ROS_DISTRO="${ROS_DISTRO:=humble}"
-ROS_SETUP="/opt/ros/${ROS_DISTRO}/setup.bash"
-if [[ ! -f "$ROS_SETUP" ]]; then
-  echo "ERROR: ROS setup not found at $ROS_SETUP"
-  exit 1
-fi
-
-set +u
-source "$ROS_SETUP"
-set -u
-
 ros2 pkg create \
   --build-type ament_python \
   --license Apache-2.0 \

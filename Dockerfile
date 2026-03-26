@@ -2,13 +2,14 @@ FROM ros:humble
 
 ENV ROS_HOME=/opt/ros_home
 
-WORKDIR /tmp/src/nav_stack
+WORKDIR /tmp/maverick
 COPY . .
 
 RUN apt-get update \
- && apt-get install -y python3-pip \
+ && xargs apt-get install -y < /tmp/maverick/tooling.apt \
+ && curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin \
  && rosdep update \
- && rosdep install --from-paths /tmp/src/nav_stack --ignore-src -r -y \
- && rm -rf /tmp/src
+ && rosdep install --from-paths /tmp/maverick --ignore-src -r -y \
+ && rm -rf /tmp/maverick
 
 WORKDIR /

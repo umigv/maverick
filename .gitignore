@@ -1,5 +1,7 @@
 # Vscode
 .vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
 
 # Python packaging
 *.egg-info/
@@ -20,6 +22,9 @@ __pycache__/
 
 # Editable install artifacts
 pip-wheel-metadata/
+
+# Generated
+pyrightconfig.json
 
 # ROS2
 build/

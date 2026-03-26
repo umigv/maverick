@@ -23,15 +23,9 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    defaults:
-      run:
-        working-directory: ws/src/${{ github.event.repository.name }}
-
     steps:
-      - name: Checkout into repo
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          path: ws/src/${{ github.event.repository.name }}
 
       - name: Install any new deps (top-up)
         run: rosdep install --from-paths . --ignore-src -r -y
