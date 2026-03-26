@@ -6,16 +6,16 @@ set -euo pipefail
 # Example: ./remove-device-alias.sh imu
 
 if [[ $# -ne 1 ]]; then
-  echo "Usage: $0 <alias> (e.g. $0 imu)"
-  exit 1
+    echo "Usage: $0 <alias> (e.g. $0 imu)"
+    exit 1
 fi
 
 ALIAS="$1"
 RULES_FILE="/etc/udev/rules.d/99-${ALIAS}.rules"
 
 if [[ ! -f "$RULES_FILE" ]]; then
-  echo "ERROR: No rule found for alias '$ALIAS' (expected $RULES_FILE)."
-  exit 1
+    echo "ERROR: No rule found for alias '$ALIAS' (expected $RULES_FILE)."
+    exit 1
 fi
 
 echo "Removing rule at $RULES_FILE:"
