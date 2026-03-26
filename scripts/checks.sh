@@ -74,6 +74,7 @@ if [[ "${#ONLY_PKGS[@]}" -gt 0 && "${#IGNORE_PKGS[@]}" -gt 0 ]]; then
 fi
 
 echo "==> Discovering ROS packages"
+# shellcheck disable=SC2016
 mapfile -t SUBMODULE_DIRS < <(git submodule foreach --quiet 'echo $displaypath' 2>/dev/null || true)
 
 mapfile -t ALL_PKG_DIRS < <(
