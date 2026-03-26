@@ -5,6 +5,9 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 cd "$ROOT"
 
+command -v shfmt >/dev/null || { echo "shfmt not found. Run scripts/setup.sh"; exit 1; }
+command -v ruff >/dev/null || { echo "ruff not found. Run scripts/setup.sh"; exit 1; }
+
 ONLY_PKGS=()
 IGNORE_PKGS=()
 
@@ -18,7 +21,7 @@ Options:
 
 Examples:
   $0
-  $0 --only nav_utils occupancy_grid_transform
+  $0 --only utils occupancy_grid_transform
   $0 --ignore perception cv_stack
 EOF
   exit 1
@@ -61,8 +64,7 @@ TARGETS=(".")
 if [[ "${#ONLY_PKGS[@]}" -gt 0 || "${#IGNORE_PKGS[@]}" -gt 0 ]]; then
   echo "==> Discovering ROS packages"
   mapfile -t ALL_PKG_DIRS < <(
-    find . -mindepth 2 -maxdepth 2 -type f -name package.xml -print \
-      | sed 's|^\./||' \
+    find src -type f -name package.xml -print \
       | xargs -n1 dirname \
       | sort -u
   )
@@ -106,6 +108,9 @@ if [[ "${#ONLY_PKGS[@]}" -gt 0 || "${#IGNORE_PKGS[@]}" -gt 0 ]]; then
 
   TARGETS=("${PKG_DIRS[@]}")
 fi
+
+echo "==> shfmt"
+shfmt -w scripts/
 
 echo "==> Ruff lint (fix: imports + safe fixes)"
 FIX_SUMMARY="$(ruff check --fix --exit-zero "${TARGETS[@]}" 2>/dev/null | grep -E 'fixed' || true)"

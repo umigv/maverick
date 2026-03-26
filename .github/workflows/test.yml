@@ -23,28 +23,32 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    defaults:
-      run:
-        working-directory: ws/src/${{ github.event.repository.name }}
+    env:
+      COLCON_DEFAULTS_FILE: colcon_defaults.yaml
 
     steps:
-      - name: Checkout into repo
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          path: ws/src/${{ github.event.repository.name }}
 
       - name: Install any new deps (top-up)
         run: rosdep install --from-paths . --ignore-src -r -y
 
-      - name: Build (repo packages)
-        run: bash scripts/build.sh
+      - name: Build
+        shell: bash
+        run: |
+          source /opt/ros/humble/setup.bash
+          just build
 
-      - name: Test (repo packages)
-        run: bash scripts/test.sh
+      - name: Test
+        shell: bash
+        run: |
+          source /opt/ros/humble/setup.bash
+          source install/setup.bash
+          just test
 
       - name: Upload logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: colcon-logs
-          path: ws/log
+          path: log

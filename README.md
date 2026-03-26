@@ -1,14 +1,5 @@
 # UMARV Maverick 2025-2026
 
-## Warning: Intellisense
-Always build with `--symlink-install`. Without it, control-clicking a dependency in VSCode will take you to a copy
-instead of the source file, and data files (launch files, config, course JSON) written to the install directory will
-not reflect back to the source tree. For example:
-```bash
-colcon build --symlink-install
-source install/setup.bash
-```
-
 ## Dependencies
 You can install all dependencies by running
 ```bash
@@ -16,6 +7,11 @@ You can install all dependencies by running
 ```
 
 ## Running the stack
+To build the stack, run 
+```
+just build
+```
+
 Run each of these commands in separate terminals:
 ```bash
 ros2 launch bringup base.launch.py mode:=<mode> [simulation:=true] [course:=<course>]

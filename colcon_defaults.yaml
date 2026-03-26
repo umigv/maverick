@@ -1,0 +1,6 @@
+build:
+  symlink-install: true
+  cmake-args:
+    - -GNinja
+    - -DCMAKE_C_COMPILER_LAUNCHER=ccache
+    - -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
