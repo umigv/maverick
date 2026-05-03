@@ -2,10 +2,10 @@ from statistics import median
 
 import rclpy
 import serial
+import utils.qos
 from geometry_msgs.msg import Twist
 from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
-from rclpy.qos import QoSDurabilityPolicy, QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
 from std_msgs.msg import String
 from std_srvs.srv import SetBool
 
@@ -35,12 +35,7 @@ class RecoveryExecutable(Node):
             String,
             "state",
             self.listener_callback,
-            QoSProfile(
-                history=QoSHistoryPolicy.KEEP_LAST,
-                depth=1,
-                reliability=QoSReliabilityPolicy.RELIABLE,
-                durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
-            ),
+            utils.qos.LATCHED,
         )
 
         self.ultrasoundReading = 2000.0

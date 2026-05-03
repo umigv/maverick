@@ -3,6 +3,7 @@ import typing
 
 import rclpy
 import serial
+import utils.qos
 from geometry_msgs.msg import Twist
 from rclpy.node import Node
 from rclpy.time import Time
@@ -27,7 +28,7 @@ class LedDriver(Node):
         self.config = LedDriverConfig()
 
         self.create_subscription(Twist, "teleop_cmd_vel", self.teleop_callback, 10)
-        self.create_subscription(String, "state", self.state_callback, 10)
+        self.create_subscription(String, "state", self.state_callback, utils.qos.LATCHED)
 
         self.last_teleop_time: Time | None = None
         self.state: str | None = None
