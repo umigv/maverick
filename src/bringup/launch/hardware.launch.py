@@ -21,31 +21,63 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         {"mapFrameId": frames["map_frame"]},
     ]
 
+    vectornav_params: list | None = None
     match mode:
         case "autonav":
             datum = gps_file["datum"]
-            params = [*base_params, {"datum": [datum["latitude"], datum["longitude"], datum["altitude"]]}]
+            vectornav_params = [*base_params, {"datum": [datum["latitude"], datum["longitude"], datum["altitude"]]}]
         case "self_drive":
-            params = base_params
+            vectornav_params = base_params
         case "nav_test":
-            return []
+            pass
         case _:
             assert_never(mode)
 
     return [
         Node(
-            package="vectornav_driver",
-            executable="vectornav_driver",
-            name="vectornav_driver",
+            package="estop_driver",
+            executable="estop_driver",
+            name="estop_driver",
             output="screen",
-            parameters=params,
-            remappings=[
-                ("vectornav/raw/imu", "imu/raw"),
-                ("vectornav/raw/navsatfix", "gps/raw"),
-                ("vectornav/raw/twist_with_covariance_stamped", "ins_vel/raw"),
-                ("vectornav/raw/odometry", "odom/global"),
+        ),
+        Node(
+            package="led_driver",
+            executable="led_driver",
+            name="led_driver",
+            output="screen",
+        ),
+        Node(
+            package="odrive_driver",
+            executable="odrive_driver",
+            name="odrive_driver",
+            output="screen",
+            parameters=[
+                f"{bringup_share()}/config/hardware/odrive_driver.yaml",
+                {"frame_id": frames["base_frame"]},
             ],
-        )
+            remappings=[
+                ("enc_vel", "enc_vel/raw"),
+            ],
+        ),
+        *(
+            [
+                Node(
+                    package="vectornav_driver",
+                    executable="vectornav_driver",
+                    name="vectornav_driver",
+                    output="screen",
+                    parameters=vectornav_params,
+                    remappings=[
+                        ("vectornav/raw/imu", "imu/raw"),
+                        ("vectornav/raw/navsatfix", "gps/raw"),
+                        ("vectornav/raw/twist_with_covariance_stamped", "ins_vel/raw"),
+                        ("vectornav/raw/odometry", "odom/global"),
+                    ],
+                ),
+            ]
+            if vectornav_params is not None
+            else []
+        ),
     ]
 
 
@@ -57,9 +89,9 @@ def generate_launch_description() -> LaunchDescription:
                 choices=MODES,
                 description=format_mode_description(
                     {
-                        "autonav": "Vectornav output + odom",
-                        "self_drive": "Vectornav output",
-                        "nav_test": "no sensors",
+                        "autonav": "estop + LED + ODrive + Vectornav + odom",
+                        "self_drive": "estop + LED + ODrive + Vectornav",
+                        "nav_test": "estop + LED + ODrive",
                     }
                 ),
             ),

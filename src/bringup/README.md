@@ -101,6 +101,7 @@ ros2 launch bringup hardware.launch.py mode:=<mode> [course:=<course>]
 - `course`: Course profile in `courses/` to load GPS datum from, default `default` (required for `autonav`)
 
 ### Published Topics
+- `enc_vel/raw` (`geometry_msgs/TwistWithCovarianceStamped`) - Encoder velocity from ODrive (all modes)
 - `imu/raw` (`sensor_msgs/Imu`) - Raw IMU data from VectorNav (`autonav`, `self_drive`)
 - `gps/raw` (`sensor_msgs/NavSatFix`) - GPS/INS fix from VectorNav (`autonav`, `self_drive`)
 - `ins_vel/raw` (`geometry_msgs/TwistWithCovarianceStamped`) - INS body-frame velocity (`autonav`, `self_drive`)
@@ -198,10 +199,12 @@ ros2 launch bringup navigation.launch.py mode:=<mode> [course:=<course>]
 - `goal` (`geometry_msgs/PointStamped`) - Goal for path planning (`autonav` only)
 - `gps_waypoint` (`geometry_msgs/PointStamped`) - Current GPS waypoint target (`autonav` only)
 - `nav_cmd_vel` (`geometry_msgs/Twist`) - Velocity command consumed by twist_mux
+- `recovery_cmd_vel` (`geometry_msgs/Twist`) - Recovery velocity command consumed by twist_mux (all modes)
 
 ### Service Clients
-- `fromLL` (`robot_localization/FromLL`) - Converts GPS coordinates to map-frame points; called at startup by 
+- `fromLL` (`robot_localization/FromLL`) - Converts GPS coordinates to map-frame points; called at startup by
 autonav_goal_selection (`autonav` only)
+- `state/set_recovery` (`std_srvs/SetBool`) - Signals recovery state transitions (all modes)
 
 
 ## teleop.launch.py
