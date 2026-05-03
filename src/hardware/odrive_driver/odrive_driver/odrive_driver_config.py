@@ -63,7 +63,7 @@ class CovarianceConfig:
 
     Variance scales with speed to reflect increased uncertainty at higher velocities:
         linear_variance  = linear_variance_static  + linear_variance_gain  * linear_mps²
-        angular_variance = angular_variance_static + angular_variance_gain * 
+        angular_variance = angular_variance_static + angular_variance_gain *
                            (linear_mps² / track_width_m² + angular_radps²)
 
     Attributes:
@@ -120,9 +120,9 @@ class OdriveDriverConfig:
             raise ValueError("OdriveDriverConfig: timestamp_delay_s must be >= 0")
 
     def twist_covariance(self, linear_mps: float, angular_radps: float) -> list[float]:
-        linear_variance_dynamic = self.covariance.linear_variance_gain * (linear_mps ** 2)
+        linear_variance_dynamic = self.covariance.linear_variance_gain * (linear_mps**2)
         angular_variance_dynamic = self.covariance.angular_variance_gain * (
-            linear_mps ** 2 / self.geometry.track_width_m ** 2 + angular_radps ** 2
+            linear_mps**2 / self.geometry.track_width_m**2 + angular_radps**2
         )
 
         linear_variance = self.covariance.linear_variance_static + linear_variance_dynamic
@@ -132,7 +132,7 @@ class OdriveDriverConfig:
         cov[0] = linear_variance
         cov[35] = angular_variance
         return cov
-    
+
     def motor_rps_to_twist(self, left_motor_rps: float, right_motor_rps: float) -> tuple[float, float]:
         left_wheel_mps = left_motor_rps * self.geometry.wheel_mps_per_motor_rps * self.left_odrive.polarity
         right_wheel_mps = right_motor_rps * self.geometry.wheel_mps_per_motor_rps * self.right_odrive.polarity

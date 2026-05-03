@@ -1,17 +1,17 @@
+import odrive
 import rclpy
+from geometry_msgs.msg import Twist, TwistWithCovariance, TwistWithCovarianceStamped, Vector3
+from odrive.enums import AxisState, ControlMode
 from rclpy.duration import Duration
 from rclpy.node import Node
-from geometry_msgs.msg import TwistWithCovarianceStamped, TwistWithCovariance, Twist, Vector3
 from std_msgs.msg import Header
-import odrive
-from odrive.enums import AxisState, ControlMode
 
 from .odrive_driver_config import CovarianceConfig, GeometryConfig, OdriveConfig, OdriveDriverConfig
 
 
 class OdriveDriver(Node):
     def __init__(self):
-        super().__init__('odrive_driver')
+        super().__init__("odrive_driver")
 
         self.config = OdriveDriverConfig(
             left_odrive=OdriveConfig(serial="395534753331"),
@@ -24,15 +24,15 @@ class OdriveDriver(Node):
         self.odrive_left = odrive.find_any(serial_number=self.config.left_odrive.serial)
         self.initialize_odrive(self.odrive_left)
         self.get_logger().info("Found left ODrive")
-        
+
         self.get_logger().info(f"Finding right ODrive (serial number {self.config.right_odrive.serial})...")
         self.odrive_right = odrive.find_any(serial_number=self.config.right_odrive.serial)
         self.initialize_odrive(self.odrive_right)
         self.get_logger().info("Found right ODrive")
 
-        self.create_subscription(Twist, 'cmd_vel', self.cmd_vel_callback, 10)
+        self.create_subscription(Twist, "cmd_vel", self.cmd_vel_callback, 10)
 
-        self.publisher = self.create_publisher(TwistWithCovarianceStamped, 'enc_vel', 10)
+        self.publisher = self.create_publisher(TwistWithCovarianceStamped, "enc_vel", 10)
 
         self.create_timer(self.config.sample_time_s, self.publish_enc_vel)
 
@@ -51,16 +51,18 @@ class OdriveDriver(Node):
 
         # Back-date to compensate for encoder read and processing latency
         timestamp_adjustment = self.get_clock().now() - Duration(nanoseconds=int(self.config.timestamp_delay_s * 1e9))
-        self.publisher.publish(TwistWithCovarianceStamped(
-            header=Header(stamp=timestamp_adjustment.to_msg(), frame_id=self.config.frame_id),
-            twist=TwistWithCovariance(
-                twist=Twist(
-                    linear=Vector3(x=linear_mps, y=0.0, z=0.0),
-                    angular=Vector3(x=0.0, y=0.0, z=angular_radps),
+        self.publisher.publish(
+            TwistWithCovarianceStamped(
+                header=Header(stamp=timestamp_adjustment.to_msg(), frame_id=self.config.frame_id),
+                twist=TwistWithCovariance(
+                    twist=Twist(
+                        linear=Vector3(x=linear_mps, y=0.0, z=0.0),
+                        angular=Vector3(x=0.0, y=0.0, z=angular_radps),
+                    ),
+                    covariance=self.config.twist_covariance(linear_mps, angular_radps),
                 ),
-                covariance=self.config.twist_covariance(linear_mps, angular_radps),
-            ),
-        ))
+            )
+        )
 
     def initialize_odrive(self, odrv) -> None:
         odrv.axis0.requested_state = AxisState.CLOSED_LOOP_CONTROL
@@ -75,10 +77,11 @@ class OdriveDriver(Node):
 
     def is_robot_enabled(self) -> bool:
         try:
-            with open(self.config.estop_file_path, "r") as f:
-                return f.read().strip() != "1" # only "1" stops the robot, everything else is enabled
+            with open(self.config.estop_file_path) as f:
+                return f.read().strip() != "1"  # only "1" stops the robot, everything else is enabled
         except Exception:
-            return True # if the e-stop file doesn't exist / is corrupted we assume e-stop is off
+            return True  # if the e-stop file doesn't exist / is corrupted we assume e-stop is off
+
 
 def main() -> None:
     rclpy.init()

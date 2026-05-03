@@ -1,4 +1,5 @@
 import time
+import typing
 
 import rclpy
 import serial
@@ -13,7 +14,7 @@ from .led_driver_config import LedDriverConfig
 class LedDriver(Node):
     LED_ESTOP = 6  # Flashing red
     LED_TELEOP = 1  # Solid blue
-    LED_STATE = {
+    LED_STATE: typing.ClassVar[dict[str, int]] = {
         "normal": 2,  # Flashing blue
         "no_mans_land": 3,  # Flashing green
         "recovery": 4,  # Flashing yellow
@@ -21,18 +22,18 @@ class LedDriver(Node):
     LED_UNKNOWN = 9  # Rainbow
 
     def __init__(self) -> None:
-        super().__init__('led_driver')
+        super().__init__("led_driver")
 
         self.config = LedDriverConfig()
 
-        self.create_subscription(Twist, 'teleop_cmd_vel', self.teleop_callback, 10)
-        self.create_subscription(String, 'state', self.state_callback, 10)
+        self.create_subscription(Twist, "teleop_cmd_vel", self.teleop_callback, 10)
+        self.create_subscription(String, "state", self.state_callback, 10)
 
         self.last_teleop_time: Time | None = None
         self.state: str | None = None
         self.last_sent: int | None = None
         self.serial: serial.Serial | None = None
-        
+
         try:
             self.serial = serial.Serial(str(self.config.serial_port), baudrate=self.config.baud_rate, timeout=1)
             self.get_logger().info(f"Connected to {self.config.serial_port}")
@@ -54,7 +55,7 @@ class LedDriver(Node):
             if line == "READY":
                 self.get_logger().info("READY received")
                 return
-        
+
         raise RuntimeError(f"Did not receive READY within {self.config.ready_timeout_s}s")
 
     def teleop_callback(self, msg):
@@ -65,15 +66,15 @@ class LedDriver(Node):
 
     def is_robot_enabled(self) -> bool:
         try:
-            with open(self.config.estop_file_path, "r") as f:
-                return f.read().strip() != "1" # only "1" stops the robot, everything else is enabled
+            with open(self.config.estop_file_path) as f:
+                return f.read().strip() != "1"  # only "1" stops the robot, everything else is enabled
         except Exception:
-            return True # if the e-stop file doesn't exist / is corrupted we assume e-stop is off
+            return True  # if the e-stop file doesn't exist / is corrupted we assume e-stop is off
 
     def is_teleop_active(self) -> bool:
         if self.last_teleop_time is None:
             return False
-        
+
         elapsed = (self.get_clock().now() - self.last_teleop_time).nanoseconds / 1e9
         return elapsed <= self.config.teleop_timeout_s
 
