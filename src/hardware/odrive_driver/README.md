@@ -45,14 +45,14 @@ Before running any script, make sure `odrivetool` and this node is closed first 
 
 Calibrate the odrive every time they turn on after a power cycle.
 ```sh
-python3 scripts/calibrate_odrive.py
+just calibrate-odrive
 ```
 You should hear a beep when calibration starts. The indicator light will flash green while calibrating and be solid blue
 when done. If the indicator light is red, run the script again.
 
 If an ODrive errors (flashing red) at runtime:
 ```sh
-python3 scripts/clear_odrive_errors.py
+just clear-odrive-errors
 ```
 The indicator light should stop flashing red.
 

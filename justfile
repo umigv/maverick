@@ -33,6 +33,12 @@ test-pkg pkg:
     colcon test --packages-select {{pkg}}
     colcon test-result --verbose
 
+calibrate-odrive:
+    python3 scripts/calibrate_odrive.py
+
+clear-odrive-errors:
+    python3 scripts/clear_odrive_errors.py
+
 clean:
     rm -rf build install log
 
