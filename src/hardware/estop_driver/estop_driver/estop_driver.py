@@ -2,6 +2,7 @@ import os
 
 import rclpy
 import serial
+import utils.config
 from rclpy.node import Node
 
 from .estop_driver_config import EstopDriverConfig
@@ -11,7 +12,7 @@ class EstopDriver(Node):
     def __init__(self) -> None:
         super().__init__("estop_driver")
 
-        self.config = EstopDriverConfig()
+        self.config = utils.config.load(self, EstopDriverConfig)
 
         self.current_state: str | None = None
         self.read_buffer: bytes = b""

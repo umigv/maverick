@@ -1,24 +1,20 @@
 import odrive
 import rclpy
+import utils.config
 from geometry_msgs.msg import Twist, TwistWithCovariance, TwistWithCovarianceStamped, Vector3
 from odrive.enums import AxisState, ControlMode
 from rclpy.duration import Duration
 from rclpy.node import Node
 from std_msgs.msg import Header
 
-from .odrive_driver_config import CovarianceConfig, GeometryConfig, OdriveConfig, OdriveDriverConfig
+from .odrive_driver_config import OdriveDriverConfig
 
 
 class OdriveDriver(Node):
     def __init__(self):
         super().__init__("odrive_driver")
 
-        self.config = OdriveDriverConfig(
-            left_odrive=OdriveConfig(serial="395534753331"),
-            right_odrive=OdriveConfig(serial="384934743539"),
-            geometry=GeometryConfig(),
-            covariance=CovarianceConfig(),
-        )
+        self.config = utils.config.load(self, OdriveDriverConfig)
 
         self.get_logger().info(f"Finding left ODrive (serial number {self.config.left_odrive.serial})...")
         self.odrive_left = odrive.find_any(serial_number=self.config.left_odrive.serial)

@@ -3,6 +3,7 @@ import typing
 
 import rclpy
 import serial
+import utils.config
 import utils.qos
 from geometry_msgs.msg import Twist
 from rclpy.node import Node
@@ -25,7 +26,7 @@ class LedDriver(Node):
     def __init__(self) -> None:
         super().__init__("led_driver")
 
-        self.config = LedDriverConfig()
+        self.config = utils.config.load(self, LedDriverConfig)
 
         self.create_subscription(Twist, "teleop_cmd_vel", self.teleop_callback, 10)
         self.create_subscription(String, "state", self.state_callback, utils.qos.LATCHED)

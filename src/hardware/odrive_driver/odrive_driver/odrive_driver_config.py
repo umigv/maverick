@@ -13,7 +13,7 @@ class OdriveConfig:
     """
 
     serial: str
-    polarity: int = 1
+    polarity: int
 
     def __post_init__(self) -> None:
         if not self.serial:
@@ -32,9 +32,9 @@ class GeometryConfig:
         gear_ratio: Motor-to-wheel gear ratio (motor revolutions per wheel revolution).
     """
 
-    track_width_m: float = 0.764
-    wheel_diameter_m: float = 0.18423
-    gear_ratio: float = 170.0 / 9.0
+    track_width_m: float
+    wheel_diameter_m: float
+    gear_ratio: float
 
     def __post_init__(self) -> None:
         if self.track_width_m <= 0:
