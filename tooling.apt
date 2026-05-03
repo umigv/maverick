@@ -4,3 +4,4 @@ ninja-build
 python3-pip
 shellcheck
 shfmt
+clang-format
