@@ -30,3 +30,8 @@ pyrightconfig.json
 build/
 install/
 log/
+
+# just extract / just publish scratch files
+/*.yaml
+/*.yml
+!colcon_defaults.yaml
