@@ -8,11 +8,11 @@ test *args:
     colcon test {{args}}
     colcon test-result --verbose
 
-lint *args:
-    scripts/format-lint.sh {{args}}
+format *args:
+    scripts/format.sh {{args}}
 
-check *args:
-    scripts/checks.sh {{args}}
+lint *args:
+    scripts/lint.sh {{args}}
 
 alias device name:
     scripts/create-device-alias.sh {{device}} {{name}}

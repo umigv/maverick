@@ -108,7 +108,7 @@ if [[ "${#ONLY_PKGS[@]}" -gt 0 || "${#IGNORE_PKGS[@]}" -gt 0 ]]; then
     fi
 
     if [[ "${#PKG_DIRS[@]}" -eq 0 ]]; then
-        echo "ERROR: No packages left to lint after filtering"
+        echo "ERROR: No packages left to format after filtering"
         exit 1
     fi
 
