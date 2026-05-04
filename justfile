@@ -9,22 +9,22 @@ test *args:
     colcon test-result --verbose
 
 format *args:
-    scripts/format.sh {{args}}
+    python3 scripts/format.py {{args}}
 
 lint *args:
-    scripts/lint.sh {{args}}
+    python3 scripts/lint.py {{args}}
 
 alias device name:
-    scripts/create-device-alias.sh {{device}} {{name}}
+    python3 scripts/create_device_alias.py {{device}} {{name}}
 
 unalias name:
-    scripts/remove-device-alias.sh {{name}}
+    python3 scripts/remove_device_alias.py {{name}}
 
-new-pkg dir pkg:
-    cd {{dir}} && {{justfile_directory()}}/scripts/create-package.sh {{pkg}}
+new-pkg dir pkg type='python':
+    cd {{dir}} && python3 {{justfile_directory()}}/scripts/create_package.py {{pkg}} --type {{type}}
 
 setup:
-    scripts/setup.sh
+    python3 scripts/setup.py
 
 build-pkg pkg:
     colcon build --packages-up-to {{pkg}}
@@ -43,29 +43,7 @@ clean:
     rm -rf build install log
 
 extract topic output:
-    #!/usr/bin/env bash
-    set -euo pipefail
-
-    type="$(ros2 topic type "{{topic}}")"
-    {
-        echo "# ros2_type: ${type}"
-        ros2 topic echo --once --full-length "{{topic}}"
-    } > "{{output}}"
+    python3 scripts/extract.py {{topic}} {{output}}
 
 publish topic input rate='once':
-    #!/usr/bin/env bash
-    set -euo pipefail
-
-    type="$(sed -n 's/^# ros2_type:[[:space:]]*//p' "{{input}}" | head -n1)"
-    payload="$(sed -e '1{/^# ros2_type:[[:space:]]*/d;}' -e '/^---$/d' "{{input}}")"
-
-    if [[ -z "${type}" ]]; then
-        echo "Error: could not find '# ros2_type: ...' header in {{input}}" >&2
-        exit 1
-    fi
-
-    if [[ "{{rate}}" == "once" ]]; then
-        ros2 topic pub --once "{{topic}}" "${type}" "${payload}"
-    else
-        ros2 topic pub -r "{{rate}}" "{{topic}}" "${type}" "${payload}"
-    fi
+    python3 scripts/publish.py {{topic}} {{input}} {{rate}}
