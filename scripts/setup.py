@@ -83,6 +83,9 @@ def main() -> None:
     log("Generating pyrightconfig.json")
     run(sys.executable, str(ROOT / "scripts" / "generate_pyrightconfig.py"))
 
+    log("Configuring git hooks")
+    run("git", "config", "core.hooksPath", "hooks")
+
     log("Setup complete")
     note("Run source ~/.bashrc for direnv hook to take effect")
 
