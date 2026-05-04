@@ -20,7 +20,8 @@ alias device name:
 unalias name:
     python3 scripts/remove_device_alias.py {{name}}
 
-new-pkg dir pkg type='python':
+### type: python | cpp
+new dir pkg type='python':
     cd {{dir}} && python3 {{justfile_directory()}}/scripts/create_package.py {{pkg}} --type {{type}}
 
 setup:
@@ -43,7 +44,7 @@ clean:
     rm -rf build install log
 
 extract topic output:
-    python3 scripts/extract.py {{topic}} {{output}}
+    python3 scripts/extract_message.py {{topic}} {{output}}
 
 publish topic input rate='once':
-    python3 scripts/publish.py {{topic}} {{input}} {{rate}}
+    python3 scripts/publish_message.py {{topic}} {{input}} {{rate}}

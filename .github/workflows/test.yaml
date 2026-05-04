@@ -11,20 +11,17 @@ on:
     branches: [main]
 
 concurrency:
-  group: test-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: test-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  ros-tests:
+  test:
     runs-on: ubuntu-22.04
     container:
       image: ghcr.io/${{ github.repository }}:latest
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-
-    env:
-      COLCON_DEFAULTS_FILE: colcon_defaults.yaml
 
     steps:
       - name: Checkout
