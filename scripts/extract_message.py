@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-import subprocess
 import sys
+
+from common import run
 
 
 def main() -> None:
@@ -10,22 +11,11 @@ def main() -> None:
 
     topic, output = sys.argv[1], sys.argv[2]
 
-    ros_type = subprocess.run(
-        ["ros2", "topic", "type", topic],
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout.strip()
-
-    echo_output = subprocess.run(
-        ["ros2", "topic", "echo", "--once", "--full-length", topic],
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout
+    ros_type = run("ros2", "topic", "type", topic, capture_output=True)
+    echo_output = run("ros2", "topic", "echo", "--once", "--full-length", topic, capture_output=True)
 
     with open(output, "w") as f:
-        f.write(f"# ros2_type: {ros_type}\n")
+        f.write(f"# ros2_type: {ros_type.strip()}\n")
         f.write(echo_output)
 
 

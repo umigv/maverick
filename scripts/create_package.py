@@ -2,9 +2,10 @@
 import argparse
 import re
 import shutil
-import subprocess
 import sys
 from pathlib import Path
+
+from common import run
 
 BUILD_TYPES = {"python": "ament_python", "cpp": "ament_cmake"}
 
@@ -27,10 +28,7 @@ def main() -> None:
 
     print(f"==> Creating ROS 2 {args.type} package: {pkg_name}")
 
-    subprocess.run(
-        ["ros2", "pkg", "create", "--build-type", BUILD_TYPES[args.type], "--license", "Apache-2.0", pkg_name],
-        check=True,
-    )
+    run("ros2", "pkg", "create", "--build-type", BUILD_TYPES[args.type], "--license", "Apache-2.0", pkg_name)
 
     pkg_dir = Path(pkg_name)
     (pkg_dir / "LICENSE").unlink(missing_ok=True)

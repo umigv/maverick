@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+from common import ROOT, discover_packages
 
 
 def get_staged_files() -> list[Path]:
@@ -18,17 +18,7 @@ def get_staged_files() -> list[Path]:
     return [Path(line) for line in result.stdout.splitlines() if line]
 
 
-def discover_packages() -> dict[Path, str]:
-    """Return a map of package directory (relative to ROOT) -> package name."""
-    pkgs: dict[Path, str] = {}
-    for p in (ROOT / "src").rglob("package.xml"):
-        pkg_dir = p.parent.relative_to(ROOT)
-        pkgs[pkg_dir] = pkg_dir.name
-    return pkgs
-
-
 def file_to_package(filepath: Path, pkg_dirs: list[Path]) -> str | None:
-    """Map a staged file path to the package name it belongs to."""
     if filepath.parts[0] == "scripts":
         return "scripts"
 
@@ -44,11 +34,11 @@ def main() -> int:
     if not staged:
         return 0
 
-    pkg_map = discover_packages()
+    pkg_dirs = discover_packages()
 
     affected: set[str] = set()
     for f in staged:
-        pkg = file_to_package(f, list(pkg_map.keys()))
+        pkg = file_to_package(f, pkg_dirs)
         if pkg is not None:
             affected.add(pkg)
 

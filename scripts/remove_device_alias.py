@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import subprocess
 import sys
 from pathlib import Path
+
+from common import run
 
 
 def main() -> None:
@@ -19,9 +20,9 @@ def main() -> None:
     print(f"Removing rule at {rules_file}:")
     print(f"  {rules_file.read_text().strip()}")
 
-    subprocess.run(["sudo", "rm", str(rules_file)], check=True)
-    subprocess.run(["sudo", "udevadm", "control", "--reload-rules"], check=True)
-    subprocess.run(["sudo", "udevadm", "trigger"], check=True)
+    run("sudo", "rm", str(rules_file))
+    run("sudo", "udevadm", "control", "--reload-rules")
+    run("sudo", "udevadm", "trigger")
 
     print(f"Udev rule removed. /dev/{alias} will no longer be created.")
 

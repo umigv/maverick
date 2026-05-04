@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import subprocess
 import sys
 from pathlib import Path
+
+from common import run
 
 
 def main() -> None:
@@ -21,13 +22,8 @@ def main() -> None:
         print(f"Replacing existing rule at {rules_file}:")
         print(f"  {rules_file.read_text().strip()}")
 
-    result = subprocess.run(
-        ["udevadm", "info", "--query=property", f"--name={dev}"],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    props = dict(line.split("=", 1) for line in result.stdout.splitlines() if "=" in line)
+    output = run("udevadm", "info", "--query=property", f"--name={dev}", capture_output=True)
+    props = dict(line.split("=", 1) for line in output.splitlines() if "=" in line)
 
     vendor = props.get("ID_VENDOR_ID", "")
     product = props.get("ID_MODEL_ID", "")
@@ -48,7 +44,7 @@ def main() -> None:
     else:
         rule = f'SUBSYSTEM=="tty", ATTRS{{idVendor}}=="{vendor}", ATTRS{{idProduct}}=="{product}", SYMLINK+="{alias}", MODE="0666"'
 
-    subprocess.run(["sudo", "tee", str(rules_file)], input=rule + "\n", text=True, check=True, capture_output=True)
+    run("sudo", "tee", str(rules_file), stdin=rule + "\n", capture_output=True)
 
 
 if __name__ == "__main__":

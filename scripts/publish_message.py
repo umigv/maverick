@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import re
-import subprocess
 import sys
 from pathlib import Path
+
+from common import run
 
 
 def main() -> None:
@@ -33,9 +34,9 @@ def main() -> None:
     )
 
     if rate == "once":
-        subprocess.run(["ros2", "topic", "pub", "--once", topic, ros_type, payload], check=True)
+        run("ros2", "topic", "pub", "--once", topic, ros_type, payload)
     else:
-        subprocess.run(["ros2", "topic", "pub", "-r", rate, topic, ros_type, payload], check=True)
+        run("ros2", "topic", "pub", "-r", rate, topic, ros_type, payload)
 
 
 if __name__ == "__main__":

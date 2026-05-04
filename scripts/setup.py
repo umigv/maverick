@@ -5,7 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+from common import ROOT, run
+
 ROS_DISTRO = os.environ.get("ROS_DISTRO", "humble")
 
 
@@ -15,10 +16,6 @@ def log(msg: str) -> None:
 
 def note(msg: str) -> None:
     print(f"    \033[0;33mNOTE: {msg}\033[0m")
-
-
-def run(*cmd: str, **kwargs) -> None:
-    subprocess.run(cmd, check=True, **kwargs)
 
 
 def main() -> None:
@@ -50,10 +47,9 @@ def main() -> None:
 
     if not shutil.which("just"):
         log("Installing just")
-        subprocess.run(
+        run(
             "curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | sudo bash -s -- --to /usr/local/bin",
             shell=True,
-            check=True,
         )
 
     bashrc = Path.home() / ".bashrc"
