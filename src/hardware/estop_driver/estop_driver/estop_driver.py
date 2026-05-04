@@ -2,6 +2,7 @@ import os
 
 import rclpy
 import serial
+import utils.config
 from rclpy.node import Node
 
 from .estop_driver_config import EstopDriverConfig
@@ -9,9 +10,9 @@ from .estop_driver_config import EstopDriverConfig
 
 class EstopDriver(Node):
     def __init__(self) -> None:
-        super().__init__('estop_driver')
+        super().__init__("estop_driver")
 
-        self.config = EstopDriverConfig()
+        self.config = utils.config.load(self, EstopDriverConfig)
 
         self.current_state: str | None = None
         self.read_buffer: bytes = b""
@@ -51,15 +52,13 @@ class EstopDriver(Node):
             self.get_logger().info(f"State changed: {line} -> {state_str}")
 
     def write_estop_state(self, value: str) -> None:
-        temp_file_path = self.config.estop_file_path.with_suffix(
-            self.config.estop_file_path.suffix + ".tmp"
-        )
-        
+        temp_file_path = self.config.estop_file_path.with_suffix(self.config.estop_file_path.suffix + ".tmp")
+
         with open(temp_file_path, "w") as f:
             f.write(value)
             f.flush()
             os.fsync(f.fileno())
-        
+
         # Atomic replace so readers never see a half-written file.
         os.replace(temp_file_path, self.config.estop_file_path)
 

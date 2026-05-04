@@ -73,11 +73,24 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         ],
     )
 
+    recovery_behavior_node = Node(
+        package="recovery_behavior",
+        executable="recovery_behavior",
+        name="recovery_behavior",
+        output="screen",
+    )
+
     match mode:
         case "autonav":
-            return [occupancy_grid_transform_node, path_tracking_node, path_planning_node, autonav_goal_selection_node]
+            return [
+                occupancy_grid_transform_node,
+                path_tracking_node,
+                path_planning_node,
+                autonav_goal_selection_node,
+                recovery_behavior_node,
+            ]
         case "self_drive" | "nav_test":
-            return [occupancy_grid_transform_node, path_tracking_node, path_planning_node]
+            return [occupancy_grid_transform_node, path_tracking_node, path_planning_node, recovery_behavior_node]
         case _:
             assert_never(mode)
 
@@ -90,9 +103,9 @@ def generate_launch_description() -> LaunchDescription:
                 choices=MODES,
                 description=format_mode_description(
                     {
-                        "autonav": "occupancy grid transform + path planning + path tracking + autonav goal selection",
-                        "self_drive": "occupancy grid transform + path planning + path tracking",
-                        "nav_test": "occupancy grid transform + path planning + path tracking",
+                        "autonav": "occupancy grid transform + path planning + path tracking + autonav goal selection + recovery",
+                        "self_drive": "occupancy grid transform + path planning + path tracking + recovery",
+                        "nav_test": "occupancy grid transform + path planning + path tracking + recovery",
                     }
                 ),
             ),
