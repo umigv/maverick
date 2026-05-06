@@ -7,7 +7,7 @@ from common import run
 
 
 def main() -> None:
-    if len(sys.argv) < 3:
+    if len(sys.argv) not in (3, 4):
         print(f"Usage: {sys.argv[0]} <topic> <input> [rate]")
         sys.exit(1)
 
