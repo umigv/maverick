@@ -1,4 +1,4 @@
-name: checks
+name: Test
 
 permissions:
   contents: read
@@ -11,11 +11,11 @@ on:
     branches: [main]
 
 concurrency:
-  group: checks-${{ github.ref }}
+  group: test-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  python-checks:
+  test:
     runs-on: ubuntu-22.04
     container:
       image: ghcr.io/${{ github.repository }}:latest
@@ -30,13 +30,22 @@ jobs:
       - name: Install any new deps (top-up)
         run: rosdep install --from-paths . --ignore-src -r -y
 
-      - name: Install tooling deps
-        run: |
-          python3 -m pip install -U pip
-          pip install ".[tooling]"
-
-      - name: Run checks
+      - name: Build
         shell: bash
         run: |
           source /opt/ros/humble/setup.bash
-          bash scripts/checks.sh
+          just build
+
+      - name: Test
+        shell: bash
+        run: |
+          source /opt/ros/humble/setup.bash
+          source install/setup.bash
+          just test
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: colcon-logs
+          path: log

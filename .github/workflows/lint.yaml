@@ -1,4 +1,4 @@
-name: test
+name: Lint
 
 permissions:
   contents: read
@@ -11,20 +11,17 @@ on:
     branches: [main]
 
 concurrency:
-  group: test-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: lint-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  ros-tests:
+  lint:
     runs-on: ubuntu-22.04
     container:
       image: ghcr.io/${{ github.repository }}:latest
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-
-    env:
-      COLCON_DEFAULTS_FILE: colcon_defaults.yaml
 
     steps:
       - name: Checkout
@@ -33,22 +30,13 @@ jobs:
       - name: Install any new deps (top-up)
         run: rosdep install --from-paths . --ignore-src -r -y
 
-      - name: Build
+      - name: Install tooling deps
+        run: |
+          python3 -m pip install -U pip
+          pip install ".[tooling]"
+
+      - name: Lint
         shell: bash
         run: |
           source /opt/ros/humble/setup.bash
-          just build
-
-      - name: Test
-        shell: bash
-        run: |
-          source /opt/ros/humble/setup.bash
-          source install/setup.bash
-          just test
-
-      - name: Upload logs on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: colcon-logs
-          path: log
+          just lint
