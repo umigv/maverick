@@ -79,11 +79,17 @@ def main() -> None:
     log("Generating pyrightconfig.json")
     run(sys.executable, str(ROOT / "scripts" / "generate_pyrightconfig.py"))
 
-    log("Installing pre-commit hook")
-    hook_src = ROOT / "scripts" / "pre_commit.py"
-    hook_dst = ROOT / ".git" / "hooks" / "pre-commit"
-    hook_dst.unlink(missing_ok=True)
-    hook_dst.symlink_to(hook_src)
+    log("Installing git hooks")
+    hooks = {
+        "pre-commit": ROOT / "scripts" / "pre_commit.py",
+        "post-checkout": ROOT / "scripts" / "generate_pyrightconfig.py",
+        "post-merge": ROOT / "scripts" / "generate_pyrightconfig.py",
+        "post-rewrite": ROOT / "scripts" / "generate_pyrightconfig.py",
+    }
+    for hook_name, hook_src in hooks.items():
+        hook_dst = ROOT / ".git" / "hooks" / hook_name
+        hook_dst.unlink(missing_ok=True)
+        hook_dst.symlink_to(hook_src)
 
     log("Setup complete")
     note("Run source ~/.bashrc for direnv hook to take effect")
