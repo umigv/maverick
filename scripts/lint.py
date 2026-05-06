@@ -38,7 +38,7 @@ def main() -> None:
 
     missing = [t for t in ("ruff", "mypy", "clang-format") if not shutil.which(t)]
     if missing:
-        die(f"missing tools: {', '.join(missing)}. Run scripts/setup.py")
+        die(f"missing tools: {', '.join(missing)}. Run just setup")
 
     pkg_dirs, all_pkg_dirs = resolve_packages(args.only, args.ignore)
 

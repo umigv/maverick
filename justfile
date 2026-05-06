@@ -25,7 +25,7 @@ new dir pkg type='python':
     cd {{dir}} && python3 {{justfile_directory()}}/scripts/create_package.py {{pkg}} --type {{type}}
 
 setup:
-    python3 scripts/setup.py
+    python3 scripts/setup_environment.py
 
 build-pkg pkg:
     colcon build --packages-up-to {{pkg}}
