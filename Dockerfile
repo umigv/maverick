@@ -10,6 +10,7 @@ RUN apt-get update \
  && curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin \
  && rosdep update \
  && rosdep install --from-paths /tmp/maverick --ignore-src -r -y \
+ && pip install "/tmp/maverick[tooling]" \
  && rm -rf /tmp/maverick
 
 WORKDIR /

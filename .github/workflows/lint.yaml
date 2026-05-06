@@ -30,8 +30,5 @@ jobs:
       - name: Install any new deps (top-up)
         run: rosdep install --from-paths . --ignore-src -r -y
 
-      - name: Install tooling deps
-        run: pip install ".[tooling]"
-
       - name: Lint
         run: just lint
