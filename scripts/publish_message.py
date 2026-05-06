@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+"""Publish a message to a ROS 2 topic from a file.
+
+Input file format (as produced by extract_message.py):
+    # ros2_type: <message_type>
+    <YAML message content>
+
+The `# ros2_type:` header on the first line is required. `---` separators
+are stripped. Rate defaults to 'once'; pass a Hz value (e.g. 10) to publish
+continuously.
+"""
+
 import re
 import sys
 from pathlib import Path
