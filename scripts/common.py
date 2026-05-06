@@ -17,7 +17,12 @@ def die(msg: str) -> None:
 
 @overload
 def run(
-    *cmd: str, env: dict | None = None, shell: bool = False, capture_output: Literal[True], stdin: str | None = None
+    *cmd: str,
+    env: dict | None = None,
+    shell: bool = False,
+    capture_output: Literal[True],
+    cwd: Path = ROOT,
+    stdin: str | None = None,
 ) -> str: ...
 @overload
 def run(
@@ -25,6 +30,7 @@ def run(
     env: dict | None = None,
     shell: bool = False,
     capture_output: Literal[False] = False,
+    cwd: Path = ROOT,
     stdin: str | None = None,
 ) -> None: ...
 def run(
@@ -32,9 +38,10 @@ def run(
     env: dict | None = None,
     shell: bool = False,
     capture_output: bool = False,
+    cwd: Path = ROOT,
     stdin: str | None = None,
 ) -> str | None:
-    """Run a command from ROOT, exiting on failure.
+    """Run a command, exiting on failure. Defaults to ROOT if cwd is not specified.
 
     Returns stdout as a string if capture_output=True, otherwise None.
     """
@@ -43,7 +50,7 @@ def run(
             cmd[0] if shell else cmd,
             shell=shell,
             check=True,
-            cwd=ROOT,
+            cwd=cwd,
             env=env,
             capture_output=capture_output,
             text=capture_output or stdin is not None,
