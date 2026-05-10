@@ -2,7 +2,7 @@ import math
 from dataclasses import dataclass
 from enum import Enum, auto
 
-from utils.geometry import Point2d, Pose2d, Rotation2d
+from utils.geometry import Point2d, Pose2d
 from utils.world_occupancy_grid import WorldOccupancyGrid
 
 from .autonav_goal_selection_config import GoalSelectionParams
@@ -56,6 +56,7 @@ def select_goal(
     robot_pose: Pose2d,
     waypoint: Point2d,
     params: GoalSelectionParams,
+    preferred_angle: float,
 ) -> GoalSelectionResult:
     """Select a local goal by ray-casting across the robot's forward arc.
 
@@ -63,14 +64,14 @@ def select_goal(
     the robot's heading. Each ray is walked in `step_size_m` increments until it hits an
     obstacle, leaves the path_planning unknown-traversal box, or reaches `max_ray_length_m`.
 
-    Each ray is scored as `free_length * ((1 + cos(angle_to_waypoint)) / 2) ** alignment_exponent`,
-    optionally averaged across `neighbor_smoothing_window` neighbors on each side. Anti-aligned
-    rays (cos < 0) score 0, so a long backward ray cannot beat a short forward one. The
-    highest-scoring ray wins; if its `free_length` is below `min_goal_progress_m`, no goal is
-    returned (treat as stuck).
+    Each ray is scored as `free_length * ((1 + cos(angle_to_preferred)) / 2) ** alignment_exponent`,
+    where `preferred_angle` is either the last chosen ray direction (momentum) or the waypoint
+    direction when nearby. Optionally averaged across `neighbor_smoothing_window` neighbors on
+    each side. Anti-aligned rays (cos < 0) score 0. The highest-scoring ray wins; if its
+    `free_length` is below `min_goal_progress_m`, no goal is returned (treat as stuck).
     """
     walks = _walk_rays(grid, robot_pose, params)
-    raw_scores = _score_walks(walks, robot_pose, waypoint, params)
+    raw_scores = _score_walks(walks, preferred_angle, params)
     scores = _smooth_scores(raw_scores, params.neighbor_smoothing_window)
     rays = [RayResult(walk=w, score=s) for w, s in zip(walks, scores, strict=True)]
 
@@ -120,19 +121,12 @@ def _walk_rays(grid: WorldOccupancyGrid, robot_pose: Pose2d, params: GoalSelecti
     return walks
 
 
-def _score_walks(
-    walks: list[RayWalk], robot_pose: Pose2d, waypoint: Point2d, params: GoalSelectionParams
-) -> list[float]:
-    waypoint_offset = waypoint - robot_pose.point
-    if waypoint_offset.mag() == 0:
-        waypoint_angle = robot_pose.rotation.angle
-    else:
-        waypoint_angle = Rotation2d.from_vector(waypoint_offset).angle
-
+def _score_walks(walks: list[RayWalk], preferred_angle: float, params: GoalSelectionParams) -> list[float]:
     scores: list[float] = []
     for w in walks:
-        cos_angle = math.cos(w.angle - waypoint_angle)
-        alignment_factor = max(0.0, (1.0 + cos_angle) / 2.0) ** params.alignment_exponent
+        cos_angle = math.cos(w.angle - preferred_angle)
+        raw = max(0.0, (1.0 + cos_angle) / 2.0) ** params.alignment_exponent
+        alignment_factor = params.alignment_floor + (1.0 - params.alignment_floor) * raw
         scores.append(w.free_length * alignment_factor)
     return scores
 

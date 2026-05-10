@@ -27,6 +27,8 @@ class AutonavGoalSelection(Node):
 
         self.robot_pose: Pose2d | None = None
         self.grid: WorldOccupancyGrid | None = None
+        self.last_chosen_angle: float | None = None
+        self._momentum_cooldown: int = 0
 
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
@@ -117,7 +119,23 @@ class AutonavGoalSelection(Node):
         if waypoint is None:
             return
 
-        result = select_goal(self.grid, self.robot_pose, waypoint, self.config.goal_selection_params)
+        dist_to_waypoint = self.robot_pose.point.distance(waypoint)
+        if dist_to_waypoint < self.config.near_waypoint_threshold_m:
+            waypoint_offset = waypoint - self.robot_pose.point
+            preferred_angle = math.atan2(waypoint_offset.y, waypoint_offset.x)
+        elif self.last_chosen_angle is not None:
+            preferred_angle = self.last_chosen_angle
+        else:
+            preferred_angle = self.robot_pose.rotation.angle
+
+        result = select_goal(self.grid, self.robot_pose, waypoint, self.config.goal_selection_params, preferred_angle)
+
+        if result.chosen_index is not None:
+            if self._momentum_cooldown > 0:
+                self._momentum_cooldown -= 1
+            else:
+                self.last_chosen_angle = result.rays[result.chosen_index].walk.angle
+                self._momentum_cooldown = self.config.momentum_cooldown_frames
 
         if self.debug_publisher is not None:
             self.debug_publisher.publish(self._build_debug_markers(result))

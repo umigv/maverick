@@ -12,10 +12,12 @@ class GoalSelectionParams:
         arc_half_angle_rad: Half-angle (rad) of the forward arc; rays span [-h, +h] from heading.
         max_ray_length_m: Maximum free length walked along each ray.
         step_size_m: Step size used when walking each ray; should be ~grid resolution.
-        alignment_exponent: Sharpness of the multiplicative waypoint-alignment factor
-            `((1 + cos(angle_to_waypoint)) / 2) ** alignment_exponent`. 0 disables the bias
-            entirely; 1 gives a smooth half-cosine; larger values penalize off-axis rays
-            more aggressively (e.g. 2 → factor of 0.25 at 90° off, 0 at 180°).
+        alignment_exponent: Sharpness of the multiplicative alignment factor applied to each
+            ray's free_length score. 0 disables the bias entirely; 1 gives a smooth half-cosine;
+            larger values penalize off-axis rays more aggressively.
+        alignment_floor: Minimum value of the alignment factor (before multiplying free_length).
+            Formula: `floor + (1 - floor) * ((1 + cos) / 2) ** exponent`. Ensures long escape
+            routes can always beat short dead-ends regardless of momentum direction.
         min_goal_progress_m: Minimum free length the chosen ray must have for a goal to be
             published. If the highest-scoring ray's free_length is below this, `select_goal`
             returns no goal (caller should treat as "stuck"). Set to 0 to always publish.
@@ -29,11 +31,12 @@ class GoalSelectionParams:
             considered drivable when walking a ray.
     """
 
-    num_rays: int = 74
+    num_rays: int = 148
     arc_half_angle_rad: float = math.pi / 2
     max_ray_length_m: float = 100
     step_size_m: float = 0.05
-    alignment_exponent: float = 0.0
+    alignment_exponent: float = 1.0
+    alignment_floor: float = 0.375
     min_goal_progress_m: float = 0.2
     neighbor_smoothing_window: int = 2
     safety_margin_m: float = 0.1
@@ -51,6 +54,8 @@ class GoalSelectionParams:
             raise ValueError("GoalSelectionParams: step_size_m must be > 0")
         if self.alignment_exponent < 0:
             raise ValueError("GoalSelectionParams: alignment_exponent must be >= 0")
+        if not (0.0 <= self.alignment_floor < 1.0):
+            raise ValueError("GoalSelectionParams: alignment_floor must be in [0, 1)")
         if self.min_goal_progress_m < 0:
             raise ValueError("GoalSelectionParams: min_goal_progress_m must be >= 0")
         if self.neighbor_smoothing_window < 0:
@@ -73,6 +78,11 @@ class AutonavGoalSelectionConfig:
             Expected format: {"waypoints": [{"x": <float>, "y": <float>}, ...]}.
         goal_publish_period_s: How often (seconds) to publish a new local goal.
         waypoint_reached_threshold: Distance (m) within which a waypoint is considered reached.
+        near_waypoint_threshold_m: Distance (m) within which the alignment bias switches from
+            momentum (last chosen ray direction) to direct waypoint heading.
+        momentum_cooldown_frames: Number of goal-publish frames to freeze momentum after a
+            direction is committed. Prevents the robot from flipping left/right at a symmetric
+            obstacle before it has had time to physically move in the chosen direction.
         map_frame_id: TF frame ID for the map coordinate frame.
         world_frame_id: TF frame ID for the world coordinate frame.
         publish_debug: When true, publish a MarkerArray on `goal_selection_debug` showing all
@@ -83,6 +93,8 @@ class AutonavGoalSelectionConfig:
     waypoints_file_path: pathlib.Path
     goal_publish_period_s: float = 0.5
     waypoint_reached_threshold: float = 1.0
+    near_waypoint_threshold_m: float = 1.0
+    momentum_cooldown_frames: int = 6
     map_frame_id: str = "map"
     world_frame_id: str = "odom"
     publish_debug: bool = True
@@ -92,3 +104,7 @@ class AutonavGoalSelectionConfig:
             raise ValueError("AutonavGoalSelectionConfig: goal_publish_period_s must be > 0")
         if self.waypoint_reached_threshold <= 0:
             raise ValueError("AutonavGoalSelectionConfig: waypoint_reached_threshold must be > 0")
+        if self.near_waypoint_threshold_m <= 0:
+            raise ValueError("AutonavGoalSelectionConfig: near_waypoint_threshold_m must be > 0")
+        if self.momentum_cooldown_frames < 0:
+            raise ValueError("AutonavGoalSelectionConfig: momentum_cooldown_frames must be >= 0")
