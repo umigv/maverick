@@ -11,6 +11,7 @@ class State(str, Enum):
     NORMAL = "normal"
     NO_MANS_LAND = "no_mans_land"
     RECOVERY = "recovery"
+    FINISHED = "finished"
 
 
 class StateMachine(Node):
@@ -29,9 +30,15 @@ class StateMachine(Node):
         self.set_recovery_service = self.create_service(SetBool, "state/set_recovery", self.set_recovery_callback)
         self.recovery_enabled: bool = False
 
+        self.set_finished_service = self.create_service(SetBool, "state/set_finished", self.set_finished_callback)
+        self.finished_enabled: bool = False
+
         self.publish_state_if_changed(reason="init")
 
     def compute_state(self) -> State:
+        if self.finished_enabled:
+            return State.FINISHED
+
         if self.recovery_enabled:
             return State.RECOVERY
 
@@ -61,6 +68,18 @@ class StateMachine(Node):
         res.success = True
         self.get_logger().info(res.message + f" (no_mans_land_enabled={self.no_mans_land_enabled})")
         self.publish_state_if_changed(reason="state/set_recovery")
+        return res
+
+    def set_finished_callback(self, req: SetBool.Request, res: SetBool.Response) -> SetBool.Response:
+        if req.data == self.finished_enabled:
+            res.message = f"Finished already {'enabled' if req.data else 'disabled'}."
+        else:
+            res.message = f"Finished {'enabled' if req.data else 'disabled'}."
+
+        self.finished_enabled = req.data
+        res.success = True
+        self.get_logger().info(res.message)
+        self.publish_state_if_changed(reason="state/set_finished")
         return res
 
     def set_no_mans_land_callback(self, req: SetBool.Request, res: SetBool.Response) -> SetBool.Response:

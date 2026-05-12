@@ -10,6 +10,7 @@ from geometry_msgs.msg import PointStamped, Vector3
 from nav_msgs.msg import OccupancyGrid, Odometry
 from rclpy.node import Node
 from std_msgs.msg import ColorRGBA, Header
+from std_srvs.srv import SetBool
 from tf2_ros import TransformException
 from utils.geometry import Point2d, Pose2d
 from utils.world_occupancy_grid import WorldOccupancyGrid
@@ -42,6 +43,8 @@ class AutonavGoalSelection(Node):
         self.debug_publisher = (
             self.create_publisher(MarkerArray, "goal_selection_debug", 10) if self.config.publish_debug else None
         )
+
+        self.set_finished_client = self.create_client(SetBool, "state/set_finished")
 
         self.create_timer(self.config.goal_publish_period_s, self.publish_goal)
         self.publish_gps_waypoint()
@@ -104,10 +107,19 @@ class AutonavGoalSelection(Node):
 
             if self.current_waypoint_index >= len(self.waypoints):
                 self.get_logger().info("Final waypoint reached, stopping navigation")
+                self._call_set_finished()
                 return
 
             self.get_logger().info(f"Waypoint reached, advancing to index {self.current_waypoint_index}")
             self.publish_gps_waypoint()
+
+    def _call_set_finished(self) -> None:
+        req = SetBool.Request()
+        req.data = True
+        future = self.set_finished_client.call_async(req)
+        future.add_done_callback(
+            lambda f: self.get_logger().error(f"set_finished call failed: {f.exception()}") if f.exception() else None
+        )
 
     def publish_goal(self) -> None:
         if self.robot_pose is None or self.grid is None or self.current_waypoint_index >= len(self.waypoints):

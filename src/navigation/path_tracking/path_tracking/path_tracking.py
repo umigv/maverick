@@ -2,9 +2,11 @@ import math
 
 import rclpy
 import utils.config
+import utils.qos
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry, Path
 from rclpy.node import Node
+from std_msgs.msg import String
 from utils.geometry import Path2d, Pose2d
 
 from .path_tracking_config import PathTrackingConfig
@@ -27,9 +29,11 @@ class PathTracking(Node):
 
         self.pose: Pose2d | None = None
         self.current_speed: float = 0.0
+        self.finished: bool = False
 
         self.create_subscription(Odometry, "odom", self.odom_callback, 10)
         self.create_subscription(Path, "path", self.path_callback, 10)
+        self.create_subscription(String, "state", self.state_callback, utils.qos.LATCHED)
 
         self.cmd_vel_publisher = self.create_publisher(Twist, "nav_cmd_vel", 10)
 
@@ -49,6 +53,11 @@ class PathTracking(Node):
         self.pose = Pose2d.from_ros(msg.pose.pose)
         self.current_speed = math.hypot(msg.twist.twist.linear.x, msg.twist.twist.linear.y)
 
+    def state_callback(self, msg: String) -> None:
+        if msg.data == "finished" and not self.finished:
+            self.get_logger().info("State is finished, stopping robot")
+            self.finished = True
+
     def path_callback(self, path_msg: Path) -> None:
         if path_msg.header.frame_id != self.config.odom_frame_id:
             self.get_logger().warn(
@@ -67,6 +76,10 @@ class PathTracking(Node):
 
     def control_loop(self) -> None:
         if self.pose is None:
+            return
+
+        if self.finished:
+            self.cmd_vel_publisher.publish(Twist())
             return
 
         cmd = self.controller.compute_command(self.pose, self.current_speed)

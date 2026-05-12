@@ -4,18 +4,19 @@ machine exposes services for state transitions and publishes the robot state to 
 to and react accordingly.
 
 ## States
-There are three mutually exclusive states:
+There are four mutually exclusive states:
 - **`normal`** – default operating mode  
 - **`no_mans_land`** – no mans land-specific behavior enabled  
 - **`recovery`** – recovery / fault handling mode  
+- **`finished`** – all waypoints reached; robot is forced to stop and stays stopped  
 
-1. State priority is fixed and deterministic: recovery > no_mans_land > normal
+1. State priority is fixed and deterministic: finished > recovery > no_mans_land > normal
 2. States are published only on state changes
 3. On startup, the node immediately publishes the initial state (`normal`)
 4. Late-joining subscribers immediately receive the most recent state
 
 ## Published Topics
-- `state` (`std_msgs/String`) - The current robot state as one of `"normal"`, `"no_mans_land"`, or `"recovery"`
+- `state` (`std_msgs/String`) - The current robot state as one of `"normal"`, `"no_mans_land"`, `"recovery"`, or `"finished"`
 
 The `state` topic uses a non-default QoS profile:
 | Setting | Value | Effect |
@@ -31,6 +32,7 @@ In code, use `utils.qos.LATCHED`. In RViz, set the topic's **Durability Policy**
 ## Services
 - `state/set_no_mans_land` (`std_srvs/SetBool`) - Enable or disable no_mans_land mode
 - `state/set_recovery` (`std_srvs/SetBool`) - Enable or disable recovery mode
+- `state/set_finished` (`std_srvs/SetBool`) - Signal that all waypoints have been reached; takes priority over all other states
 
 ## Example Usage
 ```bash
@@ -39,4 +41,5 @@ ros2 service call /state/set_no_mans_land std_srvs/srv/SetBool "{data: true}" # 
 ros2 service call /state/set_recovery std_srvs/srv/SetBool "{data: true}" # Enter recovery mode (overrides no_mans_land)
 ros2 service call /state/set_recovery std_srvs/srv/SetBool "{data: false}" # Exit recovery mode
 ros2 service call /state/set_no_mans_land std_srvs/srv/SetBool "{data: false}" # Disable no_mans_land mode
+ros2 service call /state/set_finished std_srvs/srv/SetBool "{data: true}" # Signal navigation complete (overrides all states)
 ```
