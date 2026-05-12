@@ -69,8 +69,10 @@ class AutonavGoalSelectionConfig:
 
     Attributes:
         goal_selection_params: Parameters for the ray-cast goal selection algorithm.
-        waypoints_file_path: Path to a JSON file containing the list of map-frame waypoints.
-            Expected format: {"waypoints": [{"x": <float>, "y": <float>}, ...]}.
+        waypoints_file_path: Path to a JSON file containing the datum and list of waypoints.
+            Expected format: {"datum": {"latitude": <float>, "longitude": <float>, "altitude": <float>},
+            "waypoints": [{"latitude": <float>, "longitude": <float>}, ...]}. Waypoints are converted from
+            WGS84 latitude/longitude to ENU map-frame coordinates (+x East, +y North) using the datum.
         goal_publish_period_s: How often (seconds) to publish a new local goal.
         waypoint_reached_threshold: Distance (m) within which a waypoint is considered reached.
         map_frame_id: TF frame ID for the map coordinate frame.

@@ -8,6 +8,7 @@ import utils.config
 import utils.qos
 from geometry_msgs.msg import PointStamped, Vector3
 from nav_msgs.msg import OccupancyGrid, Odometry
+from pyproj import Transformer
 from rclpy.node import Node
 from std_msgs.msg import ColorRGBA, Header
 from tf2_ros import TransformException
@@ -69,7 +70,19 @@ class AutonavGoalSelection(Node):
         with open(self.config.waypoints_file_path) as f:
             data = json.load(f)
 
-        return [Point2d(x=float(w["x"]), y=float(w["y"])) for w in data["waypoints"]]
+        d = data["datum"]
+        lat0, lon0, alt0 = d["latitude"], d["longitude"], d["altitude"]
+        to_enu = Transformer.from_pipeline(f"""
+            +proj=pipeline
+            +step +proj=cart +ellps=WGS84
+            +step +proj=topocentric +lat_0={lat0} +lon_0={lon0} +h_0={alt0} +ellps=WGS84
+        """)
+
+        points = []
+        for w in data["waypoints"]:
+            x, y, _ = to_enu.transform(w["longitude"], w["latitude"], 0.0)
+            points.append(Point2d(x=x, y=y))
+        return points
 
     def transform_map_to_world(self, point: Point2d) -> Point2d | None:
         try:

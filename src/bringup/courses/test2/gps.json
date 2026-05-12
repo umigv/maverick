@@ -5,6 +5,6 @@
         "altitude": 270.0
     },
     "waypoints": [
-        {"x": 30.0, "y": 20.0}
+        {"latitude": 42.29480104, "longitude": -83.70774823}
     ]
 }
