@@ -18,6 +18,7 @@ from .occupancy_grid_simulator_config import OccupancyGridSimulatorConfig
 class OccupancyGridSimulator(Node):
     OCCUPIED = 100
     FREE = 0
+    UNKNOWN = -1
     EPSILON = 1e-12
 
     def __init__(self) -> None:
@@ -108,6 +109,7 @@ class OccupancyGridSimulator(Node):
         grid, lane_line_mask = self.build_cell_maps(self.robot_pose)
         self.apply_raycasting(grid)
         grid[lane_line_mask] = self.OCCUPIED
+        self.apply_robot_blind_spot(grid)
 
         self.occupancy_grid_publisher.publish(
             OccupancyGrid(
@@ -150,6 +152,20 @@ class OccupancyGridSimulator(Node):
         is_lane_line = np.isin(cell_keys, self.lane_line_cell_keys)
         obstacle_grid = np.where(is_obstacle, self.OCCUPIED, self.FREE).astype(np.int8)
         return obstacle_grid, is_lane_line
+
+    def apply_robot_blind_spot(self, grid: np.ndarray) -> None:
+        """Draws a right triangle of UNKNOWN cells in front of the robot to simulate the front blind spot."""
+        triangle_height_in_cells = round(self.config.robot_blind_spot_height_m / self.resolution_m)
+        assert triangle_height_in_cells > 0, "Blind spot height must be positive"
+        assert triangle_height_in_cells < self.width_cells, "Blind spot height exceeds grid width"
+
+        rows = np.arange(self.height_cells)[:, np.newaxis]
+        cols = np.arange(triangle_height_in_cells)[np.newaxis, :]
+
+        center_row = int(-self.config.offset_y_m / self.resolution_m)
+
+        triangle_mask = np.abs(rows - center_row) <= (triangle_height_in_cells - 1 - cols)
+        grid[:, :triangle_height_in_cells][triangle_mask] = self.UNKNOWN
 
     @staticmethod
     def slab_interval(
