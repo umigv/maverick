@@ -1,15 +1,19 @@
 import json
 import math
+from dataclasses import dataclass
 
 import rclpy
 import tf2_geometry_msgs  # noqa: F401 — registers PointStamped transform
 import tf2_ros
 import utils.config
 import utils.qos
+from geographic_msgs.msg import GeoPoint
 from geometry_msgs.msg import PointStamped, Vector3
 from nav_msgs.msg import OccupancyGrid, Odometry
 from rclpy.node import Node
-from std_msgs.msg import ColorRGBA, Header
+from robot_localization.srv import FromLL
+from std_msgs.msg import ColorRGBA, Header, String
+from std_srvs.srv import SetBool
 from tf2_ros import TransformException
 from utils.geometry import Point2d, Pose2d
 from utils.world_occupancy_grid import WorldOccupancyGrid
@@ -17,6 +21,12 @@ from visualization_msgs.msg import Marker, MarkerArray
 
 from .autonav_goal_selection_config import AutonavGoalSelectionConfig
 from .autonav_goal_selection_impl import GoalSelectionResult, TerminateReason, select_goal
+
+
+@dataclass(frozen=True)
+class Waypoint:
+    point: Point2d
+    no_mans_land: bool = False
 
 
 class AutonavGoalSelection(Node):
@@ -28,24 +38,29 @@ class AutonavGoalSelection(Node):
         self.robot_pose: Pose2d | None = None
         self.grid: WorldOccupancyGrid | None = None
         self.last_chosen_angle: float | None = None
-        self._momentum_cooldown: int = 0
+        self.momentum_cooldown: int = 0
+        self.in_no_mans_land: bool = False
+        self.in_recovery: bool = False
+
+        self.waypoints: list[Waypoint] = self.load_waypoints()
+        self.current_waypoint_index = 0
 
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
 
-        self.waypoints: list[Point2d] = self.load_waypoints()
-        self.current_waypoint_index = 0
+        self.set_recovery_client = self.create_client(SetBool, "state/set_recovery")
+        self.set_no_mans_land_client = self.create_client(SetBool, "state/set_no_mans_land")
 
         self.create_subscription(Odometry, "odom", self.odom_callback, 10)
         self.create_subscription(OccupancyGrid, "occupancy_grid", self.occupancy_grid_callback, 10)
+        self.create_subscription(String, "state", self.state_callback, utils.qos.LATCHED)
 
         self.goal_publisher = self.create_publisher(PointStamped, "goal", 10)
-        self.gps_waypoint_publisher = self.create_publisher(PointStamped, "gps_waypoint", utils.qos.LATCHED)
-        self.debug_publisher = (
-            self.create_publisher(MarkerArray, "goal_selection_debug", 10) if self.config.publish_debug else None
-        )
+        self.waypoint_publisher = self.create_publisher(PointStamped, "waypoint", utils.qos.LATCHED)
+        self.debug_publisher = self.create_publisher(MarkerArray, "goal_selection_debug", 10)
 
         self.create_timer(self.config.goal_publish_period_s, self.publish_goal)
+
         self.publish_gps_waypoint()
 
     def odom_callback(self, msg: Odometry) -> None:
@@ -67,11 +82,32 @@ class AutonavGoalSelection(Node):
 
         self.grid = WorldOccupancyGrid(msg)
 
-    def load_waypoints(self) -> list[Point2d]:
+    def state_callback(self, msg: String) -> None:
+        self.in_recovery = msg.data == "recovery"
+
+    def load_waypoints(self) -> list[Waypoint]:
         with open(self.config.waypoints_file_path) as f:
             data = json.load(f)
 
-        return [Point2d(x=float(w["x"]), y=float(w["y"])) for w in data["waypoints"]]
+        from_ll_client = self.create_client(FromLL, "fromLL")
+
+        self.get_logger().info("Waiting for fromLL service...")
+        from_ll_client.wait_for_service()
+        self.get_logger().info("fromLL service available, loading waypoints")
+
+        waypoints = []
+        for w in data["waypoints"]:
+            if "lat" in w:
+                request = FromLL.Request(ll_point=GeoPoint(latitude=w["latitude"], longitude=w["longitude"]))
+                future = from_ll_client.call_async(request)
+                rclpy.spin_until_future_complete(self, future)
+                point = Point2d.from_ros(future.result().map_point)
+            else:
+                point = Point2d(x=float(w["x"]), y=float(w["y"]))
+
+            waypoints.append(Waypoint(point=point, no_mans_land=bool(w.get("no_mans_land", False))))
+
+        return waypoints
 
     def transform_map_to_world(self, point: Point2d) -> Point2d | None:
         try:
@@ -82,11 +118,11 @@ class AutonavGoalSelection(Node):
             return None
 
     def publish_gps_waypoint(self) -> None:
-        map_point = self.waypoints[self.current_waypoint_index]
+        map_point = self.waypoints[self.current_waypoint_index].point
         self.get_logger().info(
             f"Publishing waypoint ({map_point.x:.2f}, {map_point.y:.2f}) in {self.config.map_frame_id} frame"
         )
-        self.gps_waypoint_publisher.publish(
+        self.waypoint_publisher.publish(
             PointStamped(
                 header=Header(frame_id=self.config.map_frame_id, stamp=self.get_clock().now().to_msg()),
                 point=map_point.to_ros(),
@@ -97,25 +133,35 @@ class AutonavGoalSelection(Node):
         if self.robot_pose is None or self.current_waypoint_index >= len(self.waypoints):
             return
 
-        waypoint = self.transform_map_to_world(self.waypoints[self.current_waypoint_index])
+        waypoint = self.transform_map_to_world(self.waypoints[self.current_waypoint_index].point)
         if waypoint is None:
             return
 
-        if self.robot_pose.point.distance(waypoint) < self.config.waypoint_reached_threshold:
-            self.current_waypoint_index += 1
+        if self.robot_pose.point.distance(waypoint) >= self.config.waypoint_reached_threshold:
+            return
 
-            if self.current_waypoint_index >= len(self.waypoints):
-                self.get_logger().info("Final waypoint reached, stopping navigation")
-                return
+        self.current_waypoint_index += 1
 
-            self.get_logger().info(f"Waypoint reached, advancing to index {self.current_waypoint_index}")
-            self.publish_gps_waypoint()
+        if self.current_waypoint_index >= len(self.waypoints):
+            self.get_logger().info("Final waypoint reached, stopping navigation")
+            return
+
+        self.get_logger().info(f"Waypoint reached, advancing to index {self.current_waypoint_index}")
+        self.publish_gps_waypoint()
+
+        if self.waypoints[self.current_waypoint_index].no_mans_land:
+            self.in_no_mans_land = not self.in_no_mans_land
+            self.get_logger().info(f"{'Entering' if self.in_no_mans_land else 'Exiting'} no man's land")
+            self.set_no_mans_land_client.call_async(SetBool.Request(data=self.in_no_mans_land))
 
     def publish_goal(self) -> None:
         if self.robot_pose is None or self.grid is None or self.current_waypoint_index >= len(self.waypoints):
             return
 
-        waypoint = self.transform_map_to_world(self.waypoints[self.current_waypoint_index])
+        if self.in_recovery:
+            return
+
+        waypoint = self.transform_map_to_world(self.waypoints[self.current_waypoint_index].point)
         if waypoint is None:
             return
 
@@ -131,17 +177,18 @@ class AutonavGoalSelection(Node):
         result = select_goal(self.grid, self.robot_pose, waypoint, self.config.goal_selection_params, preferred_angle)
 
         if result.chosen_index is not None:
-            if self._momentum_cooldown > 0:
-                self._momentum_cooldown -= 1
+            if self.momentum_cooldown > 0:
+                self.momentum_cooldown -= 1
             else:
                 self.last_chosen_angle = result.rays[result.chosen_index].walk.angle
-                self._momentum_cooldown = self.config.momentum_cooldown_frames
+                self.momentum_cooldown = self.config.momentum_cooldown_frames
 
-        if self.debug_publisher is not None:
+        if self.config.publish_debug:
             self.debug_publisher.publish(self._build_debug_markers(result))
 
         if result.goal is None:
             self.get_logger().warn("No drivable goal found in occupancy grid")
+            self.set_recovery_client.call_async(SetBool.Request(data=True))
             return
 
         self.get_logger().info(
@@ -251,8 +298,6 @@ def _score_to_color(t: float) -> ColorRGBA:
 
 
 def _terminate_color(reason: TerminateReason) -> ColorRGBA:
-    if reason is TerminateReason.MAX_LENGTH:
-        return ColorRGBA(r=0.2, g=0.6, b=1.0, a=1.0)  # blue
     if reason is TerminateReason.OBSTACLE:
         return ColorRGBA(r=1.0, g=0.0, b=0.0, a=1.0)  # red
     return ColorRGBA(r=1.0, g=1.0, b=0.0, a=1.0)  # yellow — out of bounds
