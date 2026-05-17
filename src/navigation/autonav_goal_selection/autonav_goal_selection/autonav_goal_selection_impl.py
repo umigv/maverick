@@ -9,7 +9,6 @@ from .autonav_goal_selection_config import GoalSelectionParams
 
 
 class TerminateReason(Enum):
-    MAX_LENGTH = auto()
     OBSTACLE = auto()
     OUT_OF_BOUNDS = auto()  # unknown cell outside the path_planning forward/sideways box
 
@@ -62,7 +61,7 @@ def select_goal(
 
     Casts `params.num_rays` rays evenly spaced over [-arc_half_angle, +arc_half_angle] from
     the robot's heading. Each ray is walked in `step_size_m` increments until it hits an
-    obstacle, leaves the path_planning unknown-traversal box, or reaches `max_ray_length_m`.
+    obstacle or leaves the path_planning unknown-traversal box.
 
     Each ray is scored as `free_length * ((1 + cos(angle_to_preferred)) / 2) ** alignment_exponent`,
     where `preferred_angle` is either the last chosen ray direction (momentum) or the waypoint
@@ -90,7 +89,6 @@ def select_goal(
 def _walk_rays(grid: WorldOccupancyGrid, robot_pose: Pose2d, params: GoalSelectionParams) -> list[RayWalk]:
     angle_step = (2 * params.arc_half_angle_rad) / (params.num_rays - 1)
     base_angle = robot_pose.rotation.angle - params.arc_half_angle_rad
-    num_steps = int(params.max_ray_length_m / params.step_size_m)
 
     walks: list[RayWalk] = []
     for i in range(params.num_rays):
@@ -98,8 +96,10 @@ def _walk_rays(grid: WorldOccupancyGrid, robot_pose: Pose2d, params: GoalSelecti
         direction = Point2d(x=math.cos(angle), y=math.sin(angle))
 
         free_length = 0.0
-        terminate_reason = TerminateReason.MAX_LENGTH
-        for step in range(1, num_steps + 1):
+        terminate_reason = TerminateReason.OBSTACLE
+        step = 0
+        while True:
+            step += 1
             distance = step * params.step_size_m
             point = robot_pose.point + direction * distance
             state = grid.state(point)
@@ -111,7 +111,6 @@ def _walk_rays(grid: WorldOccupancyGrid, robot_pose: Pose2d, params: GoalSelecti
                     terminate_reason = TerminateReason.OUT_OF_BOUNDS
                     break
             elif not state.is_drivable:
-                terminate_reason = TerminateReason.OBSTACLE
                 break
 
             free_length = distance

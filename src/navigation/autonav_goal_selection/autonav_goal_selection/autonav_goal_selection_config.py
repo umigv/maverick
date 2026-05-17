@@ -10,7 +10,6 @@ class GoalSelectionParams:
     Attributes:
         num_rays: Number of rays cast across the forward arc.
         arc_half_angle_rad: Half-angle (rad) of the forward arc; rays span [-h, +h] from heading.
-        max_ray_length_m: Maximum free length walked along each ray.
         step_size_m: Step size used when walking each ray; should be ~grid resolution.
         alignment_exponent: Sharpness of the multiplicative alignment factor applied to each
             ray's free_length score. 0 disables the bias entirely; 1 gives a smooth half-cosine;
@@ -33,7 +32,6 @@ class GoalSelectionParams:
 
     num_rays: int = 148
     arc_half_angle_rad: float = math.pi / 2
-    max_ray_length_m: float = 100
     step_size_m: float = 0.05
     alignment_exponent: float = 1.0
     alignment_floor: float = 0.375
@@ -48,8 +46,6 @@ class GoalSelectionParams:
             raise ValueError("GoalSelectionParams: num_rays must be >= 2")
         if not (0 < self.arc_half_angle_rad <= math.pi):
             raise ValueError("GoalSelectionParams: arc_half_angle_rad must be in (0, pi]")
-        if self.max_ray_length_m <= 0:
-            raise ValueError("GoalSelectionParams: max_ray_length_m must be > 0")
         if self.step_size_m <= 0:
             raise ValueError("GoalSelectionParams: step_size_m must be > 0")
         if self.alignment_exponent < 0:
