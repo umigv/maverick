@@ -17,11 +17,14 @@ class OdriveDriver(Node):
 
         self.config = utils.config.load(self, OdriveDriverConfig)
 
+        self.watchdog_triggered = False
+
         self.create_subscription(Twist, "cmd_vel", self.cmd_vel_callback, 10)
 
         self.publisher = self.create_publisher(TwistWithCovarianceStamped, "enc_vel", 10)
 
-        self.create_timer(self.config.sample_time_s, self.publish_enc_vel)
+        self.create_timer(self.config.publish_period_s, self.publish_enc_vel)
+        self.watchdog_timer = self.create_timer(self.config.cmd_vel_timeout_s, self.watchdog_callback)
 
     def init(self) -> bool:
         try:
@@ -40,6 +43,9 @@ class OdriveDriver(Node):
             return False
 
     def cmd_vel_callback(self, msg: Twist) -> None:
+        self.watchdog_timer.reset()
+        self.watchdog_triggered = False
+
         if not self.is_robot_enabled():
             self.get_logger().warning("Robot disabled", throttle_duration_sec=2.0)
             self.set_motor_rps(0.0, 0.0)
@@ -47,6 +53,13 @@ class OdriveDriver(Node):
 
         left_rps, right_rps = self.config.twist_to_motor_rps(msg.linear.x, msg.angular.z)
         self.set_motor_rps(left_rps, right_rps)
+
+    def watchdog_callback(self) -> None:
+        if not self.watchdog_triggered:
+            self.get_logger().error("cmd_vel timed out, stopping robot")
+            self.watchdog_triggered = True
+
+        self.set_motor_rps(0.0, 0.0)
 
     def publish_enc_vel(self) -> None:
         left_motor_rps, right_motor_rps = self.get_motor_rps()
@@ -89,6 +102,7 @@ class OdriveDriver(Node):
             with open(self.config.estop_file_path) as f:
                 return f.read().strip() != "1"  # only "1" stops the robot, everything else is enabled
         except Exception:
+            self.get_logger().error("EStop file not found", throttle_duration_sec=30.0)
             return True  # if the e-stop file doesn't exist / is corrupted we assume e-stop is off
 
 
