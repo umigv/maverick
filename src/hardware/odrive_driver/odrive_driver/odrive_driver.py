@@ -1,8 +1,9 @@
 import odrive
+import odrive.utils
 import rclpy
 import utils.config
 from geometry_msgs.msg import Twist, TwistWithCovariance, TwistWithCovarianceStamped, Vector3
-from odrive.enums import AxisState, ControlMode
+from odrive.enums import AxisState, ControlMode, ODriveError
 from rclpy.duration import Duration
 from rclpy.node import Node
 from std_msgs.msg import Header
@@ -16,23 +17,29 @@ class OdriveDriver(Node):
 
         self.config = utils.config.load(self, OdriveDriverConfig)
 
-        self.get_logger().info(f"Finding left ODrive (serial number {self.config.left_odrive.serial})...")
-        self.odrive_left = odrive.find_any(serial_number=self.config.left_odrive.serial)
-        self.initialize_odrive(self.odrive_left)
-        self.get_logger().info("Found left ODrive")
-
-        self.get_logger().info(f"Finding right ODrive (serial number {self.config.right_odrive.serial})...")
-        self.odrive_right = odrive.find_any(serial_number=self.config.right_odrive.serial)
-        self.initialize_odrive(self.odrive_right)
-        self.get_logger().info("Found right ODrive")
-
         self.create_subscription(Twist, "cmd_vel", self.cmd_vel_callback, 10)
 
         self.publisher = self.create_publisher(TwistWithCovarianceStamped, "enc_vel", 10)
 
         self.create_timer(self.config.sample_time_s, self.publish_enc_vel)
 
-    def cmd_vel_callback(self, msg):
+    def init(self) -> bool:
+        try:
+            self.get_logger().info(f"Finding left ODrive (serial number {self.config.left_odrive.serial})...")
+            self.odrive_left = odrive.find_any(serial_number=self.config.left_odrive.serial)
+            self.initialize_odrive(self.odrive_left)
+            self.get_logger().info("Found left ODrive")
+
+            self.get_logger().info(f"Finding right ODrive (serial number {self.config.right_odrive.serial})...")
+            self.odrive_right = odrive.find_any(serial_number=self.config.right_odrive.serial)
+            self.initialize_odrive(self.odrive_right)
+            self.get_logger().info("Found right ODrive")
+            return True
+        except Exception as e:
+            self.get_logger().fatal(f"Failed to initialize ODrive: {e}")
+            return False
+
+    def cmd_vel_callback(self, msg: Twist) -> None:
         if not self.is_robot_enabled():
             self.get_logger().warning("Robot disabled", throttle_duration_sec=2.0)
             self.set_motor_rps(0.0, 0.0)
@@ -41,7 +48,7 @@ class OdriveDriver(Node):
         left_rps, right_rps = self.config.twist_to_motor_rps(msg.linear.x, msg.angular.z)
         self.set_motor_rps(left_rps, right_rps)
 
-    def publish_enc_vel(self):
+    def publish_enc_vel(self) -> None:
         left_motor_rps, right_motor_rps = self.get_motor_rps()
         linear_mps, angular_radps = self.config.motor_rps_to_twist(left_motor_rps, right_motor_rps)
 
@@ -61,7 +68,13 @@ class OdriveDriver(Node):
         )
 
     def initialize_odrive(self, odrv) -> None:
-        odrv.axis0.requested_state = AxisState.CLOSED_LOOP_CONTROL
+        odrv.clear_errors()
+        try:
+            odrive.utils.request_state(odrv.axis0, AxisState.CLOSED_LOOP_CONTROL)
+        except Exception as e:
+            if ODriveError.DC_BUS_UNDER_VOLTAGE in ODriveError(odrv.axis0.active_errors):
+                raise RuntimeError("EStop is engaged") from e
+            raise
         odrv.axis0.controller.config.control_mode = ControlMode.VELOCITY_CONTROL
 
     def set_motor_rps(self, left_motor_rps: float, right_motor_rps: float) -> None:
@@ -82,6 +95,10 @@ class OdriveDriver(Node):
 def main() -> None:
     rclpy.init()
     node = OdriveDriver()
+
+    if not node.init():
+        return
+
     try:
         rclpy.spin(node)
     finally:
