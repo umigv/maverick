@@ -32,6 +32,16 @@ class OccupancyGridSimulator(Node):
             "occupancy_grid/ground_truth",
             qos_profile=utils.qos.LATCHED,
         )
+        self.ground_truth_lane_lines_publisher = self.create_publisher(
+            OccupancyGrid,
+            "occupancy_grid/ground_truth/lane_lines",
+            qos_profile=utils.qos.LATCHED,
+        )
+        self.ground_truth_obstacles_publisher = self.create_publisher(
+            OccupancyGrid,
+            "occupancy_grid/ground_truth/obstacles",
+            qos_profile=utils.qos.LATCHED,
+        )
 
         self.robot_pose: Pose2d | None = None
 
@@ -73,33 +83,42 @@ class OccupancyGridSimulator(Node):
             f"at {self.resolution_m} m/cell ({self.width_cells}x{self.height_cells} grid)"
         )
 
-    def publish_ground_truth_map(self) -> None:
-        non_drivable_cells = self.obstacle_cells | self.lane_line_cells
-        if not non_drivable_cells:
-            return
+    def _build_ground_truth_grid(self, cells: frozenset[tuple[int, int]]) -> OccupancyGrid | None:
+        if not cells:
+            return None
 
-        xs, ys = zip(*non_drivable_cells, strict=True)
+        xs, ys = zip(*cells, strict=True)
         min_x, max_x = min(xs), max(xs)
         min_y, max_y = min(ys), max(ys)
         map_width_cells = max_x - min_x + 1
         map_height_cells = max_y - min_y + 1
 
-        static_map = np.full((map_height_cells, map_width_cells), self.FREE, dtype=np.int8)
-        for x, y in non_drivable_cells:
-            static_map[y - min_y, x - min_x] = self.OCCUPIED
+        grid = np.full((map_height_cells, map_width_cells), self.FREE, dtype=np.int8)
+        for x, y in cells:
+            grid[y - min_y, x - min_x] = self.OCCUPIED
 
-        self.ground_truth_publisher.publish(
-            OccupancyGrid(
-                header=Header(stamp=self.get_clock().now().to_msg(), frame_id=self.config.map_frame_id),
-                info=MapMetaData(
-                    resolution=self.resolution_m,
-                    width=map_width_cells,
-                    height=map_height_cells,
-                    origin=Pose2d(Point2d(x=min_x, y=min_y) * self.resolution_m, Rotation2d(0.0)).to_ros(),
-                ),
-                data=static_map.flatten().tolist(),
-            )
+        return OccupancyGrid(
+            header=Header(stamp=self.get_clock().now().to_msg(), frame_id=self.config.map_frame_id),
+            info=MapMetaData(
+                resolution=self.resolution_m,
+                width=map_width_cells,
+                height=map_height_cells,
+                origin=Pose2d(Point2d(x=min_x, y=min_y) * self.resolution_m, Rotation2d(0.0)).to_ros(),
+            ),
+            data=grid.flatten().tolist(),
         )
+
+    def publish_ground_truth_map(self) -> None:
+        merged = self._build_ground_truth_grid(self.obstacle_cells | self.lane_line_cells)
+        lane_lines = self._build_ground_truth_grid(self.lane_line_cells)
+        obstacles = self._build_ground_truth_grid(self.obstacle_cells)
+
+        if merged is not None:
+            self.ground_truth_publisher.publish(merged)
+        if lane_lines is not None:
+            self.ground_truth_lane_lines_publisher.publish(lane_lines)
+        if obstacles is not None:
+            self.ground_truth_obstacles_publisher.publish(obstacles)
 
     def publish_occupancy_grid(self) -> None:
         if self.robot_pose is None:
