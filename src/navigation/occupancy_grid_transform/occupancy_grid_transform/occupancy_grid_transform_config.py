@@ -19,7 +19,7 @@ class InflationParams:
             1.0 result in slower decay and more conservative paths; values closer to 0.0 decay more aggressively.
     """
 
-    inflation_radius_cells: int = 12
+    inflation_radius_cells: int = 8
     inflation_falloff_extent_cells: int = 0
     inflation_decay_factor: float = 0.9
 
