@@ -20,6 +20,7 @@ setup(
     entry_points={
         "console_scripts": [
             "sensor_simulator = sensor_simulator.sensor_simulator:main",
+            "ultrasonic_simulator = sensor_simulator.ultrasonic_simulator:main",
         ],
     },
 )
