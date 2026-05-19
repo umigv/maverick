@@ -5,18 +5,19 @@ from dataclasses import dataclass
 class UltrasonicSimulatorConfig:
     """Configuration for the ultrasonic sensor simulator node.
 
-    Subscribes to the ground truth odometry and obstacle occupancy grid, then raycasts from each
-    sensor's position in the map frame to find the nearest obstacle and publishes
-    sensor_msgs/Range on a per-sensor topic.
+    Subscribes to the ground truth odometry and obstacle occupancy grid, raycasts from each
+    sensor's position in the map frame, then merges all readings into one by taking the minimum
+    and publishes a single sensor_msgs/Range on ``topic``.
 
     Measurement model::
         range_meas = raycast_distance + N(0, noise_std_m), clamped to [min_range_m, max_range_m]
+        merged     = min(range_meas for each sensor)
 
     Attributes:
         frame_ids: TF frame IDs of the sensor transducer faces (e.g. the ``${name}_link`` frames
-            from the ultrasonic xacro).  Each frame ID becomes a topic name by stripping the
-            trailing ``_link`` suffix (e.g. ``ultrasonic_rear_left_link`` →
-            ``ultrasonic_rear_left``).
+            from the ultrasonic xacro).  Used for raycasting only — does not affect the topic.
+
+        topic: Topic name on which the merged Range message is published.
 
         min_range_m: Minimum measurable distance (m).  Readings below this are clamped.
         max_range_m: Maximum measurable distance (m).  Readings above this are reported as
@@ -30,10 +31,12 @@ class UltrasonicSimulatorConfig:
             sensor-to-base transforms.
         ground_truth_base_frame_id: Expected child_frame_id in ground truth odometry messages.
 
-        publish_period_s: Publish interval for all sensors (s).
+        publish_period_s: Publish interval (s).
     """
 
     frame_ids: list[str]
+
+    topic: str = "ultrasonic_rear"
 
     min_range_m: float = 0.02
     max_range_m: float = 4.0

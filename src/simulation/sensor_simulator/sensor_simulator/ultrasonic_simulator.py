@@ -49,10 +49,7 @@ class UltrasonicSimulator(Node):
             qos_profile=utils.qos.LATCHED,
         )
 
-        self.range_publishers = {
-            frame_id: self.create_publisher(Range, frame_id.removesuffix("_link"), 10)
-            for frame_id in self.config.frame_ids
-        }
+        self.range_publisher = self.create_publisher(Range, self.config.topic, 10)
 
         self.create_timer(self.config.publish_period_s, self._publish)
 
@@ -110,9 +107,8 @@ class UltrasonicSimulator(Node):
         cos_r = robot.rotation.cos
         sin_r = robot.rotation.sin
 
-        for frame_id, publisher in self.range_publishers.items():
-            tx, ty, sensor_yaw_base = self.sensor_transforms[frame_id]
-
+        ranges = []
+        for tx, ty, sensor_yaw_base in self.sensor_transforms.values():
             # Sensor origin in world frame: rotate base-frame offset by robot yaw.
             sx = robot.point.x + cos_r * tx - sin_r * ty
             sy = robot.point.y + sin_r * tx + cos_r * ty
@@ -125,17 +121,18 @@ class UltrasonicSimulator(Node):
             raw_range = self._raycast(sx, sy, dx, dy)
             measured = raw_range + random.gauss(0.0, self.config.noise_std_m)
             measured = max(self.config.min_range_m, min(measured, self.config.max_range_m))
+            ranges.append(measured)
 
-            publisher.publish(
-                Range(
-                    header=Header(stamp=stamp, frame_id=frame_id),
-                    radiation_type=Range.ULTRASOUND,
-                    field_of_view=self.config.field_of_view_rad,
-                    min_range=self.config.min_range_m,
-                    max_range=self.config.max_range_m,
-                    range=measured,
-                )
+        self.range_publisher.publish(
+            Range(
+                header=Header(stamp=stamp, frame_id=self.config.topic + "_link"),
+                radiation_type=Range.ULTRASOUND,
+                field_of_view=self.config.field_of_view_rad,
+                min_range=self.config.min_range_m,
+                max_range=self.config.max_range_m,
+                range=min(ranges),
             )
+        )
 
     def _raycast(self, sx: float, sy: float, dx: float, dy: float) -> float:
         """DDA raycast from (sx, sy) in direction (dx, dy). Returns distance in metres to the
