@@ -1,6 +1,7 @@
 # odrive_driver
 Controls two ODrives (left and right) over USB. Converts `cmd_vel` twist commands to per-motor velocity setpoints and
-publishes encoder-derived velocity with propagated covariance.
+publishes encoder-derived velocity with propagated covariance. Motors are zeroed if no `cmd_vel` is received within
+`cmd_vel_timeout_s` or if the e-stop is active.
 
 ## Read Files
 - `/tmp/estop_value.txt` - e-stop state written by `estop_driver`; commands zero velocity to both motors while estopped
@@ -15,7 +16,8 @@ covariance
 ## Config Parameters
 | Parameter | Type | Default | Description |
 |---|---|---|---|
-| `sample_time_s` | `float` | `0.01` | Period (s) of the encoder publish timer |
+| `publish_period_s` | `float` | `0.01` | Period (s) of the encoder publish timer |
+| `cmd_vel_timeout_s` | `float` | `0.5` | Max age of a `cmd_vel` command before motors are zeroed (s) |
 | `timestamp_delay_s` | `float` | `0.0` | Subtracted from the publish timestamp to compensate read and processing latency (s) |
 | `frame_id` | `str` | `"base_link"` | TF frame ID attached to the published twist header |
 | `estop_file_path` | `Path` | `/tmp/estop_value.txt` | Path to the e-stop flag file |

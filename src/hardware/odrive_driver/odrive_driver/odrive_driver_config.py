@@ -98,8 +98,9 @@ class OdriveDriverConfig:
         right_odrive: Hardware identification and polarity for the right ODrive unit.
         geometry: Drivetrain geometry.
         covariance: Dynamic covariance model for the published twist estimate.
-        sample_time_s: Period of the encoder publish timer (s).
+        publish_period_s: Period of the encoder publish timer (s).
         timestamp_delay_s: Amount subtracted from the publish timestamp to compensate read and processing latency (s).
+        cmd_vel_timeout_s: Maximum age of a cmd_vel command before motors are zeroed (s).
         frame_id: TF frame ID of the robot base, attached to the published twist header.
         estop_file_path: Path to the e-stop flag file. A value of "1" disables motor output.
     """
@@ -108,16 +109,19 @@ class OdriveDriverConfig:
     right_odrive: OdriveConfig
     geometry: GeometryConfig
     covariance: CovarianceConfig
-    sample_time_s: float = 0.01
+    publish_period_s: float = 0.01
     timestamp_delay_s: float = 0.0
+    cmd_vel_timeout_s: float = 0.5
     frame_id: str = "base_link"
     estop_file_path: Path = Path("/tmp/estop_value.txt")
 
     def __post_init__(self) -> None:
-        if self.sample_time_s <= 0:
-            raise ValueError("OdriveDriverConfig: sample_time_s must be > 0")
+        if self.publish_period_s <= 0:
+            raise ValueError("OdriveDriverConfig: publish_period_s must be > 0")
         if self.timestamp_delay_s < 0:
             raise ValueError("OdriveDriverConfig: timestamp_delay_s must be >= 0")
+        if self.cmd_vel_timeout_s <= 0:
+            raise ValueError("OdriveDriverConfig: cmd_vel_timeout_s must be > 0")
 
     def twist_covariance(self, linear_mps: float, angular_radps: float) -> list[float]:
         linear_variance_dynamic = self.covariance.linear_variance_gain * (linear_mps**2)
