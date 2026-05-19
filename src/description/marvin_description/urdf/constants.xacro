@@ -59,4 +59,10 @@
     <xacro:property name="gps_x_offset" value="${3*0.0254}"/>
     <xacro:property name="gps_y_offset" value="0.0"/>
     <xacro:property name="gps_z_offset" value="${chassis_z_offset + chassis_tower_height}"/>
+
+
+    <!-- Rear Ultrasonic Sensor Constants -->
+    <xacro:property name="ultrasonic_rear_x_offset" value="${-(chassis_tower_length/2 + chassis_electrical_length + chassis_caster_length)}"/>
+    <xacro:property name="ultrasonic_rear_y_spacing" value="${8*0.0254}"/>
+    <xacro:property name="ultrasonic_rear_z_offset" value="${chassis_z_offset + 2*0.0254}"/>
 </robot>

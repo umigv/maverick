@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+
+<!-- Brief: Generic ultrasonic proximity sensor -->
+<!-- Dimensions: 45 x 20 x 15 mm (length x width x height), sensing axis along local +x -->
+<!-- Mass: 9g -->
+<!-- Mounting Location: Rear face of sensor body (attachment point to chassis wall) -->
+<!-- Joint Type: fixed -->
+<!-- Param name: name of the sensor -->
+<!-- Param parent: name of the parent link, defaulted to base_link -->
+<!-- Param joint_origin: location of sensor attachment face relative to parent link -->
+<!--   Note: orient so that local +x points in the desired sensing direction -->
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="ultrasonic">
+    <xacro:macro name="ultrasonic" params="name parent:=base_link *joint_origin">
+        <!-- Includes -->
+        <xacro:include filename="$(find common_description)/urdf/physics/inertia.xacro"/>
+
+
+        <!-- Ultrasonic sensor dimensions -->
+        <xacro:property name="ultrasonic_mass" value="0.009"/>
+        <xacro:property name="ultrasonic_length" value="0.045"/>
+        <xacro:property name="ultrasonic_width" value="0.020"/>
+        <xacro:property name="ultrasonic_height" value="0.015"/>
+
+
+        <!-- Base link (geometry centered on body, attachment face at local x=0) -->
+        <link name="${name}_base_link">
+            <xacro:box_inertia mass="${ultrasonic_mass}" length="${ultrasonic_length}" width="${ultrasonic_width}" height="${ultrasonic_height}">
+                <origin xyz="${ultrasonic_length / 2} 0 0" rpy="0 0 0" />
+            </xacro:box_inertia>
+
+            <visual>
+                <origin xyz="${ultrasonic_length / 2} 0 0" rpy="0 0 0" />
+                <geometry>
+                    <box size="${ultrasonic_length} ${ultrasonic_width} ${ultrasonic_height}" />
+                </geometry>
+            </visual>
+
+            <collision>
+                <origin xyz="${ultrasonic_length / 2} 0 0" rpy="0 0 0" />
+                <geometry>
+                    <box size="${ultrasonic_length} ${ultrasonic_width} ${ultrasonic_height}" />
+                </geometry>
+            </collision>
+        </link>
+
+        <joint name="${name}_base_joint" type="fixed">
+            <xacro:insert_block name="joint_origin" />
+            <parent link="${parent}" />
+            <child link="${name}_base_link" />
+        </joint>
+
+
+        <!-- Sensing link at transducer face (local x = ultrasonic_length, pointing in sensing direction) -->
+        <link name="${name}_link" />
+
+        <joint name="${name}_joint" type="fixed">
+            <origin xyz="${ultrasonic_length} 0 0" rpy="0 0 0" />
+            <parent link="${name}_base_link" />
+            <child link="${name}_link" />
+        </joint>
+    </xacro:macro>
+</robot>

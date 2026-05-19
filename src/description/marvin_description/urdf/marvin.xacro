@@ -54,4 +54,17 @@
     <xacro:ann_mb name="$(arg gps_name)" parent="$(arg base_frame_id)">
         <origin xyz="${gps_x_offset} ${gps_y_offset} ${gps_z_offset}" rpy="0 0 0" />
     </xacro:ann_mb>
+
+
+    <!-- Rear Ultrasonic Sensors -->
+    <xacro:include filename="$(find common_description)/urdf/sensor/ultrasonic.xacro" />
+    <xacro:ultrasonic name="ultrasonic_rear_left" parent="$(arg base_frame_id)">
+        <origin xyz="${ultrasonic_rear_x_offset} ${ultrasonic_rear_y_spacing} ${ultrasonic_rear_z_offset}" rpy="0 0 ${pi}" />
+    </xacro:ultrasonic>
+    <xacro:ultrasonic name="ultrasonic_rear_center" parent="$(arg base_frame_id)">
+        <origin xyz="${ultrasonic_rear_x_offset} 0 ${ultrasonic_rear_z_offset}" rpy="0 0 ${pi}" />
+    </xacro:ultrasonic>
+    <xacro:ultrasonic name="ultrasonic_rear_right" parent="$(arg base_frame_id)">
+        <origin xyz="${ultrasonic_rear_x_offset} ${-ultrasonic_rear_y_spacing} ${ultrasonic_rear_z_offset}" rpy="0 0 ${pi}" />
+    </xacro:ultrasonic>
 </robot>
