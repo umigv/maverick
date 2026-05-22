@@ -53,9 +53,13 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         remappings=[
             ("occupancy_grid", "occupancy_grid/transformed"),
             ("odom", "odom/local"),
+            ("state", "state"),
             ("fromLL", "fromLL"),
+            ("state/set_recovery", "state/set_recovery"),
+            ("state/set_no_mans_land", "state/set_no_mans_land"),
             ("goal", "goal"),
-            ("gps_waypoint", "gps_waypoint"),
+            ("waypoint", "waypoint"),
+            ("goal_selection_debug", "goal_selection_debug"),
         ],
     )
 
