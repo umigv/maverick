@@ -1,7 +1,7 @@
 # occupancy_grid_transform
-This package consumes the occupancy grid provided by CV, adds a border on the far edges, applies obstacle inflation, and 
-republishes the occupancy grid suitable for planning. The grid origin is transformed from the incoming frame to the 
-configured output frame using TF2.
+This package consumes the occupancy grid provided by CV, adds a border on the far edges, applies obstacle inflation, and
+republishes two grids suitable for planning. The grid origin is transformed from the incoming frame to the configured
+output frame using TF2.
 
 ## Grid conventions
 The occupancy grid from CV is expected to match the convention of 
@@ -16,7 +16,8 @@ The occupancy grid from CV is expected to match the convention of
 - `occupancy_grid` (`nav_msgs/msg/OccupancyGrid`) - Input occupancy grid in CV frame
 
 ## Published Topics
-- `transformed_occupancy_grid` (`nav_msgs/msg/OccupancyGrid`) - Bordered and inflated occupancy grid in the configured output frame
+- `transformed_occupancy_grid` (`nav_msgs/msg/OccupancyGrid`) - Bordered grid in the configured output frame
+- `inflated_occupancy_grid` (`nav_msgs/msg/OccupancyGrid`) - Bordered and inflated grid in the configured output frame
 
 ## Inflation
 After the grid is converted and a border is added, obstacle inflation is applied. For each occupied cell, surrounding
@@ -28,7 +29,7 @@ cells are inflated based on their distance:
 ## Config Parameters
 | Parameter | Default | Description |
 |---|---|---|
-| `frame_id` | `odom` | TF frame the transformed grid is published in |
+| `frame_id` | `odom` | TF frame the transformed grids are published in |
 
 ### Inflation Parameters (`inflation_params`)
 | Parameter | Default | Description |

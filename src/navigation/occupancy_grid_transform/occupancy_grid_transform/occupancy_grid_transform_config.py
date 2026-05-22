@@ -38,8 +38,7 @@ class OccupancyGridTransformConfig:
 
     Attributes:
         inflation_params: Parameters controlling obstacle inflation applied to the grid prior to publishing.
-        frame_id: TF frame ID in which the transformed occupancy grid is published. All grid coordinates and the
-            computed origin pose are expressed in this frame.
+        frame_id: TF frame the transformed grids are published in.
     """
 
     inflation_params: InflationParams

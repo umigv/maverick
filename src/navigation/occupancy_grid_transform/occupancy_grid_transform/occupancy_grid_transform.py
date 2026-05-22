@@ -23,7 +23,8 @@ class OccupancyGridTransform(Node):
 
         self.create_subscription(OccupancyGrid, "occupancy_grid", self.occupancy_grid_callback, 10)
 
-        self.publisher = self.create_publisher(OccupancyGrid, "transformed_occupancy_grid", 10)
+        self.transformed_publisher = self.create_publisher(OccupancyGrid, "transformed_occupancy_grid", 10)
+        self.inflated_publisher = self.create_publisher(OccupancyGrid, "inflated_occupancy_grid", 10)
 
     def occupancy_grid_callback(self, msg: OccupancyGrid) -> None:
         # Drop the stamp so tf uses the latest available transform instead of looking up the exact time. If we copied
@@ -46,7 +47,16 @@ class OccupancyGridTransform(Node):
         inflated_grid = inflate_grid(bordered_grid, self.config.inflation_params)
         height, width = grid.shape
 
-        self.publisher.publish(
+        # We omit the stamp in the header to avoid TF extrapolation errors in rviz
+        self.transformed_publisher.publish(
+            OccupancyGrid(
+                header=Header(frame_id=self.config.frame_id),
+                info=MapMetaData(resolution=msg.info.resolution, width=width, height=height, origin=origin_transformed),
+                data=bordered_grid.astype(np.int8).reshape(-1).tolist(),
+            )
+        )
+
+        self.inflated_publisher.publish(
             OccupancyGrid(
                 header=Header(frame_id=self.config.frame_id),
                 info=MapMetaData(resolution=msg.info.resolution, width=width, height=height, origin=origin_transformed),
