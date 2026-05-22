@@ -90,7 +90,7 @@ class OdriveDriver(Node):
             raise
         odrv.axis0.controller.config.control_mode = ControlMode.VELOCITY_CONTROL
         odrv.axis0.controller.config.input_mode = InputMode.VEL_RAMP
-        odrv.axis0.controller.config.vel_ramp_rate = 100.0
+        odrv.axis0.controller.config.vel_ramp_rate = self.config.accel_limit_motor_rps_per_s
 
     def set_motor_rps(self, left_motor_rps: float, right_motor_rps: float) -> None:
         self.odrive_left.axis0.controller.input_vel = left_motor_rps

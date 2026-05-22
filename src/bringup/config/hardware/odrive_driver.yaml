@@ -28,4 +28,7 @@ odrive_driver:
     # Subtracted from publish timestamp to compensate for read/processing latency (s)
     timestamp_delay_s: 0.0
 
+    # Maximum linear acceleration for the ODrive velocity ramp (m/s²)
+    accel_limit_mps2: 3.0
+
     estop_file_path: "/tmp/estop_value.txt"

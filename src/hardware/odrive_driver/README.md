@@ -19,6 +19,7 @@ covariance
 | `publish_period_s` | `float` | `0.01` | Period (s) of the encoder publish timer |
 | `cmd_vel_timeout_s` | `float` | `0.5` | Max age of a `cmd_vel` command before motors are zeroed (s) |
 | `timestamp_delay_s` | `float` | `0.0` | Subtracted from the publish timestamp to compensate read and processing latency (s) |
+| `accel_limit_mps2` | `float` | `3.0` | Maximum linear acceleration applied via ODrive velocity ramp (m/s²) |
 | `frame_id` | `str` | `"base_link"` | TF frame ID attached to the published twist header |
 | `estop_file_path` | `Path` | `/tmp/estop_value.txt` | Path to the e-stop flag file |
 
