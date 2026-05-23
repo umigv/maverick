@@ -32,3 +32,7 @@ class OccupancyGridSimulatorConfig:
     ground_truth_base_frame_id: str = "base_link_ground_truth"
     publish_period_s: float = 0.03
     robot_blind_spot_height_m: float = 1.25
+
+    def __post_init__(self) -> None:
+        if self.robot_blind_spot_height_m <= 0:
+            raise ValueError("OccupancyGridSimulatorConfig: robot_blind_spot_height_m must be > 0")
