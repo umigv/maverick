@@ -61,8 +61,8 @@ class GeometryConfig:
 class ControllerConfig:
     """ODrive axis controller parameters.
 
-    vel_gain, vel_integrator_gain, vel_integrator_limit, and inertia map directly to ODrive
-    controller config fields after unit conversion from SI to motor-native units.
+    vel_gain, vel_integrator_gain, vel_integrator_limit, and inertia map directly to ODrive controller config fields
+    after unit conversion from SI to motor-native units.
 
     Attributes:
         vel_gain: Velocity controller proportional gain (A / (m/s)).
