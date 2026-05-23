@@ -58,6 +58,44 @@ class GeometryConfig:
 
 
 @dataclass(frozen=True)
+class ControllerConfig:
+    """ODrive axis controller parameters.
+
+    vel_gain, vel_integrator_gain, vel_integrator_limit, and inertia map directly to ODrive controller config fields
+    after unit conversion from SI to motor-native units.
+
+    Attributes:
+        vel_gain: Velocity controller proportional gain (A / (m/s)).
+        vel_integrator_gain: Velocity controller integrator gain (A / (m/s * s)).
+        vel_integrator_limit: Integrator output clamp (A). 0.0 disables the limit.
+        vel_limit_mps: Motor velocity hard limit (m/s). Trips an error if exceeded.
+        accel_limit_mps2: Maximum linear acceleration applied via ODrive velocity ramp (m/s²).
+        inertia: Feed-forward inertia compensation (Nm / (m/s²)).
+    """
+
+    vel_gain: float = 0.08
+    vel_integrator_gain: float = 0.0
+    vel_integrator_limit: float = 0.0
+    vel_limit_mps: float = 3.0
+    accel_limit_mps2: float = 3.0
+    inertia: float = 0.0
+
+    def __post_init__(self) -> None:
+        if self.vel_gain < 0:
+            raise ValueError("ControllerConfig: vel_gain must be >= 0")
+        if self.vel_integrator_gain < 0:
+            raise ValueError("ControllerConfig: vel_integrator_gain must be >= 0")
+        if self.vel_integrator_limit < 0:
+            raise ValueError("ControllerConfig: vel_integrator_limit must be >= 0")
+        if self.vel_limit_mps <= 0:
+            raise ValueError("ControllerConfig: vel_limit_mps must be > 0")
+        if self.accel_limit_mps2 <= 0:
+            raise ValueError("ControllerConfig: accel_limit_mps2 must be > 0")
+        if self.inertia < 0:
+            raise ValueError("ControllerConfig: inertia must be >= 0")
+
+
+@dataclass(frozen=True)
 class CovarianceConfig:
     """Dynamic covariance model for the published twist estimate.
 
@@ -97,6 +135,7 @@ class OdriveDriverConfig:
         left_odrive: Hardware identification and polarity for the left ODrive unit.
         right_odrive: Hardware identification and polarity for the right ODrive unit.
         geometry: Drivetrain geometry.
+        controller: ODrive axis controller parameters.
         covariance: Dynamic covariance model for the published twist estimate.
         publish_period_s: Period of the encoder publish timer (s).
         timestamp_delay_s: Amount subtracted from the publish timestamp to compensate read and processing latency (s).
@@ -108,6 +147,7 @@ class OdriveDriverConfig:
     left_odrive: OdriveConfig
     right_odrive: OdriveConfig
     geometry: GeometryConfig
+    controller: ControllerConfig
     covariance: CovarianceConfig
     publish_period_s: float = 0.01
     timestamp_delay_s: float = 0.0
@@ -122,6 +162,18 @@ class OdriveDriverConfig:
             raise ValueError("OdriveDriverConfig: timestamp_delay_s must be >= 0")
         if self.cmd_vel_timeout_s <= 0:
             raise ValueError("OdriveDriverConfig: cmd_vel_timeout_s must be > 0")
+
+    @property
+    def vel_ramp_rate_motor(self) -> float:
+        return self.controller.accel_limit_mps2 * self.geometry.motor_rps_per_wheel_mps
+
+    @property
+    def vel_limit_motor(self) -> float:
+        return self.controller.vel_limit_mps * self.geometry.motor_rps_per_wheel_mps
+
+    @property
+    def inertia_motor(self) -> float:
+        return self.controller.inertia / self.geometry.motor_rps_per_wheel_mps
 
     def twist_covariance(self, linear_mps: float, angular_radps: float) -> list[float]:
         linear_variance_dynamic = self.covariance.linear_variance_gain * (linear_mps**2)

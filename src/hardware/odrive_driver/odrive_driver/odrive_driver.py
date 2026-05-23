@@ -3,7 +3,7 @@ import odrive.utils
 import rclpy
 import utils.config
 from geometry_msgs.msg import Twist, TwistWithCovariance, TwistWithCovarianceStamped, Vector3
-from odrive.enums import AxisState, ControlMode, ODriveError
+from odrive.enums import AxisState, ControlMode, InputMode, ODriveError
 from rclpy.duration import Duration
 from rclpy.node import Node
 from std_msgs.msg import Header
@@ -89,6 +89,13 @@ class OdriveDriver(Node):
                 raise RuntimeError("EStop is engaged") from e
             raise
         odrv.axis0.controller.config.control_mode = ControlMode.VELOCITY_CONTROL
+        odrv.axis0.controller.config.input_mode = InputMode.VEL_RAMP
+        odrv.axis0.controller.config.vel_gain = self.config.controller.vel_gain
+        odrv.axis0.controller.config.vel_integrator_gain = self.config.controller.vel_integrator_gain
+        odrv.axis0.controller.config.vel_integrator_limit = self.config.controller.vel_integrator_limit
+        odrv.axis0.controller.config.vel_limit = self.config.vel_limit_motor
+        odrv.axis0.controller.config.vel_ramp_rate = self.config.vel_ramp_rate_motor
+        odrv.axis0.controller.config.inertia = self.config.inertia_motor
 
     def set_motor_rps(self, left_motor_rps: float, right_motor_rps: float) -> None:
         self.odrive_left.axis0.controller.input_vel = left_motor_rps
