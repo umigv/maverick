@@ -20,7 +20,8 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         ],
         remappings=[
             ("occupancy_grid", "occupancy_grid/raw"),
-            ("transformed_occupancy_grid", "occupancy_grid"),
+            ("transformed_occupancy_grid", "occupancy_grid/transformed"),
+            ("inflated_occupancy_grid", "occupancy_grid/inflated"),
         ],
     )
 
@@ -50,7 +51,7 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
             {"world_frame_id": frames["odom_frame"]},
         ],
         remappings=[
-            ("occupancy_grid", "occupancy_grid"),
+            ("occupancy_grid", "occupancy_grid/transformed"),
             ("odom", "odom/local"),
             ("fromLL", "fromLL"),
             ("goal", "goal"),
@@ -66,7 +67,7 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
             {"frame_id": frames["odom_frame"]},
         ],
         remappings=[
-            ("occupancy_grid", "occupancy_grid"),
+            ("occupancy_grid", "occupancy_grid/inflated"),
             ("odom", "odom/local"),
             ("goal", "goal"),
             ("path", "path"),
