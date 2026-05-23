@@ -15,6 +15,15 @@ odrive_driver:
       wheel_diameter_m: 0.18423
       gear_ratio: 18.888888888888889  # 170 / 9
 
+    # ODrive axis controller parameters (all in SI / robot-frame units)
+    controller:
+      vel_gain: 0.08
+      vel_integrator_gain: 0.0
+      vel_integrator_limit: 0.0
+      vel_limit_mps: 3.0
+      accel_limit_mps2: 3.0
+      inertia: 0.0                 # Nm / (m/s²)
+
     # Dynamic covariance model (variance scales with speed)
     covariance:
       linear_variance_static: 1.0e-6
@@ -28,7 +37,5 @@ odrive_driver:
     # Subtracted from publish timestamp to compensate for read/processing latency (s)
     timestamp_delay_s: 0.0
 
-    # Maximum linear acceleration for the ODrive velocity ramp (m/s²)
-    accel_limit_mps2: 3.0
 
     estop_file_path: "/tmp/estop_value.txt"

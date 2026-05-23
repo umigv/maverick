@@ -19,9 +19,16 @@ covariance
 | `publish_period_s` | `float` | `0.01` | Period (s) of the encoder publish timer |
 | `cmd_vel_timeout_s` | `float` | `0.5` | Max age of a `cmd_vel` command before motors are zeroed (s) |
 | `timestamp_delay_s` | `float` | `0.0` | Subtracted from the publish timestamp to compensate read and processing latency (s) |
-| `accel_limit_mps2` | `float` | `3.0` | Maximum linear acceleration applied via ODrive velocity ramp (m/s²) |
 | `frame_id` | `str` | `"base_link"` | TF frame ID attached to the published twist header |
 | `estop_file_path` | `Path` | `/tmp/estop_value.txt` | Path to the e-stop flag file |
+
+### ODrive Units
+Each ODrive is identified by its USB serial number and a polarity correction. `left_odrive` and `right_odrive` each take the same parameters:
+
+| Parameter | Type | Description |
+|---|---|---|
+| `serial` | `str` | USB serial number of the ODrive unit (find with `odrivetool`) |
+| `polarity` | `int` | Sign correction mapping motor-native direction to robot-forward (`1` or `-1`) |
 
 ### Geometry
 | Parameter | Type | Default | Description |
@@ -29,6 +36,18 @@ covariance
 | `track_width_m` | `float` | `0.764` | Distance between left and right wheel contact points (m) |
 | `wheel_diameter_m` | `float` | `0.18423` | Diameter of each drive wheel (m) |
 | `gear_ratio` | `float` | `170/9 ≈ 18.89` | Motor-to-wheel gear ratio (motor revolutions per wheel revolution) |
+
+### Controller
+All parameters are specified in SI / robot-frame units and converted to motor-native units before being written to the ODrive.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `vel_gain` | `float` | `0.08` | Velocity controller proportional gain (A / (m/s)) |
+| `vel_integrator_gain` | `float` | `0.0` | Velocity controller integrator gain (A / (m/s · s)) |
+| `vel_integrator_limit` | `float` | `0.0` | Integrator output clamp (A); `0.0` disables the limit |
+| `vel_limit_mps` | `float` | `3.0` | Motor velocity hard limit (m/s); trips an ODrive error if exceeded |
+| `accel_limit_mps2` | `float` | `3.0` | Maximum linear acceleration via ODrive velocity ramp (m/s²) |
+| `inertia` | `float` | `0.0` | Feed-forward inertia compensation (Nm / (m/s²)) |
 
 ### Covariance
 Variance scales with speed to reflect increased uncertainty at higher velocities:
