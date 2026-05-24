@@ -23,9 +23,11 @@ class GpsOriginCalculator(Node):
         self.done = False
 
         self.get_logger().info(
-            f"Collecting GNSS samples for datum. Keep robot STILL.\n"
+            f"\n"
+            f"Collecting GNSS samples for datum. Timing will start when the first valid sample is received.\n"
             f"Policy: min_samples={self.config.min_samples_required}, max_horizontal_stdev={self.config.max_horizontal_stdev_m}m,\n"
             f"        min_duration={self.config.min_sample_duration_s}s, max_duration={self.config.max_sample_duration_s}s\n"
+            f"Keep robot STILL."
         )
 
     def gps_callback(self, msg: NavSatFix) -> None:
@@ -48,6 +50,9 @@ class GpsOriginCalculator(Node):
                 f"Dropping GPS msg with high horizontal stdev: {horizontal_stdev} > {self.config.max_horizontal_stdev_m}"
             )
             return
+
+        if len(self.samples) == 0:
+            self.get_logger().info("Received first valid GPS sample, starting collection timer.")
 
         self.samples.append(msg)
 
