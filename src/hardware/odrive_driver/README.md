@@ -62,18 +62,20 @@ Variance scales with speed to reflect increased uncertainty at higher velocities
 | `angular_variance_static` | `float` | `1e-6` | Baseline angular velocity variance, independent of speed (rad²/s²) |
 | `angular_variance_gain` | `float` | `0.0004` | Speed-dependent gain on angular velocity variance (rad²/s² per (m/s)²) |
 
-## Motor calibration
+## Scripts
 Before running any script, make sure `odrivetool` and this node is closed first as they hold the USB connection.
 
+### `scripts/calibrate_odrive.py`
 Calibrate the odrive every time they turn on after a power cycle.
-```sh
+```bash
 just calibrate-odrive
 ```
 You should hear a beep when calibration starts. The indicator light will flash green while calibrating and be solid blue
 when done. If the indicator light is red, run the script again.
 
-If an ODrive errors (flashing red) at runtime:
-```sh
+### `scripts/clear_odrive_errors.py`
+Run if an ODrive errors (flashing red) at runtime:
+```bash
 just clear-odrive-errors
 ```
 The indicator light should stop flashing red.

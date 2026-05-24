@@ -1,3 +1,6 @@
+from glob import glob
+from pathlib import Path
+
 from setuptools import find_packages, setup
 
 package_name = "odrive_driver"
@@ -9,6 +12,7 @@ setup(
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
+        (str(Path("share") / package_name / "sounds"), glob("sounds/*")),
     ],
     install_requires=["setuptools"],
     zip_safe=True,
