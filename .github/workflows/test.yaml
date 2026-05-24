@@ -26,6 +26,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ccache-${{ runner.os }}-${{ hashFiles('src/**/*.cpp', 'src/**/*.hpp', 'src/**/CMakeLists.txt') }}
+          restore-keys: ccache-${{ runner.os }}-
 
       - name: Install any new deps (top-up)
         run: rosdep install --from-paths . --ignore-src -r -y
@@ -33,8 +42,10 @@ jobs:
       - name: Build
         shell: bash
         run: |
+          ccache --zero-stats
           source /opt/ros/humble/setup.bash
           just build
+          ccache --show-stats
 
       - name: Test
         shell: bash
