@@ -200,24 +200,24 @@ class AutonavGoalSelection(Node):
             header = Header(frame_id=self.config.world_frame_id)
             return Marker(header=header, ns="goal_selection", id=marker_id, type=marker_type, action=Marker.ADD, **kw)
 
-        scores = [r.score for r in debug.rays]
+        scores = [result.score for result in debug.results]
         score_min, score_max = min(scores), max(scores)
         score_span = max(score_max - score_min, 1e-6)
 
         rays_marker = marker(0, Marker.LINE_LIST, scale=Vector3(x=0.02, y=0.0, z=0.0))
         thick_marker = marker(1, Marker.LINE_LIST, scale=Vector3(x=0.06, y=0.0, z=0.0))
 
-        for ray in debug.rays:
-            end = self.robot_pose.point + Point2d.unit(ray.angle) * ray.length
+        for result in debug.results:
+            end = self.robot_pose.point + Point2d.unit(result.ray.angle) * result.ray.length
             pts = [self.robot_pose.point.to_ros(), end.to_ros()]
-            if ray is debug.chosen:
+            if result is debug.chosen:
                 thick_marker.points.extend(pts)
                 thick_marker.colors.extend([ColorRGBA(r=1.0, g=1.0, b=0.0, a=1.0)] * 2)
-            elif ray is debug.momentum_ray:
+            elif result is debug.momentum:
                 thick_marker.points.extend(pts)
                 thick_marker.colors.extend([ColorRGBA(r=0.2, g=0.4, b=1.0, a=0.8)] * 2)
             else:
-                t = (ray.score - score_min) / score_span
+                t = (result.score - score_min) / score_span
                 rays_marker.points.extend(pts)
                 rays_marker.colors.extend([ColorRGBA(r=1.0 - t, g=t, b=0.0, a=0.8)] * 2)
 
