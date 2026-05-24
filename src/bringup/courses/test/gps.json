@@ -6,18 +6,16 @@
     },
     "waypoints": [
         {
-            "latitude": 42.29478329,
-            "longitude": -83.70810902
+            "x": 5.0,
+            "y": 0.0
         },
         {
-            "x": 25.2,
-            "y": 23.8,
-            "no_mans_land": true
+            "x": 5.0,
+            "y": 5.0
         },
         {
-            "latitude": 42.29462457,
-            "longitude": -83.70792126,
-            "no_mans_land": true
+            "x": 0.0,
+            "y": 5.0
         },
         {
             "x": 0.0,

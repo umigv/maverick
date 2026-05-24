@@ -1,4 +1,5 @@
 {
-    "resolution_m": 0.05,
-    "obstacles": []
+  "resolution_m": 0.05,
+  "obstacles": [],
+  "lane_lines": []
 }
