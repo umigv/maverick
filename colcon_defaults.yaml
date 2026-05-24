@@ -1,5 +1,7 @@
 build:
   symlink-install: true
+  event-handlers:
+    - console_cohesion+
   cmake-args:
     - -GNinja
     - -DCMAKE_C_COMPILER_LAUNCHER=ccache
