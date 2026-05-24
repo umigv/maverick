@@ -25,8 +25,8 @@ course is used when no `course` argument is provided. See `bringup/courses/defau
 
 ## gps_origin_calculator.launch.py
 Computes and records the GPS datum for a course. Run this once with the robot stationary at the start position before
-an autonomous run. Starts the VectorNav driver, collects samples for 60–90 seconds, writes the median lat/lon/alt into
-the course's `gps.json`, then shuts down both nodes automatically.
+an autonomous run. Collects GPS samples, writes the median lat/lon/alt into the course's `gps.json`, then shuts down
+automatically.
 
 ```
 ros2 launch bringup gps_origin_calculator.launch.py [course:=<course>]
@@ -35,8 +35,8 @@ ros2 launch bringup gps_origin_calculator.launch.py [course:=<course>]
 ### Parameters
 - `course`: Course profile in `courses/` whose `gps.json` will be updated, default `default`
 
-### Published Topics
-- `gps/raw` (`sensor_msgs/NavSatFix`) - Raw GPS fix from VectorNav INS
+### Subscribed Topics
+- `gps/raw` (`sensor_msgs/NavSatFix`) - Raw GPS fix (e.g. from VectorNav INS)
 
 
 ## base.launch.py
