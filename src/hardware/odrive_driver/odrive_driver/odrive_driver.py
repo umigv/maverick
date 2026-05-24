@@ -1,9 +1,13 @@
+from pathlib import Path
+
 import odrive
 import odrive.utils
 import rclpy
 import utils.config
+from ament_index_python.packages import get_package_share_directory
 from geometry_msgs.msg import Twist, TwistWithCovariance, TwistWithCovarianceStamped, Vector3
 from odrive.enums import AxisState, ControlMode, InputMode, ODriveError
+from playsound import playsound
 from rclpy.duration import Duration
 from rclpy.node import Node
 from std_msgs.msg import Header
@@ -86,6 +90,7 @@ class OdriveDriver(Node):
             odrive.utils.request_state(odrv.axis0, AxisState.CLOSED_LOOP_CONTROL)
         except Exception as e:
             if ODriveError.DC_BUS_UNDER_VOLTAGE in ODriveError(odrv.axis0.active_errors):
+                playsound(Path(get_package_share_directory("odrive_driver")) / "sounds" / "turn_off_estop.wav")
                 raise RuntimeError("EStop is engaged") from e
             raise
         odrv.axis0.controller.config.control_mode = ControlMode.VELOCITY_CONTROL

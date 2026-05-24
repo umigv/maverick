@@ -62,14 +62,6 @@ alias device name:
 unalias name:
     python3 scripts/remove_device_alias.py {{name}}
 
-# Calibrate the ODrive motor controllers
-calibrate-odrive:
-    python3 scripts/calibrate_odrive.py
-
-# Clear ODrive motor controller errors
-clear-odrive-errors:
-    python3 scripts/clear_odrive_errors.py
-
 # ── ROS 2 ──────────────────────────────────────────────────────────────────────
 
 # Capture a single message from a topic to a file
@@ -79,3 +71,13 @@ extract topic output:
 # Publish a message to a topic from a file
 publish topic input rate='once':
     python3 scripts/publish_message.py {{topic}} {{input}} {{rate}}
+
+# ── ODrive ────────────────────────────────────────────────────────────────────
+
+# Calibrate the ODrive motor controllers
+calibrate-odrive:
+    python3 src/hardware/odrive_driver/scripts/calibrate_odrive.py
+
+# Clear ODrive motor controller errors
+clear-odrive-errors:
+    python3 src/hardware/odrive_driver/scripts/clear_odrive_errors.py
