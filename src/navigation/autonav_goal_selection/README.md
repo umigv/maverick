@@ -1,12 +1,73 @@
 # autonav_goal_selection
 Map waypoint following with local goal selection for autonomous navigation.
 
-Loads a list of map-frame waypoints from a JSON file and, on a timer, selects a local goal by ray-casting across the 
-robot's forward arc through the occupancy grid. Each ray is scored by its free length weighted by a momentum alignment 
-factor; the highest-scoring ray's endpoint (pulled back by a safety margin) is published as the goal. A momentum angle 
-is tracked across ticks via EMA and biases scoring toward directional consistency. When the robot is within 
-`waypoint_approach_radius_m` of the current waypoint, ray-casting is bypassed and the waypoint itself is published 
-directly. Waypoints advance automatically as they are reached.
+## How it works
+
+### The big picture
+The robot is given a list of coarse GPS/map waypoints (think: "go to this field corner, then that one"). The waypoints
+are far apart and don't account for obstacles between them. This node's job is to bridge that gap: every publish period 
+it picks a local goal a few meters ahead that keeps the robot moving toward the current waypoint while staying in 
+drivable space.
+
+### Step 1 — Ray casting
+Each tick, the node shoots a fan of rays outward from the robot's current position. The fan spans `arc_angle_rad`
+(default 180°) centered on the robot's heading, with rays spaced `ray_interval_rad` (default ~1.25°) apart.
+
+Each ray is walked step by step (`step_size_m`, default 5 cm ≈ grid resolution) until it hits either:
+- an **occupied cell** (obstacle), or
+- an **unknown cell** too far outside the robot's forward path (unknown cells within `max_unknown_forward_m` forward and
+  `max_unknown_sideways_m` sideways are treated as drivable, since the area right under the robot is blocked and marked
+  as unknown even though it is drivable)
+
+The ray's **length** is how far it traveled before stopping. A longer ray means more open space in that direction.
+
+### Step 2 — Scoring
+Each ray gets a score:
+
+```
+score = ray_length * momentum_factor
+```
+
+**`ray_length`** rewards pointing into open space.
+
+**`momentum_factor`** is a value in [0, 1] that rewards pointing in roughly the same direction the robot has been going. 
+It exists to prevent the robot from oscillating. Without it, a small asymmetry in the occupancy grid could flip the 
+chosen direction every tick, causing the robot to wiggle rather than drive straight.
+
+The momentum factor has two parts that interact:
+- **Alignment term**: how well this ray aligns with the current momentum angle. Rays pointing along momentum score close 
+  to 1; rays pointing sideways or backward score closer to `alignment_floor` (default 0.1). The sharpness of this 
+  penalty is controlled by `alignment_gain`.
+- **Obstacle scale**: if the momentum aligned ray itself is short (something is blocking the direction the robot has
+  been going), the alignment penalty is relaxed so that longer escape route rays can win. This kicks in below
+  `obstacle_threshold_m` and fades to zero (all rays equally weighted by length) as the momentum ray approaches zero.
+
+After scoring, each ray's score is **neighbor smoothed** by averaging it with its `neighbor_smoothing_window` adjacent
+rays. This prevents a single unusually long gap in the occupancy grid from dominating, and makes the chosen direction
+more stable.
+
+### Step 3 — Choosing and publishing the goal
+The highest scoring ray wins. The goal point is placed along that ray at `ray_length - safety_margin_m` from the robot 
+(pulling back from the termination point keeps the goal away from the obstacle edge).
+
+If the winning ray is shorter than `min_goal_progress_m`, the robot is considered stuck. No goal is published and we 
+trigger recovery
+
+### Step 4 — Updating momentum
+After choosing a direction, the stored **momentum angle** is nudged toward the chosen ray's angle using an exponential
+moving average (EMA):
+
+```
+momentum_angle += ema_alpha * (chosen_angle − momentum_angle)
+```
+
+Low `ema_alpha` (default 0.1) means momentum changes slowly; high values make it respond faster to sharp turns.
+
+### Waypoint approach
+When the robot is within `waypoint_approach_radius_m` (default 5 m) of the current waypoint, ray casting is skipped
+entirely and the waypoint itself is published as the goal. This ensures the robot reaches waypoints precisely rather
+than stopping short. Once within `waypoint_reached_threshold_m` (default 1 m), the waypoint is marked reached and the
+next one becomes active.
 
 ## Waypoints File Format
 ```json
@@ -18,8 +79,8 @@ directly. Waypoints advance automatically as they are reached.
     ]
 }
 ```
-Each waypoint is either map-frame `x`/`y` (meters) or GPS `latitude`/`longitude` (converted via `fromLL` at
-startup). Setting `no_mans_land: true` toggles no-man's-land state when that waypoint is reached.
+Each waypoint is either map frame `x`/`y` (meters) or GPS `latitude`/`longitude` (converted via `fromLL` at
+startup). Setting `no_mans_land: true` toggles no man's land state when that waypoint is reached.
 
 ## State Machine Integration
 This node both reads and writes state via the `state` topic and two service clients.
@@ -29,7 +90,7 @@ The node calls `state/set_recovery true`, resets momentum, and stops publishing 
 responsible for driving the robot out of the stuck situation and calling `state/set_recovery false` when done.
 
 **No-man's land** is toggled each time a waypoint flagged `no_mans_land: true` is reached. The node calls 
-`state/set_no_mans_land` with the new boolean value and logs the transition. No-man's land waypoints act as region 
+`state/set_no_mans_land` with the new boolean value and logs the transition. No man's land waypoints act as region 
 boundary markers: the first one entering a region sets the flag true, the next one exiting sets it false.
 
 ## Subscribed Topics
