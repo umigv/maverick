@@ -90,7 +90,7 @@ class OdriveDriver(Node):
             odrive.utils.request_state(odrv.axis0, AxisState.CLOSED_LOOP_CONTROL)
         except Exception as e:
             if ODriveError.DC_BUS_UNDER_VOLTAGE in ODriveError(odrv.axis0.active_errors):
-                playsound(Path(get_package_share_directory("odrive_driver")) / "sounds" / "turn_off_estop.wav")
+                playsound(Path(get_package_share_directory("odrive_driver")) / "sounds" / "turn_off_the_estop.wav")
                 raise RuntimeError("EStop is engaged") from e
             raise
         odrv.axis0.controller.config.control_mode = ControlMode.VELOCITY_CONTROL
