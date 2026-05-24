@@ -147,7 +147,9 @@ class AutonavGoalSelection(Node):
 
         if self.current_waypoint_index >= len(self.waypoints):
             self.get_logger().info("Final waypoint reached, stopping navigation")
-            return
+            # We don't call rclpy.shutdown() here because it causes a deadlock in humble
+            # https://github.com/ros2/rclpy/issues/1646
+            raise SystemExit(1) from None
 
         self.get_logger().info(f"Waypoint reached, advancing to index {self.current_waypoint_index}")
         self.publish_gps_waypoint()
