@@ -8,14 +8,16 @@
   <license>Apache-2.0</license>
 
   <exec_depend>rclpy</exec_depend>
-  <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>geographic_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>nav_msgs</exec_depend>
   <exec_depend>std_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
   <exec_depend>tf2_geometry_msgs</exec_depend>
   <exec_depend>robot_localization</exec_depend>
   <exec_depend>utils</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
   <exec_depend>builtin_interfaces</exec_depend>
   
   <test_depend>ament_copyright</test_depend>

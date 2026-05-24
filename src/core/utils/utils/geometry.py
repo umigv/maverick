@@ -211,6 +211,18 @@ class Point2d:
         return Point(x=self.x, y=self.y, z=0.0)
 
     @classmethod
+    def unit(cls, rotation: Rotation2d) -> Point2d:
+        """Return the Point2d 1 unit away from the origin in the direction of rotation.
+
+        Args:
+            rotation: Direction to point toward.
+
+        Returns:
+            Point2d with x=cos(rotation.angle), y=sin(rotation.angle).
+        """
+        return cls(x=rotation.cos, y=rotation.sin)
+
+    @classmethod
     def from_ros(cls, point: Point) -> Point2d:
         """Construct from a ROS Point, discarding z.
 

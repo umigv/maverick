@@ -1,6 +1,8 @@
 from bringup.launch_utils import MODES, Mode, bringup_share, format_mode_description, load_frames
 from launch import LaunchDescription, LaunchDescriptionEntity
-from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.actions import DeclareLaunchArgument, EmitEvent, OpaqueFunction, RegisterEventHandler
+from launch.event_handlers import OnProcessExit
+from launch.events import Shutdown
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from typing_extensions import assert_never
@@ -53,9 +55,13 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         remappings=[
             ("occupancy_grid", "occupancy_grid/transformed"),
             ("odom", "odom/local"),
+            ("state", "state"),
             ("fromLL", "fromLL"),
+            ("state/set_recovery", "state/set_recovery"),
+            ("state/set_no_mans_land", "state/set_no_mans_land"),
             ("goal", "goal"),
-            ("gps_waypoint", "gps_waypoint"),
+            ("waypoint", "waypoint"),
+            ("goal_selection_debug", "goal_selection_debug"),
         ],
     )
 
@@ -81,6 +87,13 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         output="screen",
     )
 
+    shutdown_on_completion = RegisterEventHandler(
+        OnProcessExit(
+            target_action=autonav_goal_selection_node,
+            on_exit=[EmitEvent(event=Shutdown())],
+        )
+    )
+
     match mode:
         case "autonav":
             return [
@@ -89,6 +102,7 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
                 path_planning_node,
                 autonav_goal_selection_node,
                 recovery_behavior_node,
+                shutdown_on_completion,
             ]
         case "self_drive" | "nav_test":
             return [occupancy_grid_transform_node, path_tracking_node, path_planning_node, recovery_behavior_node]

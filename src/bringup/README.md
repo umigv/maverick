@@ -196,15 +196,14 @@ ros2 launch bringup navigation.launch.py mode:=<mode> [course:=<course>]
 - `odom/local` (`nav_msgs/Odometry`) - Odometry from localization
 
 ### Published Topics
-- `goal` (`geometry_msgs/PointStamped`) - Goal for path planning (`autonav` only)
-- `gps_waypoint` (`geometry_msgs/PointStamped`) - Current GPS waypoint target (`autonav` only)
+- `waypoint` (`geometry_msgs/PointStamped`) - Current GPS waypoint target, latched (`autonav` only)
 - `nav_cmd_vel` (`geometry_msgs/Twist`) - Velocity command consumed by twist_mux
 - `recovery_cmd_vel` (`geometry_msgs/Twist`) - Recovery velocity command consumed by twist_mux (all modes)
 
 ### Service Clients
-- `fromLL` (`robot_localization/FromLL`) - Converts GPS coordinates to map-frame points; called at startup by
-autonav_goal_selection (`autonav` only)
+- `fromLL` (`robot_localization/FromLL`) - Converts GPS coordinates to map-frame points; called at startup by autonav_goal_selection (`autonav` only)
 - `state/set_recovery` (`std_srvs/SetBool`) - Signals recovery state transitions (all modes)
+- `state/set_no_mans_land` (`std_srvs/SetBool`) - Signals no-man's-land transitions when a flagged waypoint is reached (`autonav` only)
 
 
 ## teleop.launch.py

@@ -121,6 +121,7 @@ Wraps a yaw angle in radians. Angle is automatically wrapped to `[-π, π]` and 
 | `distance(other)` | Distance to another `Point2d` |
 | `to_ros()` | Convert to `geometry_msgs/Point` |
 | `from_ros(point)` | Construct from a `geometry_msgs/Point` |
+| `unit(vector)` | Construct a Point2d 1 unit away from the origin in the direction of rotation |
 
 ### `Pose2d`
 2D pose (position + rotation) with world/local frame transforms and ROS interop.
