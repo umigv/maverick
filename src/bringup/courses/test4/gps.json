@@ -5,8 +5,19 @@
         "altitude": 270.0
     },
     "waypoints": [
-        {"x": 30.0, "y": 10.0, "no_mans_land": true},
-        {"x": 30.0, "y": 15.0},
-        {"x": 30.0, "y": 20.0, "no_mans_land": true}
+        {
+            "x": 30.0,
+            "y": 10.0,
+            "no_mans_land": true
+        },
+        {
+            "x": 30.0,
+            "y": 15.0
+        },
+        {
+            "x": 30.0,
+            "y": 20.0,
+            "no_mans_land": true
+        }
     ]
 }
