@@ -212,7 +212,7 @@ class Point2d:
 
     @classmethod
     def unit(cls, rotation: Rotation2d) -> Point2d:
-        """Return the unit vector pointing in the given direction.
+        """Return the Point2d 1 unit away from the origin in the direction of rotation.
 
         Args:
             rotation: Direction to point toward.

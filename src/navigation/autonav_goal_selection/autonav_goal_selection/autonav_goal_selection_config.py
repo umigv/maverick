@@ -65,20 +65,20 @@ class GoalSelectionParams:
     """Parameters controlling the ray-cast goal selection heuristic.
 
     Attributes:
+        momentum: All parameters controlling momentum strength, alignment bias, obstacle
+            scaling, and EMA smoothing.
         arc_angle_rad: Full angular width (rad) of the forward arc; rays span symmetrically
             around the robot's heading. math.pi = 180° forward semicircle.
         ray_interval_rad: Angular spacing (rad) between adjacent rays. Controls density
             independently of arc size; num_rays is derived as int(arc / interval) + 1.
         step_size_m: Step size used when walking each ray; should be ~grid resolution.
-        momentum: All parameters controlling momentum strength, alignment bias, obstacle
-            scaling, and EMA smoothing.
         min_goal_progress_m: Minimum length the chosen ray must have for a goal to be
             published. If the highest-scoring ray's length is below this, `select_goal`
             returns no goal (caller should treat as "stuck"). Set to 0 to always publish.
-        neighbor_smoothing_window: Number of neighbors on each side averaged into each ray's
-            score before picking. 0 disables smoothing.
         safety_margin_m: Distance (m) the chosen endpoint is pulled back from where the ray
             terminated.
+        neighbor_smoothing_window: Number of neighbors on each side averaged into each ray's
+            score before picking. 0 disables smoothing.
         max_unknown_forward_m: Mirror of path_planning: how far forward unknown cells are
             considered drivable when walking a ray.
         max_unknown_sideways_m: Mirror of path_planning: how far sideways unknown cells are
@@ -98,8 +98,8 @@ class GoalSelectionParams:
     def __post_init__(self) -> None:
         if not (0 < self.arc_angle_rad <= 2 * math.pi):
             raise ValueError("GoalSelectionParams: arc_angle_rad must be in (0, 2*pi]")
-        if self.ray_interval_rad <= 0:
-            raise ValueError("GoalSelectionParams: ray_interval_rad must be > 0")
+        if not (0 < self.ray_interval_rad <= self.arc_angle_rad):
+            raise ValueError("GoalSelectionParams: ray_interval_rad must be in (0, arc_angle_rad]")
         if self.step_size_m <= 0:
             raise ValueError("GoalSelectionParams: step_size_m must be > 0")
         if self.min_goal_progress_m < 0:

@@ -74,11 +74,11 @@ class GoalSelector:
 
                 if state.is_unknown:
                     local = robot_pose.world_to_local(point)
-                    in_box = (
+                    within_unknown_limits = (
                         0 <= local.x <= self.params.max_unknown_forward_m
                         and abs(local.y) <= self.params.max_unknown_sideways_m
                     )
-                    if not in_box:
+                    if not within_unknown_limits:
                         break
                 elif not state.is_drivable:
                     break
