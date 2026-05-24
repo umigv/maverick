@@ -122,8 +122,7 @@ class VectornavDriver : public rclcpp::Node {
         if (!validate_params()) {
             return false;
         }
-        RCLCPP_INFO(get_logger(), "Settling hardware serial line...");
-        rclcpp::sleep_for(std::chrono::milliseconds(50));
+
         if (!configure_sensor_output()) {
             return false;
         }
