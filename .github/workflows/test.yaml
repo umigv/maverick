@@ -46,7 +46,9 @@ jobs:
           ccache --zero-stats
           source /opt/ros/humble/setup.bash
           just build
-          ccache --show-stats
+
+      - name: Cache stats
+        run: ccache --show-stats
 
       - name: Test
         shell: bash
