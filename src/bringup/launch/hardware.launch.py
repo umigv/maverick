@@ -14,11 +14,11 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
 
     base_params = [
         f"{bringup_share()}/config/hardware/vectornav.yaml",
-        {"imuFrameId": frames["imu_frame"]},
-        {"insFrameId": frames["base_frame"]},
-        {"gnssAFrameId": frames["gnss_a_frame"]},
-        {"gnssBFrameId": frames["gnss_b_frame"]},
-        {"mapFrameId": frames["map_frame"]},
+        {"imu_frame_id": frames["imu_frame"]},
+        {"ins_frame_id": frames["base_frame"]},
+        {"gnss_a_frame_id": frames["gnss_a_frame"]},
+        {"gnss_b_frame_id": frames["gnss_b_frame"]},
+        {"map_frame_id": frames["map_frame"]},
     ]
 
     vectornav_params: list | None = None
@@ -68,10 +68,10 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
                     output="screen",
                     parameters=vectornav_params,
                     remappings=[
-                        ("vectornav/raw/imu", "imu/raw"),
-                        ("vectornav/raw/navsatfix", "gps/raw"),
-                        ("vectornav/raw/twist_with_covariance_stamped", "ins_vel/raw"),
-                        ("vectornav/raw/odometry", "odom/global"),
+                        ("vectornav/imu", "imu/raw"),
+                        ("vectornav/fix", "gps/raw"),
+                        ("vectornav/velocity", "ins_vel/raw"),
+                        ("vectornav/odom", "odom/global"),
                     ],
                 ),
             ]
