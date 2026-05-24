@@ -3,7 +3,7 @@
 ## Dependencies
 You can install all dependencies by running
 ```bash
-./scripts/setup.sh
+./scripts/setup_environment.py
 ```
 
 ## Running the stack
