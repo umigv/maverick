@@ -66,7 +66,7 @@ Low `ema_alpha` (default 0.1) means momentum changes slowly; high values make it
 ### Waypoint approach
 When the robot is within `waypoint_approach_radius_m` (default 5 m) of the current waypoint, ray casting is skipped
 entirely and the waypoint itself is published as the goal. This ensures the robot reaches waypoints precisely rather
-than stopping short. Once within `waypoint_reached_threshold_m` (default 1 m), the waypoint is marked reached and the
+than stopping short. Once within `waypoint_reached_threshold_m` (default 1.5m), the waypoint is marked reached and the
 next one becomes active.
 
 ## Waypoints File Format
@@ -124,7 +124,7 @@ not receive the message. In code, use `utils.qos.LATCHED`. In RViz, set **Durabi
 | `goal_selection_params` | `GoalSelectionParams` | required | Ray-cast goal selection parameters (see below) |
 | `waypoints_file_path` | `Path` | required | Path to the JSON waypoints file |
 | `goal_publish_period_s` | `float` | `0.25` | Timer period (s) for goal selection and publishing |
-| `waypoint_reached_threshold_m` | `float` | `1.0` | Distance (m) within which a waypoint is considered reached |
+| `waypoint_reached_threshold_m` | `float` | `1.5` | Distance (m) within which a waypoint is considered reached |
 | `waypoint_approach_radius_m` | `float` | `5.0` | Distance (m) from the waypoint within which ray-casting is bypassed and the waypoint is published directly |
 | `map_frame_id` | `str` | `"map"` | TF frame for map-frame waypoint coordinates |
 | `world_frame_id` | `str` | `"odom"` | TF frame for the world/robot pose coordinates |
