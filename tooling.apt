@@ -1,5 +1,6 @@
 ccache
 direnv
 ninja-build
+openssh-client
 python3-pip
 clang-format

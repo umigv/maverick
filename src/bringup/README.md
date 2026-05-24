@@ -105,7 +105,6 @@ ros2 launch bringup hardware.launch.py mode:=<mode> [course:=<course>]
 - `imu/raw` (`sensor_msgs/Imu`) - Raw IMU data from VectorNav (`autonav`, `self_drive`)
 - `gps/raw` (`sensor_msgs/NavSatFix`) - GPS/INS fix from VectorNav (`autonav`, `self_drive`)
 - `ins_vel/raw` (`geometry_msgs/TwistWithCovarianceStamped`) - INS body-frame velocity (`autonav`, `self_drive`)
-- `vectornav/raw/ins_status` (`std_msgs/UInt16`) - INS tracking status bitfield (`autonav`, `self_drive`)
 - `odom/global` (`nav_msgs/Odometry`) - INS odometry in map frame (`autonav` only)
 
 

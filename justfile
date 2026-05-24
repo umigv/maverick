@@ -81,3 +81,13 @@ calibrate-odrive:
 # Clear ODrive motor controller errors
 clear-odrive-errors:
     python3 src/hardware/odrive_driver/scripts/clear_odrive_errors.py
+
+# ── VectorNav ──────────────────────────────────────────────────────────────────
+
+# Monitor IMU orientation as Euler angles
+euler-monitor *args:
+    python3 src/hardware/vectornav_driver/scripts/euler_monitor.py {{args}}
+
+# Monitor VectorNav INS/GNSS status
+vectornav-monitor:
+    python3 src/hardware/vectornav_driver/scripts/vectornav_monitor.py

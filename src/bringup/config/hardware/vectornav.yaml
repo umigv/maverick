@@ -4,17 +4,17 @@ vectornav_driver:
     port: "/dev/vn300"
 
     # Serial baud rate. Must be one of: 9600 19200 38400 57600 115200 128000 230400 460800 921600
-    baudRate: 230400
+    baud_rate: 230400
 
     # Output rate in Hz. Must be a valid divisor of the sensor sample rate (800 Hz for VN-100/200, 400 Hz for VN-300)
-    publishRate: 100
+    publish_rate: 100
 
     # 3x3 row-major covariance matrix for linear acceleration (m/s^2)^2, in FLU body frame
-    linearAccelCovariance: [0.01, 0.0, 0.0,
-                            0.0, 0.01, 0.0,
-                            0.0, 0.0, 0.01]
+    linear_accel_covariance: [0.01, 0.0, 0.0,
+                              0.0, 0.01, 0.0,
+                              0.0, 0.0, 0.01]
 
     # 3x3 row-major covariance matrix for angular velocity (rad/s)^2, in FLU body frame
-    angularVelCovariance: [1e-5, 0.0, 0.0,
-                           0.0, 1e-5, 0.0,
-                           0.0, 0.0, 1e-5]
+    angular_vel_covariance: [1e-5, 0.0, 0.0,
+                             0.0, 1e-5, 0.0,
+                             0.0, 0.0, 1e-5]

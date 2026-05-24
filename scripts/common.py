@@ -66,17 +66,6 @@ def discover_packages() -> list[Path]:
     return sorted({p.parent.relative_to(ROOT) for p in (ROOT / "src").rglob("package.xml")})
 
 
-def get_submodule_dirs() -> list[Path]:
-    """Return paths to all git submodules, relative to ROOT."""
-    result = subprocess.run(
-        ["git", "submodule", "foreach", "--quiet", "echo $displaypath"],
-        capture_output=True,
-        text=True,
-        cwd=ROOT,
-    )
-    return [Path(line) for line in result.stdout.splitlines() if line]
-
-
 def resolve_target(name: str, pkg_dirs: list[Path], extra_dirs: list[Path]) -> Path:
     """Resolve a package name to its path, dying if not found."""
     if Path(name) in extra_dirs:
@@ -91,17 +80,12 @@ def resolve_packages(only: list[str] | None, ignore: list[str] | None) -> tuple[
     """Resolve the target package list from --only/--ignore filters.
 
     Returns (pkg_dirs, all_pkg_dirs) where pkg_dirs is the filtered set to operate on and all_pkg_dirs is the full
-    unfiltered set (used for cross-package type checking). Submodule packages are excluded from both.
+    unfiltered set (used for cross-package type checking).
     """
     print("==> Discovering ROS packages")
     all_pkg_dirs = discover_packages()
     if not all_pkg_dirs:
         die("No package.xml found under src/")
-
-    subs = get_submodule_dirs()
-    all_pkg_dirs = [p for p in all_pkg_dirs if not any(p == s or s in p.parents for s in subs)]
-    if not all_pkg_dirs:
-        die("No packages found after filtering submodules")
 
     extra_dirs = [Path("scripts")]
     pkg_dirs = list(all_pkg_dirs) + extra_dirs
