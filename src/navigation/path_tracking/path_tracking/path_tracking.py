@@ -9,6 +9,7 @@ from typing_extensions import assert_never
 from utils.geometry import Path2d, Pose2d
 
 from .controllers.controller import Controller
+from .controllers.differential_drive.controller import DifferentialDriveController
 from .controllers.pure_pursuit.controller import PurePursuitController
 from .controllers.stanley.controller import StanleyController
 from .path_tracking_config import PathTrackingConfig
@@ -25,6 +26,8 @@ class PathTracking(Node):
                 self.controller: Controller = PurePursuitController(self.config.pure_pursuit, self.get_logger())
             case "stanley":
                 self.controller = StanleyController(self.config.stanley, self.get_logger())
+            case "differential_drive":
+                self.controller = DifferentialDriveController(self.config.differential_drive, self.get_logger())
             case _ as unreachable:
                 assert_never(unreachable)
 
