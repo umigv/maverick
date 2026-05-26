@@ -5,7 +5,7 @@ from rclpy.impl.rcutils_logger import RcutilsLogger
 from utils.geometry import Path2d, Point2d, Pose2d, Rotation2d
 from utils.math import clamp
 
-from .path_tracking_config import StanleyConfig
+from .config import StanleyConfig
 
 
 class StanleyController:
