@@ -185,8 +185,9 @@ class OdriveDriverConfig:
         angular_variance = self.covariance.angular_variance_static + angular_variance_dynamic
 
         cov = [0.0] * 36
-        cov[0] = linear_variance
-        cov[35] = angular_variance
+        cov[0] = linear_variance  # x
+        cov[7] = 1e-10  # y (we don't move sideways so give a small value)
+        cov[35] = angular_variance  # yaw
         return cov
 
     def motor_rps_to_twist(self, left_motor_rps: float, right_motor_rps: float) -> tuple[float, float]:
