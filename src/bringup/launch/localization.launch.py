@@ -11,7 +11,6 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
     mode: Mode = LaunchConfiguration("mode").perform(context)
     course = LaunchConfiguration("course").perform(context)
     gps_file = load_gps_file(course)
-    localization_params = f"{bringup_share()}/config/localization/localization.yaml"
 
     ekf_local_node = Node(
         package="robot_localization",
@@ -19,7 +18,7 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         name="ekf_local",
         output="screen",
         parameters=[
-            localization_params,
+            f"{bringup_share()}/config/localization/ekf.yaml",
             {"map_frame": frames["map_frame"]},
             {"odom_frame": frames["odom_frame"]},
             {"base_link_frame": frames["base_frame"]},
