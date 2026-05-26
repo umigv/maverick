@@ -52,13 +52,13 @@ class StanleyConfig:
         curvature_lookahead_m: Arclength ahead of the projection over which heading change is accumulated (m).
     """
 
-    target_speed_mps: float = 1.8
-    cross_track_gain: float = 0.5
-    front_offset_m: float = 1.0
+    target_speed_mps: float = 1.35
+    cross_track_gain: float = 0.6
+    front_offset_m: float = 0.85
     max_steer_rad: float = 1.2
-    max_angular_speed_radps: float = 2.0
+    max_angular_speed_radps: float = 1.0
     goal_tolerance_m: float = 0.3
-    max_lateral_accel_mps2: float = 0.5
+    max_lateral_accel_mps2: float = 1.0
     curvature_lookahead_m: float = 1.5
 
     def __post_init__(self) -> None:
