@@ -13,7 +13,7 @@ ekf_local:
     twist0: enc_vel/raw
     twist0_config: [false, false, false,  # x, y, z
                     false, false, false,  # roll, pitch, yaw
-                    true,  true, false,  # vx, vy, vz
+                    true,  true, false,   # vx, vy, vz
                     false, false, false,  # vroll, vpitch, vyaw
                     false, false, false]  # accx, accy, accz
     twist0_queue_size: 10
