@@ -27,22 +27,6 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         ],
     )
 
-    path_tracking_node = Node(
-        package="path_tracking",
-        executable="path_tracking",
-        name="path_tracking",
-        parameters=[
-            {"base_frame_id": frames["base_frame"]},
-            {"odom_frame_id": frames["odom_frame"]},
-        ],
-        remappings=[
-            ("odom", "odom/local"),
-            ("path", "path"),
-            ("nav_cmd_vel", "nav_cmd_vel"),
-            ("smoothed_path", "smoothed_path"),
-        ],
-    )
-
     autonav_goal_selection_node = Node(
         package="autonav_goal_selection",
         executable="autonav_goal_selection",
@@ -80,6 +64,32 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         ],
     )
 
+    path_smoothing_node = Node(
+        package="path_smoothing",
+        executable="path_smoothing",
+        name="path_smoothing",
+        remappings=[
+            ("path", "path"),
+            ("smoothed_path", "smoothed_path"),
+        ],
+    )
+
+    path_tracking_node = Node(
+        package="path_tracking",
+        executable="path_tracking",
+        name="path_tracking",
+        parameters=[
+            {"base_frame_id": frames["base_frame"]},
+            {"odom_frame_id": frames["odom_frame"]},
+        ],
+        remappings=[
+            ("odom", "odom/local"),
+            ("path", "smoothed_path"),
+            ("nav_cmd_vel", "nav_cmd_vel"),
+            ("smoothed_path", "smoothed_path"),
+        ],
+    )
+
     recovery_behavior_node = Node(
         package="recovery_behavior",
         executable="recovery_behavior",
@@ -98,14 +108,21 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         case "autonav":
             return [
                 occupancy_grid_transform_node,
-                path_tracking_node,
                 path_planning_node,
+                path_smoothing_node,
+                path_tracking_node,
                 autonav_goal_selection_node,
                 recovery_behavior_node,
                 shutdown_on_completion,
             ]
         case "self_drive" | "nav_test":
-            return [occupancy_grid_transform_node, path_tracking_node, path_planning_node, recovery_behavior_node]
+            return [
+                occupancy_grid_transform_node,
+                path_planning_node,
+                path_smoothing_node,
+                path_tracking_node,
+                recovery_behavior_node,
+            ]
         case _:
             assert_never(mode)
 
@@ -118,9 +135,9 @@ def generate_launch_description() -> LaunchDescription:
                 choices=MODES,
                 description=format_mode_description(
                     {
-                        "autonav": "occupancy grid transform + path planning + path tracking + autonav goal selection + recovery",
-                        "self_drive": "occupancy grid transform + path planning + path tracking + recovery",
-                        "nav_test": "occupancy grid transform + path planning + path tracking + recovery",
+                        "autonav": "occupancy grid transform + path planning + path smoothing + path tracking + autonav goal selection + recovery",
+                        "self_drive": "occupancy grid transform + path planning + path smoothing + path tracking + recovery",
+                        "nav_test": "occupancy grid transform + path planning + path smoothing + path tracking + recovery",
                     }
                 ),
             ),
