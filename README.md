@@ -17,7 +17,7 @@ Run each of these commands in separate terminals:
 ros2 launch bringup base.launch.py mode:=<mode> [simulation:=true] [course:=<course>]
 ```
 ```bash
-ros2 launch bringup teleop.launch.py controller:=<ps4/xbox>
+ros2 launch bringup teleop.launch.py controller:=<xbox/xbox_wireless/ps4>
 ```
 and / or
 ```bash
