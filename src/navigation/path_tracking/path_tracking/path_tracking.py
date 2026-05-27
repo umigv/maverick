@@ -5,11 +5,14 @@ import utils.config
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry, Path
 from rclpy.node import Node
+from typing_extensions import assert_never
 from utils.geometry import Path2d, Pose2d
 
+from .controllers.controller import Controller
+from .controllers.differential_drive.controller import DifferentialDriveController
+from .controllers.pure_pursuit.controller import PurePursuitController
+from .controllers.stanley.controller import StanleyController
 from .path_tracking_config import PathTrackingConfig
-from .pure_pursuit_controller import PurePursuitController
-from .stanley_controller import StanleyController
 
 
 class PathTracking(Node):
@@ -18,12 +21,15 @@ class PathTracking(Node):
 
         self.config: PathTrackingConfig = utils.config.load(self, PathTrackingConfig)
 
-        if self.config.algorithm == "pure_pursuit":
-            self.controller: PurePursuitController | StanleyController = PurePursuitController(
-                self.config.pure_pursuit, self.get_logger()
-            )
-        else:
-            self.controller = StanleyController(self.config.stanley, self.get_logger())
+        match self.config.algorithm:
+            case "pure_pursuit":
+                self.controller: Controller = PurePursuitController(self.config.pure_pursuit, self.get_logger())
+            case "stanley":
+                self.controller = StanleyController(self.config.stanley, self.get_logger())
+            case "differential_drive":
+                self.controller = DifferentialDriveController(self.config.differential_drive, self.get_logger())
+            case _ as unreachable:
+                assert_never(unreachable)
 
         self.pose: Pose2d | None = None
         self.current_speed: float = 0.0
