@@ -213,10 +213,10 @@ ros2 launch bringup teleop.launch.py controller:=<controller>
 ```
 
 ### Parameters
-- `controller`: Controller profile (`xbox` or `ps4`), required
+- `controller`: Controller profile (`xbox`, `xbox_wireless` or `ps4`), required
 
 ### Controller Mappings
-For both Xbox and PS4:
+For all controllers:
 - Left joystick - linear motion
 - Right joystick - turning
 - Right shoulder button (RB / R1) - enable
