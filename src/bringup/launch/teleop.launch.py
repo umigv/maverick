@@ -4,7 +4,7 @@ from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
-CONTROLLERS = ("xbox", "xbox_wireless", "ps4")
+CONTROLLERS = ("xbox", "xbox_wireless", "ps4", "ps4_wireless")
 
 
 def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:

@@ -213,7 +213,7 @@ ros2 launch bringup teleop.launch.py controller:=<controller>
 ```
 
 ### Parameters
-- `controller`: Controller profile (`xbox`, `xbox_wireless` or `ps4`), required
+- `controller`: Controller profile (`xbox`, `xbox_wireless`, `ps4`, or `ps4_wireless`   ), required
 
 ### Controller Mappings
 For all controllers:
