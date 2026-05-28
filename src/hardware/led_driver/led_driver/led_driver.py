@@ -98,12 +98,10 @@ class LedDriver(Node):
         if not self.serial.is_open:
             return
 
-        if value == self.last_sent:
-            return
-
         try:
             self.serial.write(f"{value}\n".encode())
-            self.get_logger().info(f"Sent: {value}")
+            if value != self.last_sent:
+                self.get_logger().info(f"Sent: {value}")
             self.last_sent = value
         except serial.SerialException as e:
             self.get_logger().error(f"Serial communication error: {e}")
