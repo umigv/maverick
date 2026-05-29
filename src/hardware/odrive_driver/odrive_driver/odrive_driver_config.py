@@ -142,6 +142,7 @@ class OdriveDriverConfig:
         cmd_vel_timeout_s: Maximum age of a cmd_vel command before motors are zeroed (s).
         frame_id: TF frame ID of the robot base, attached to the published twist header.
         estop_file_path: Path to the e-stop flag file. A value of "1" disables motor output.
+        debug: Whether to log debug output
     """
 
     left_odrive: OdriveConfig
@@ -154,6 +155,7 @@ class OdriveDriverConfig:
     cmd_vel_timeout_s: float = 0.5
     frame_id: str = "base_link"
     estop_file_path: Path = Path("/tmp/estop_value.txt")
+    debug: bool = False
 
     def __post_init__(self) -> None:
         if self.publish_period_s <= 0:

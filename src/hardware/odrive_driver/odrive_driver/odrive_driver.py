@@ -30,6 +30,9 @@ class OdriveDriver(Node):
         self.create_timer(self.config.publish_period_s, self.publish_enc_vel)
         self.watchdog_timer = self.create_timer(self.config.cmd_vel_timeout_s, self.watchdog_callback)
 
+        if self.config.debug:
+            self.create_timer(0.01, self.log_debug_info)
+
     def init(self) -> bool:
         try:
             self.get_logger().info(f"Finding left ODrive (serial number {self.config.left_odrive.serial})...")
@@ -116,6 +119,18 @@ class OdriveDriver(Node):
         except Exception:
             self.get_logger().error("EStop file not found", throttle_duration_sec=30.0)
             return True  # if the e-stop file doesn't exist / is corrupted we assume e-stop is off
+
+    def log_debug_info(self) -> None:
+        self.get_logger().info(
+            f"left Iq_setpoint={self.odrive_left.axis0.motor.foc.Iq_setpoint:.3f} "
+            f"Iq_measured={self.odrive_left.axis0.motor.foc.Iq_measured:.3f} "
+            f"vel_setpoint={self.odrive_left.axis0.controller.vel_setpoint:.3f} "
+            f"vel_estimate={self.odrive_left.axis0.vel_estimate:.3f} | "
+            f"right Iq_setpoint={self.odrive_right.axis0.motor.foc.Iq_setpoint:.3f} "
+            f"Iq_measured={self.odrive_right.axis0.motor.foc.Iq_measured:.3f} "
+            f"vel_setpoint={self.odrive_right.axis0.controller.vel_setpoint:.3f} "
+            f"vel_estimate={self.odrive_right.axis0.vel_estimate:.3f}",
+        )
 
 
 def main() -> None:
