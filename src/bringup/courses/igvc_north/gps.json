@@ -1,0 +1,25 @@
+{
+    "datum": {
+        "latitude": 88.888888,
+        "longitude": 77.77777,
+        "altitude": 270.0
+    },
+    "waypoints": [
+        {
+            "latitude": 42.668269722,
+            "longitude": -83.219340303
+        },
+        {
+            "latitude": 42.668120644,
+            "longitude": -83.219360608
+        },
+        {
+            "latitude": 42.668076633,
+            "longitude": -83.219359158
+        },
+        {
+            "latitude": 42.667927706,
+            "longitude": -83.219327642
+        }
+    ]
+}
