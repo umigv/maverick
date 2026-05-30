@@ -39,4 +39,4 @@ odrive_driver:
 
     estop_file_path: "/tmp/estop_value.txt"
 
-    debug: true
+    debug: false
