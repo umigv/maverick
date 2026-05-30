@@ -82,6 +82,10 @@ calibrate-odrive:
 clear-odrive-errors:
     python3 src/hardware/odrive_driver/scripts/clear_odrive_errors.py
 
+# Plot ODrive Iq and velocity (requires odrive_driver running with debug: true)
+plot-odrive:
+    python3 src/hardware/odrive_driver/scripts/plot_motor_signals.py
+
 # ── VectorNav ──────────────────────────────────────────────────────────────────
 
 # Monitor IMU orientation as Euler angles
