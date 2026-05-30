@@ -27,7 +27,7 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
             datum = gps_file["datum"]
             vectornav_params = [*base_params, {"datum": [datum["latitude"], datum["longitude"], datum["altitude"]]}]
         case "self_drive":
-            vectornav_params = base_params
+            vectornav_params = [*base_params, {"publish_imu_without_orientation": True}]
         case "nav_test":
             pass
         case _:

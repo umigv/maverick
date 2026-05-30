@@ -82,6 +82,7 @@ class VectornavDriver : public rclcpp::Node {
         declare_parameter<std::string>("gnss_b_frame_id", "");
         declare_parameter<std::vector<double>>("datum", std::vector<double>{});
         declare_parameter<std::string>("map_frame_id", "map");
+        declare_parameter<bool>("publish_imu_without_orientation", false);
 
         imu_publisher_ = create_publisher<sensor_msgs::msg::Imu>("vectornav/imu", 10);
         fix_publisher_ = create_publisher<sensor_msgs::msg::NavSatFix>("vectornav/fix", 10);
@@ -135,6 +136,7 @@ class VectornavDriver : public rclcpp::Node {
         ins_frame_id_ = get_parameter("ins_frame_id").as_string();
         linear_accel_covariance_ = to_covariance(get_parameter("linear_accel_covariance").as_double_array());
         angular_vel_covariance_ = to_covariance(get_parameter("angular_vel_covariance").as_double_array());
+        publish_imu_without_orientation_ = get_parameter("publish_imu_without_orientation").as_bool();
 
         if (const auto datum = get_parameter("datum").as_double_array(); !datum.empty()) {
             datum_projection_.emplace(datum[0], datum[1], datum[2]);
@@ -540,7 +542,13 @@ class VectornavDriver : public rclcpp::Node {
 
         const bool is_vn100 = sensor_type_ == SensorType::VN100;
         const bool ins_valid = ins_status && ins_status->imuErr == 0 && ins_status->mode != MODE_ALIGNING;
-        if (!quat || !angular_vel || !accel || !ypr_u || (!is_vn100 && !ins_valid)) {
+        const bool orientation_available = quat && accel && ypr_u && (is_vn100 || ins_valid);
+
+        if (!angular_vel) {
+            return;
+        }
+
+        if (!orientation_available && !publish_imu_without_orientation_) {
             return;
         }
 
@@ -548,16 +556,23 @@ class VectornavDriver : public rclcpp::Node {
         msg.header.stamp = time;
         msg.header.frame_id = imu_frame_id_;
 
-        msg.orientation = tf2::toMsg(ned_to_enu(to_tf2_quaternion(*quat)));
         msg.angular_velocity = frd_to_flu(to_vector3(*angular_vel));
-        msg.linear_acceleration = frd_to_flu(to_vector3(*accel));
-
-        // ypr -> roll, pitch, yaw
-        msg.orientation_covariance =
-            frd_to_flu(diag_covariance(std::pow((*ypr_u)[2] * M_PI / 180.0, 2), std::pow((*ypr_u)[1] * M_PI / 180.0, 2),
-                                       std::pow((*ypr_u)[0] * M_PI / 180.0, 2)));
         msg.angular_velocity_covariance = angular_vel_covariance_;
-        msg.linear_acceleration_covariance = linear_accel_covariance_;
+
+        if (orientation_available) {
+            msg.orientation = tf2::toMsg(ned_to_enu(to_tf2_quaternion(*quat)));
+            msg.linear_acceleration = frd_to_flu(to_vector3(*accel));
+            // ypr -> roll, pitch, yaw
+            msg.orientation_covariance =
+                frd_to_flu(diag_covariance(std::pow((*ypr_u)[2] * M_PI / 180.0, 2),
+                                           std::pow((*ypr_u)[1] * M_PI / 180.0, 2),
+                                           std::pow((*ypr_u)[0] * M_PI / 180.0, 2)));
+            msg.linear_acceleration_covariance = linear_accel_covariance_;
+        } else {
+            // ROS convention: covariance[0] = -1 means field is unknown
+            msg.orientation_covariance[0] = -1;
+            msg.linear_acceleration_covariance[0] = -1;
+        }
 
         imu_publisher_->publish(msg);
     }
@@ -786,6 +801,7 @@ class VectornavDriver : public rclcpp::Node {
     std::string map_frame_id_;
     std::array<double, 9> linear_accel_covariance_;
     std::array<double, 9> angular_vel_covariance_;
+    bool publish_imu_without_orientation_ = false;
     std::optional<GeographicLib::LocalCartesian> datum_projection_;
     Rotation imu_to_ins_;
 };
