@@ -17,7 +17,7 @@ odrive_driver:
 
     # ODrive axis controller parameters (all in SI / robot-frame units)
     controller:
-      vel_gain: 0.08
+      vel_gain: 0.06
       vel_integrator_gain: 0.0
       vel_integrator_limit: 0.0
       vel_limit_mps: 2.2
