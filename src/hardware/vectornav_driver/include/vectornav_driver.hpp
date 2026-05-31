@@ -7,6 +7,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/imu.hpp"
 #include "sensor_msgs/msg/nav_sat_fix.hpp"
+#include "std_msgs/msg/float32_multi_array.hpp"
 #include "std_msgs/msg/u_int16.hpp"
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
@@ -14,6 +15,9 @@
 #include "tf2_ros/transform_listener.h"
 #include "transforms.hpp"
 #include "vectornav/Interface/Sensor.hpp"
+
+#include <atomic>
+#include <thread>
 
 #if __linux__
 #include <fcntl.h>
@@ -91,12 +95,20 @@ class VectornavDriver : public rclcpp::Node {
         gnss_status_publisher_ = create_publisher<std_msgs::msg::UInt16>("vectornav/gnss_status", 10);
         gnss2_status_publisher_ = create_publisher<std_msgs::msg::UInt16>("vectornav/gnss2_status", 10);
         odom_publisher_ = create_publisher<nav_msgs::msg::Odometry>("vectornav/odom", 10);
+        gnss_compass_signal_health_publisher_ =
+            create_publisher<std_msgs::msg::Float32MultiArray>("vectornav/gnss_compass_signal_health", 10);
+        gnss_compass_startup_status_publisher_ =
+            create_publisher<std_msgs::msg::Float32MultiArray>("vectornav/gnss_compass_startup_status", 10);
 
         tf_buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
         tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_, this, false);
     }
 
     ~VectornavDriver() {
+        gnss_compass_thread_running_ = false;
+        if (gnss_compass_thread_.joinable()) {
+            gnss_compass_thread_.join();
+        }
         vs_.disconnect();
         RCLCPP_INFO(get_logger(), "Device disconnected.");
     }
@@ -140,6 +152,11 @@ class VectornavDriver : public rclcpp::Node {
             datum_projection_.emplace(datum[0], datum[1], datum[2]);
             map_frame_id_ = get_parameter("map_frame_id").as_string();
             RCLCPP_INFO(get_logger(), "Odometry datum: lat=%f lon=%f alt=%f", datum[0], datum[1], datum[2]);
+        }
+
+        if (sensor_type_ == SensorType::VN300) {
+            gnss_compass_thread_running_ = true;
+            gnss_compass_thread_ = std::thread(&VectornavDriver::gnss_compass_thread_fn, this);
         }
 
         return true;
@@ -767,6 +784,28 @@ class VectornavDriver : public rclcpp::Node {
         gnss2_status_publisher_->publish(msg);
     }
 
+    void gnss_compass_thread_fn() {
+        while (gnss_compass_thread_running_) {
+            VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus signal_health;
+            if (vs_.readRegister(&signal_health) == VN::Error::None) {
+                std_msgs::msg::Float32MultiArray msg;
+                msg.data = {signal_health.numSatsPvtA, signal_health.numSatsRtkA, signal_health.highestCn0A,
+                            signal_health.numSatsPvtB, signal_health.numSatsRtkB, signal_health.highestCn0B,
+                            signal_health.numComSatsPvt, signal_health.numComSatsRtk};
+                gnss_compass_signal_health_publisher_->publish(msg);
+            }
+
+            VN::Registers::GNSSCompass::GnssCompassStartupStatus startup_status;
+            if (vs_.readRegister(&startup_status) == VN::Error::None) {
+                std_msgs::msg::Float32MultiArray msg;
+                msg.data = {static_cast<float>(startup_status.percentComplete), startup_status.currentHeading};
+                gnss_compass_startup_status_publisher_->publish(msg);
+            }
+
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+    }
+
     rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_publisher_;
     rclcpp::Publisher<sensor_msgs::msg::NavSatFix>::SharedPtr fix_publisher_;
     rclcpp::Publisher<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr velocity_publisher_;
@@ -774,12 +813,17 @@ class VectornavDriver : public rclcpp::Node {
     rclcpp::Publisher<std_msgs::msg::UInt16>::SharedPtr gnss_status_publisher_;
     rclcpp::Publisher<std_msgs::msg::UInt16>::SharedPtr gnss2_status_publisher_;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_publisher_;
+    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr gnss_compass_signal_health_publisher_;
+    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr gnss_compass_startup_status_publisher_;
 
     std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
     VN::Sensor vs_;
     SensorType sensor_type_ = SensorType::VN100;
+
+    std::thread gnss_compass_thread_;
+    std::atomic<bool> gnss_compass_thread_running_{false};
 
     std::string imu_frame_id_;
     std::string ins_frame_id_;
