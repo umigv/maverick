@@ -38,7 +38,7 @@ class AutonavGoalSelection(Node):
         self.grid: WorldOccupancyGrid | None = None
         self.goal_selector = GoalSelector(self.config.goal_selection_params)
         self.in_no_mans_land: bool = False
-        self.state: string = "normal"
+        self.state: str = "normal"
 
         self.waypoints: list[Waypoint] = self.load_waypoints()
         self.current_waypoint_index = 0
