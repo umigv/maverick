@@ -137,7 +137,8 @@ class AutonavGoalSelection(Node):
             return
 
         distance = self.robot_pose.point.distance(waypoint)
-        if self.current_waypoint_index == len(self.waypoints) - 1 and distance <= self.config.ramp_approach_radius_m:
+        is_last_waypoint = self.current_waypoint_index == len(self.waypoints) - 1
+        if self.state != "ramp" and is_last_waypoint and distance <= self.config.ramp_approach_radius_m:
             self.get_logger().info("Entering ramp")
             self.set_ramp_client.call_async(SetBool.Request(data=True))
 
