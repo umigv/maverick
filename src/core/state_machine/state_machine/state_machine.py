@@ -30,7 +30,6 @@ class StateMachine(Node):
         self.set_recovery_service = self.create_service(SetBool, "state/set_recovery", self.set_recovery_callback)
         self.recovery_enabled: bool = False
 
-        #as a fun side effect of me not knowing LED modes, the LEDS will turn rainbow in ramp mode. Happy (early) pride!
         self.set_ramp_service = self.create_service(SetBool, "state/set_ramp", self.set_ramp_callback)
         self.ramp_enabled: bool = False
 
@@ -40,11 +39,11 @@ class StateMachine(Node):
         if self.recovery_enabled:
             return State.RECOVERY
 
-        if self.no_mans_land_enabled:
-            return State.NO_MANS_LAND
-
         if self.ramp_enabled:
             return State.RAMP
+
+        if self.no_mans_land_enabled:
+            return State.NO_MANS_LAND
 
         return State.NORMAL
 

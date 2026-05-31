@@ -4,10 +4,11 @@ machine exposes services for state transitions and publishes the robot state to 
 to and react accordingly.
 
 ## States
-There are three mutually exclusive states:
+There are four mutually exclusive states:
 - **`normal`** – default operating mode  
 - **`no_mans_land`** – no mans land-specific behavior enabled  
-- **`recovery`** – recovery / fault handling mode  
+- **`ramp`** – ramp specific behavior enabled
+- **`recovery`** – recovery / fault handling mode 
 
 1. State priority is fixed and deterministic: recovery > no_mans_land > normal
 2. States are published only on state changes
@@ -15,7 +16,7 @@ There are three mutually exclusive states:
 4. Late-joining subscribers immediately receive the most recent state
 
 ## Published Topics
-- `state` (`std_msgs/String`) - The current robot state as one of `"normal"`, `"no_mans_land"`, or `"recovery"`
+- `state` (`std_msgs/String`) - The current robot state as one of `"normal"`, `"no_mans_land"`, `ramp`, or `"recovery"`
 
 The `state` topic uses a non-default QoS profile:
 | Setting | Value | Effect |
@@ -30,7 +31,9 @@ In code, use `utils.qos.LATCHED`. In RViz, set the topic's **Durability Policy**
 
 ## Services
 - `state/set_no_mans_land` (`std_srvs/SetBool`) - Enable or disable no_mans_land mode
+- `state/set_ramp` (`std_srvs/SetBool`) - Enable or disable ramp mode
 - `state/set_recovery` (`std_srvs/SetBool`) - Enable or disable recovery mode
+
 
 ## Example Usage
 ```bash
