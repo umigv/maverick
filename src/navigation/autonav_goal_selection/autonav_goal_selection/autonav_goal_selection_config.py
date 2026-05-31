@@ -125,6 +125,8 @@ class AutonavGoalSelectionConfig:
         waypoint_reached_threshold_m: Distance (m) within which a waypoint is considered reached.
         waypoint_approach_radius_m: Distance (m) from the waypoint within which ray-cast goal selection is bypassed and
             the waypoint itself is published directly as the goal.
+        ramp_approach_radius_m: Distance (m) from the waypoint within which ray-cast goal selection is bypassed and
+            the waypoint itself is published directly as the goal when the waypoint is the ramp waypoint.
         map_frame_id: TF frame ID for the map coordinate frame.
         world_frame_id: TF frame ID for the world coordinate frame.
         publish_debug: When true, publish a MarkerArray on `goal_selection_debug` showing all rays, the chosen ray, the
@@ -136,6 +138,7 @@ class AutonavGoalSelectionConfig:
     goal_publish_period_s: float = 0.25
     waypoint_reached_threshold_m: float = 1.5
     waypoint_approach_radius_m: float = 5.0
+    ramp_approach_radius_m: float = 12.0
     map_frame_id: str = "map"
     world_frame_id: str = "odom"
     publish_debug: bool = True

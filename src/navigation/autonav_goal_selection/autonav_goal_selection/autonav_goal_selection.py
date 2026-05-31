@@ -48,6 +48,7 @@ class AutonavGoalSelection(Node):
 
         self.set_recovery_client = self.create_client(SetBool, "state/set_recovery")
         self.set_no_mans_land_client = self.create_client(SetBool, "state/set_no_mans_land")
+        self.set_ramp_client = self.create_client(SetBool, "state/set_ramp")
 
         self.create_subscription(Odometry, "odom", self.odom_callback, 10)
         self.create_subscription(OccupancyGrid, "occupancy_grid", self.occupancy_grid_callback, 10)
@@ -150,7 +151,9 @@ class AutonavGoalSelection(Node):
             # We don't call rclpy.shutdown() here because it causes a deadlock in humble
             # https://github.com/ros2/rclpy/issues/1646
             raise SystemExit(1) from None
-
+        elif self.current_waypoint_index == len(self.waypoints) - 1:
+            self.get_logger().info("Ramp waypoint reached!")
+            self.set_ramp_client.call_async(SetBool.Request(data=True))
         self.get_logger().info(f"Waypoint reached, advancing to index {self.current_waypoint_index}")
         self.publish_gps_waypoint()
 
@@ -165,7 +168,7 @@ class AutonavGoalSelection(Node):
         if waypoint is None:
             return
 
-        near_waypoint = self.robot_pose.point.distance(waypoint) < self.config.waypoint_approach_radius_m
+        near_waypoint = self.robot_pose.point.distance(waypoint) < self.config.ramp_approach_radius_m if self.state == "ramp" else self.robot_pose.point.distance(waypoint) < self.config.waypoint_approach_radius_m
         if near_waypoint or self.state == "no_mans_land":
             self.goal_selector.reset()
             self.goal_publisher.publish(
