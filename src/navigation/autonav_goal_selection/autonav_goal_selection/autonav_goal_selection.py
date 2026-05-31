@@ -38,7 +38,7 @@ class AutonavGoalSelection(Node):
         self.grid: WorldOccupancyGrid | None = None
         self.goal_selector = GoalSelector(self.config.goal_selection_params)
         self.in_no_mans_land: bool = False
-        self.in_recovery: bool = False
+        self.state: str = "normal"
 
         self.waypoints: list[Waypoint] = self.load_waypoints()
         self.current_waypoint_index = 0
@@ -81,7 +81,7 @@ class AutonavGoalSelection(Node):
         self.grid = WorldOccupancyGrid(msg)
 
     def state_callback(self, msg: String) -> None:
-        self.in_recovery = msg.data == "recovery"
+        self.state = msg.data
 
     def load_waypoints(self) -> list[Waypoint]:
         with open(self.config.waypoints_file_path) as f:
@@ -158,14 +158,15 @@ class AutonavGoalSelection(Node):
         if self.robot_pose is None or self.grid is None or self.current_waypoint_index >= len(self.waypoints):
             return
 
-        if self.in_recovery:
+        if self.state == "recovery":
             return
 
         waypoint = self.transform_map_to_world(self.waypoints[self.current_waypoint_index].point)
         if waypoint is None:
             return
 
-        if self.robot_pose.point.distance(waypoint) < self.config.waypoint_approach_radius_m:
+        near_waypoint = self.robot_pose.point.distance(waypoint) < self.config.waypoint_approach_radius_m
+        if near_waypoint or self.state == "no_mans_land":
             self.goal_selector.reset()
             self.goal_publisher.publish(
                 PointStamped(
