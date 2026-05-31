@@ -136,7 +136,12 @@ class AutonavGoalSelection(Node):
         if waypoint is None:
             return
 
-        if self.robot_pose.point.distance(waypoint) >= self.config.waypoint_reached_threshold_m:
+        distance = self.robot_pose.point.distance(waypoint)
+        if self.current_waypoint_index == len(self.waypoints) - 1 and distance <= self.config.ramp_approach_radius_m:
+            self.get_logger().info("Entering ramp")
+            self.set_ramp_client.call_async(SetBool.Request(data=True))
+
+        if distance >= self.config.waypoint_reached_threshold_m:
             return
 
         if self.waypoints[self.current_waypoint_index].no_mans_land:
@@ -147,13 +152,13 @@ class AutonavGoalSelection(Node):
         self.current_waypoint_index += 1
 
         if self.current_waypoint_index >= len(self.waypoints):
+            self.get_logger().info("Exiting ramp")
+            self.set_ramp_client.call_async(SetBool.Request(data=False))
             self.get_logger().info("Final waypoint reached, stopping navigation")
             # We don't call rclpy.shutdown() here because it causes a deadlock in humble
             # https://github.com/ros2/rclpy/issues/1646
             raise SystemExit(1) from None
-        elif self.current_waypoint_index == len(self.waypoints) - 1:
-            self.get_logger().info("Ramp waypoint reached!")
-            self.set_ramp_client.call_async(SetBool.Request(data=True))
+
         self.get_logger().info(f"Waypoint reached, advancing to index {self.current_waypoint_index}")
         self.publish_gps_waypoint()
 
@@ -168,7 +173,12 @@ class AutonavGoalSelection(Node):
         if waypoint is None:
             return
 
-        near_waypoint = self.robot_pose.point.distance(waypoint) < self.config.ramp_approach_radius_m if self.state == "ramp" else self.robot_pose.point.distance(waypoint) < self.config.waypoint_approach_radius_m
+        near_waypoint_threshold = (
+            self.config.ramp_approach_radius_m if self.state == "ramp" else self.config.waypoint_approach_radius_m
+        )
+
+        near_waypoint = self.robot_pose.point.distance(waypoint) < near_waypoint_threshold
+
         if near_waypoint or self.state == "no_mans_land":
             self.goal_selector.reset()
             self.goal_publisher.publish(
