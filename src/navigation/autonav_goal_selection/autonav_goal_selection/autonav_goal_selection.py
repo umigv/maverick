@@ -157,9 +157,10 @@ class AutonavGoalSelection(Node):
             self.get_logger().info("Exiting ramp")
             self.set_ramp_client.call_async(SetBool.Request(data=False))
             self.get_logger().info("Final waypoint reached, stopping navigation")
-            # We don't call rclpy.shutdown() here because it causes a deadlock in humble
-            # https://github.com/ros2/rclpy/issues/1646
-            raise SystemExit(1) from None
+            # Our last gps waypoint is collected before the starting line, but for IGVC we must cross the line so we
+            # need to go further than our last gps waypoint. As a workaround we just loop back to the first point which
+            # triggers autonav goal selection mode to drive forward then manually estop
+            self.current_waypoint_index = 0
 
         self.get_logger().info(f"Waypoint reached, advancing to index {self.current_waypoint_index}")
         self.publish_gps_waypoint()
