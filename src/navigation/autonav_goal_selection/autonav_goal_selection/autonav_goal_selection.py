@@ -11,7 +11,7 @@ from geometry_msgs.msg import PointStamped, Vector3
 from nav_msgs.msg import OccupancyGrid, Odometry
 from rclpy.node import Node
 from robot_localization.srv import FromLL
-from std_msgs.msg import ColorRGBA, Header, String
+from std_msgs.msg import Bool, ColorRGBA, Header, String
 from std_srvs.srv import SetBool
 from tf2_ros import TransformException
 from utils.geometry import Point2d, Pose2d
@@ -57,8 +57,10 @@ class AutonavGoalSelection(Node):
         self.goal_publisher = self.create_publisher(PointStamped, "goal", 10)
         self.waypoint_publisher = self.create_publisher(PointStamped, "waypoint", utils.qos.LATCHED)
         self.debug_publisher = self.create_publisher(MarkerArray, "goal_selection_debug", 10)
+        self.hsv_enabled_publisher = self.create_publisher(Bool, "hsv_enabled", 10)
 
         self.create_timer(self.config.goal_publish_period_s, self.publish_goal)
+        self.create_timer(self.config.hsv_publish_period_s, self.publish_hsv_enabled)
 
         self.publish_gps_waypoint()
 
@@ -205,6 +207,27 @@ class AutonavGoalSelection(Node):
                 point=goal.to_ros(),
             )
         )
+
+    def publish_hsv_enabled(self) -> None:
+        if self.robot_pose is None or self.current_waypoint_index >= len(self.waypoints):
+            return
+
+        enabled = True
+
+        if self.state == "no_mans_land":
+            enabled = False
+
+            next_waypoint = self.waypoints[self.current_waypoint_index]
+            if next_waypoint.no_mans_land:
+                waypoint = self.transform_map_to_world(next_waypoint.point)
+                if (
+                    waypoint is not None
+                    and self.robot_pose.point.distance(waypoint)
+                    <= self.config.hsv_disable_distance_to_end_of_no_mans_land_threshold
+                ):
+                    enabled = True
+
+        self.hsv_enabled_publisher.publish(Bool(data=enabled))
 
     def build_debug_markers(self, debug: GoalSelector.DebugInfo) -> MarkerArray:
         assert self.robot_pose is not None
