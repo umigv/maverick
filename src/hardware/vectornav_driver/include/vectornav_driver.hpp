@@ -1,6 +1,8 @@
 #pragma once
 
 #include <GeographicLib/LocalCartesian.hpp>
+#include <atomic>
+#include <thread>
 
 #include "geometry_msgs/msg/twist_with_covariance_stamped.hpp"
 #include "nav_msgs/msg/odometry.hpp"
@@ -15,9 +17,6 @@
 #include "tf2_ros/transform_listener.h"
 #include "transforms.hpp"
 #include "vectornav/Interface/Sensor.hpp"
-
-#include <atomic>
-#include <thread>
 
 #if __linux__
 #include <fcntl.h>
@@ -789,8 +788,8 @@ class VectornavDriver : public rclcpp::Node {
             VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus signal_health;
             if (vs_.readRegister(&signal_health) == VN::Error::None) {
                 std_msgs::msg::Float32MultiArray msg;
-                msg.data = {signal_health.numSatsPvtA, signal_health.numSatsRtkA, signal_health.highestCn0A,
-                            signal_health.numSatsPvtB, signal_health.numSatsRtkB, signal_health.highestCn0B,
+                msg.data = {signal_health.numSatsPvtA,   signal_health.numSatsRtkA,  signal_health.highestCn0A,
+                            signal_health.numSatsPvtB,   signal_health.numSatsRtkB,  signal_health.highestCn0B,
                             signal_health.numComSatsPvt, signal_health.numComSatsRtk};
                 gnss_compass_signal_health_publisher_->publish(msg);
             }
