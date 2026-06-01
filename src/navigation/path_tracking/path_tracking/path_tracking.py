@@ -16,6 +16,7 @@ from .controllers.pure_pursuit.controller import PurePursuitController
 from .controllers.stanley.controller import StanleyController
 from .path_tracking_config import PathTrackingConfig
 
+
 class PathTracking(Node):
     def __init__(self) -> None:
         super().__init__("path_tracking")
