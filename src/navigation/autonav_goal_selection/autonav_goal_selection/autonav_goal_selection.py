@@ -137,8 +137,9 @@ class AutonavGoalSelection(Node):
             return
 
         distance = self.robot_pose.point.distance(waypoint)
-        is_last_waypoint = self.current_waypoint_index == len(self.waypoints) - 1
-        if self.state != "ramp" and is_last_waypoint and distance <= self.config.ramp_approach_radius_m:
+        is_last = self.current_waypoint_index == len(self.waypoints) - 1
+
+        if is_last and self.state != "ramp" and distance <= self.config.ramp_approach_radius_m:
             self.get_logger().info("Entering ramp")
             self.set_ramp_client.call_async(SetBool.Request(data=True))
 
@@ -152,7 +153,7 @@ class AutonavGoalSelection(Node):
 
         self.current_waypoint_index += 1
 
-        if self.current_waypoint_index >= len(self.waypoints):
+        if is_last:
             self.get_logger().info("Exiting ramp")
             self.set_ramp_client.call_async(SetBool.Request(data=False))
             self.get_logger().info("Final waypoint reached, stopping navigation")
@@ -174,13 +175,8 @@ class AutonavGoalSelection(Node):
         if waypoint is None:
             return
 
-        near_waypoint_threshold = (
-            self.config.ramp_approach_radius_m if self.state == "ramp" else self.config.waypoint_approach_radius_m
-        )
-
-        near_waypoint = self.robot_pose.point.distance(waypoint) < near_waypoint_threshold
-
-        if near_waypoint or self.state == "no_mans_land":
+        distance = self.robot_pose.point.distance(waypoint)
+        if distance < self.config.waypoint_approach_radius_m or self.state in ("no_mans_land", "ramp"):
             self.goal_selector.reset()
             self.goal_publisher.publish(
                 PointStamped(

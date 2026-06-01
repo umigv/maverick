@@ -43,6 +43,7 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
             ("fromLL", "fromLL"),
             ("state/set_recovery", "state/set_recovery"),
             ("state/set_no_mans_land", "state/set_no_mans_land"),
+            ("state/set_ramp", "state/set_ramp"),
             ("goal", "goal"),
             ("waypoint", "waypoint"),
             ("goal_selection_debug", "goal_selection_debug"),
