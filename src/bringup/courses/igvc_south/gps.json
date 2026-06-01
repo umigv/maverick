@@ -1,9 +1,8 @@
 {
     "datum": {
-        "latitude": 88.888888,
-        "longitude": 77.77777,
-        "altitude": 270.0,
-        "fill_in_with_start_waypoint": true
+        "latitude": 42.66813366,
+        "longitude": -83.21876890,
+        "altitude": 237.821
     },
     "waypoints": [
         {
@@ -25,8 +24,8 @@
             "no_mans_land": true
         },
         {
-            "latitude": 88.888888,
-            "longitude": 77.77777,
+            "latitude": 42.66808296,
+            "longitude": -83.21891701,
             "fill_in_with_start_waypoint": true
         }
     ]

@@ -15,8 +15,8 @@ class GpsOriginCalculatorConfig:
         output_file: Path to gps.json to write the computed datum into. Empty string skips writing.
     """
 
-    min_samples_required: int = 3000
-    min_sample_duration_s: float = 60.0
+    min_samples_required: int = 1500
+    min_sample_duration_s: float = 30.0
     max_sample_duration_s: float = 90.0
     max_horizontal_stdev_m: float = math.sqrt(2)
     output_file: Path = Path("")

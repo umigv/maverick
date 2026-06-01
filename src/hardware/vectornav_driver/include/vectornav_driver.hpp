@@ -139,9 +139,9 @@ class VectornavDriver : public rclcpp::Node {
             return false;
         }
 
-        if (!configure_sensor_transforms()) {
-            return false;
-        }
+        // if (!configure_sensor_transforms()) {
+        //     return false;
+        // }
 
         imu_frame_id_ = get_parameter("imu_frame_id").as_string();
         ins_frame_id_ = get_parameter("ins_frame_id").as_string();
