@@ -28,7 +28,7 @@ class MotorSignalPlotter(Node):
     def __init__(self, window: int):
         super().__init__("odrive_plot")
 
-        self._data = {k: deque(maxlen=window) for k in _FIELDS}
+        self._data: dict[str, deque[float]] = {k: deque(maxlen=window) for k in _FIELDS}
 
         self._fig, axes = plt.subplots(2, 2, sharex=True, figsize=(12, 7))
         self._fig.suptitle("ODrive diagnostics")
