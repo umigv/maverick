@@ -133,9 +133,9 @@ class AutonavGoalSelectionConfig:
 
     goal_selection_params: GoalSelectionParams
     waypoints_file_path: pathlib.Path
-    goal_publish_period_s: float = 0.25
-    waypoint_reached_threshold_m: float = 1.5
-    waypoint_approach_radius_m: float = 5.0
+    goal_publish_period_s: float = 1
+    waypoint_reached_threshold_m: float = 0.001
+    waypoint_approach_radius_m: float = 0.01
     map_frame_id: str = "map"
     world_frame_id: str = "odom"
     publish_debug: bool = True
