@@ -19,10 +19,10 @@ class LedDriver(Node):
     LED_STATE: typing.ClassVar[dict[str, int]] = {
         "normal": 2,  # Flashing blue
         "no_mans_land": 3,  # Flashing green
-        "ramp": 9,  # Flashing purple
+        "ramp": 5,  # Flashing purple
         "recovery": 4,  # Flashing yellow
     }
-    LED_UNKNOWN = 5  # Rainbow
+    LED_UNKNOWN = 9  # Rainbow
 
     def __init__(self) -> None:
         super().__init__("led_driver")
