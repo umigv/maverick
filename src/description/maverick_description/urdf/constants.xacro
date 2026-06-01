@@ -26,12 +26,12 @@
     <xacro:property name="base_frame_to_imu_z_offset_m" value="0.789"/>
 
     <!-- GNSS A Constants -->
-    <xacro:property name="imu_to_gnss_a_x_offset_m" value="0.0270"/>
-    <xacro:property name="imu_to_gnss_a_y_offset_m" value="-0.291"/>
-    <xacro:property name="imu_to_gnss_a_z_offset_m" value="0.171"/>
+    <xacro:property name="imu_to_gnss_a_x_offset_m" value="0.163"/>
+    <xacro:property name="imu_to_gnss_a_y_offset_m" value="-0.379"/>
+    <xacro:property name="imu_to_gnss_a_z_offset_m" value="0.473"/>
 
     <!-- GNSS B Constants -->
-    <xacro:property name="gnss_a_to_gnss_b_x_offset_m" value="-0.524"/>
-    <xacro:property name="gnss_a_to_gnss_b_y_offset_m" value="0.576"/>
-    <xacro:property name="gnss_a_to_gnss_b_z_offset_m" value="0.006"/>
+    <xacro:property name="gnss_a_to_gnss_b_x_offset_m" value="-0.829"/>
+    <xacro:property name="gnss_a_to_gnss_b_y_offset_m" value="0.749"/>
+    <xacro:property name="gnss_a_to_gnss_b_z_offset_m" value="0.000"/>
 </robot>

@@ -420,41 +420,43 @@ class VectornavDriver : public rclcpp::Node {
 
         auto differs = [](float a, float b) { return std::abs(a - b) > 1e-3f; };
 
-        if (need_imu_ins) {
-            const auto tf = tf_buffer_->lookupTransform(imu_frame_id, ins_frame_id, tf2::TimePointZero);
-            tf2::Quaternion q;
-            tf2::fromMsg(tf.transform.rotation, q);
-            imu_to_ins_ = Rotation(q.inverse());
+        // TODO: we temporarily disable this since InsRefOffset is a static register so we need a reset anyways.
+        // to avoid this potentially breaking during comp we just don't run it and make ins = imu
+        // if (need_imu_ins) {
+        //     const auto tf = tf_buffer_->lookupTransform(imu_frame_id, ins_frame_id, tf2::TimePointZero);
+        //     tf2::Quaternion q;
+        //     tf2::fromMsg(tf.transform.rotation, q);
+        //     imu_to_ins_ = Rotation(q.inverse());
 
-            // FLU -> FRD; uncertainty = max(2.5% of max offset, 1cm) (VectorNav recommendation)
-            const float x = static_cast<float>(tf.transform.translation.x);
-            const float y = static_cast<float>(-tf.transform.translation.y);
-            const float z = static_cast<float>(-tf.transform.translation.z);
-            const float u = std::max(0.01f, 0.025f * std::max({std::abs(x), std::abs(y), std::abs(z)}));
+        //     // FLU -> FRD; uncertainty = max(2.5% of max offset, 1cm) (VectorNav recommendation)
+        //     const float x = static_cast<float>(tf.transform.translation.x);
+        //     const float y = static_cast<float>(-tf.transform.translation.y);
+        //     const float z = static_cast<float>(-tf.transform.translation.z);
+        //     const float u = std::max(0.01f, 0.025f * std::max({std::abs(x), std::abs(y), std::abs(z)}));
 
-            VN::Registers::INS::InsRefOffset current;
-            // clang-format off
-            const bool unchanged = vs_.readRegister(&current) == VN::Error::None &&
-                                   !differs(current.refOffsetX.value_or(0.f), x) &&
-                                   !differs(current.refOffsetY.value_or(0.f), y) &&
-                                   !differs(current.refOffsetZ.value_or(0.f), z);
-            // clang-format on
-            if (!unchanged) {
-                VN::Registers::INS::InsRefOffset updated;
-                updated.refOffsetX = x;
-                updated.refOffsetY = y;
-                updated.refOffsetZ = z;
-                updated.refUncertX = u;
-                updated.refUncertY = u;
-                updated.refUncertZ = u;
-                if (vs_.writeRegister(&updated) != VN::Error::None) {
-                    RCLCPP_ERROR(get_logger(), "Failed to write InsRefOffset");
-                    return false;
-                }
-            }
-            RCLCPP_INFO(get_logger(), "InsRefOffset [write FRD]: %.3f %.3f %.3f (u=%.3f)%s", x, y, z, u,
-                        unchanged ? " [unchanged]" : "");
-        }
+        //     VN::Registers::INS::InsRefOffset current;
+        //     // clang-format off
+        //     const bool unchanged = vs_.readRegister(&current) == VN::Error::None &&
+        //                            !differs(current.refOffsetX.value_or(0.f), x) &&
+        //                            !differs(current.refOffsetY.value_or(0.f), y) &&
+        //                            !differs(current.refOffsetZ.value_or(0.f), z);
+        //     // clang-format on
+        //     if (!unchanged) {
+        //         VN::Registers::INS::InsRefOffset updated;
+        //         updated.refOffsetX = x;
+        //         updated.refOffsetY = y;
+        //         updated.refOffsetZ = z;
+        //         updated.refUncertX = u;
+        //         updated.refUncertY = u;
+        //         updated.refUncertZ = u;
+        //         if (vs_.writeRegister(&updated) != VN::Error::None) {
+        //             RCLCPP_ERROR(get_logger(), "Failed to write InsRefOffset");
+        //             return false;
+        //         }
+        //     }
+        //     RCLCPP_INFO(get_logger(), "InsRefOffset [write FRD]: %.3f %.3f %.3f (u=%.3f)%s", x, y, z, u,
+        //                 unchanged ? " [unchanged]" : "");
+        // }
 
         if (has_ins) {
             const auto tf = tf_buffer_->lookupTransform(imu_frame_id, gnss_a_frame_id, tf2::TimePointZero);
