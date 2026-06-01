@@ -15,7 +15,7 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
     base_params = [
         f"{bringup_share()}/config/hardware/vectornav.yaml",
         {"imu_frame_id": frames["imu_frame"]},
-        {"ins_frame_id": frames["base_frame"]},
+        {"ins_frame_id": frames["imu_frame"]},
         {"gnss_a_frame_id": frames["gnss_a_frame"]},
         {"gnss_b_frame_id": frames["gnss_b_frame"]},
         {"map_frame_id": frames["map_frame"]},

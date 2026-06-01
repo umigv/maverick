@@ -439,7 +439,7 @@ class VectornavDriver : public rclcpp::Node {
         }
 
         if (has_ins) {
-            const auto tf = tf_buffer_->lookupTransform(imu_frame_id, gnss_a_frame_id, tf2::TimePointZero);
+            const auto tf = tf_buffer_->lookupTransform(ins_frame_id, gnss_a_frame_id, tf2::TimePointZero);
             const float x = static_cast<float>(tf.transform.translation.x);
             const float y = static_cast<float>(-tf.transform.translation.y);
             const float z = static_cast<float>(-tf.transform.translation.z);
