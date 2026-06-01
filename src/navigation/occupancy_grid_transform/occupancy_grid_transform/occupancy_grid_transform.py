@@ -2,14 +2,17 @@ import numpy as np
 import rclpy
 import tf2_geometry_msgs  # noqa: F401 - registers PoseStamped transform handlers
 import utils.config
+import utils.qos
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import MapMetaData, OccupancyGrid
 from rclpy.node import Node
-from std_msgs.msg import Header
+from std_msgs.msg import Header, String
 from tf2_ros import Buffer, TransformListener
 
-from .occupancy_grid_transform_config import OccupancyGridTransformConfig
+from .occupancy_grid_transform_config import InflationParams, OccupancyGridTransformConfig
 from .occupancy_grid_transform_impl import add_border, inflate_grid
+
+NO_MANS_LAND_INFLATION_RADIUS_CELLS = 22
 
 
 class OccupancyGridTransform(Node):
@@ -17,14 +20,19 @@ class OccupancyGridTransform(Node):
         super().__init__("occupancy_grid_transform")
 
         self.config: OccupancyGridTransformConfig = utils.config.load(self, OccupancyGridTransformConfig)
+        self.in_no_mans_land: bool = False
 
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
+        self.create_subscription(String, "state", self.state_callback, utils.qos.LATCHED)
         self.create_subscription(OccupancyGrid, "occupancy_grid", self.occupancy_grid_callback, 10)
 
         self.transformed_publisher = self.create_publisher(OccupancyGrid, "transformed_occupancy_grid", 10)
         self.inflated_publisher = self.create_publisher(OccupancyGrid, "inflated_occupancy_grid", 10)
+
+    def state_callback(self, msg: String) -> None:
+        self.in_no_mans_land = msg.data == "no_mans_land"
 
     def occupancy_grid_callback(self, msg: OccupancyGrid) -> None:
         # Drop the stamp so tf uses the latest available transform instead of looking up the exact time. If we copied
@@ -44,7 +52,16 @@ class OccupancyGridTransform(Node):
 
         grid = np.asarray(msg.data, dtype=np.int8).reshape((msg.info.height, msg.info.width))
         bordered_grid = add_border(grid)
-        inflated_grid = inflate_grid(bordered_grid, self.config.inflation_params)
+        inflation_params = (
+            InflationParams(
+                inflation_radius_cells=NO_MANS_LAND_INFLATION_RADIUS_CELLS,
+                inflation_falloff_extent_cells=self.config.inflation_params.inflation_falloff_extent_cells,
+                inflation_decay_factor=self.config.inflation_params.inflation_decay_factor,
+            )
+            if self.in_no_mans_land
+            else self.config.inflation_params
+        )
+        inflated_grid = inflate_grid(bordered_grid, inflation_params)
         height, width = grid.shape
 
         # We omit the stamp in the header to avoid TF extrapolation errors in rviz
