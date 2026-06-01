@@ -38,3 +38,5 @@ odrive_driver:
     timestamp_delay_s: 0.0
 
     estop_file_path: "/tmp/estop_value.txt"
+
+    debug: false
