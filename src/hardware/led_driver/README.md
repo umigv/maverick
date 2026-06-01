@@ -16,9 +16,9 @@ Waits up to `ready_timeout_s` for the Arduino to send `READY` before starting.
 | 2 | `teleop_cmd_vel` received within `teleop_timeout_s` | `1` | Solid blue |
 | 3 | `state` = `normal` | `2` | Flashing blue |
 | 3 | `state` = `no_mans_land` | `3` | Flashing green |
-| 3 | `state` = `ramp` | `9` | Rainbow |
+| 3 | `state` = `ramp` | `5` | Flashing purple |
 | 3 | `state` = `recovery` | `4` | Flashing yellow |
-| 4 | `state` is unknown | `5` | Flashing purple |
+| 4 | `state` is unknown | `9` | Rainbow |
 
 ## Config Parameters
 | Parameter | Type | Default | Description |

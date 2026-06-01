@@ -66,8 +66,9 @@ class StateMachine(Node):
 
         self.recovery_enabled = req.data
         res.success = True
-        self.get_logger().info(res.message + f" (no_mans_land_enabled={self.no_mans_land_enabled})")
-        self.get_logger().info(res.message + f" (ramp_enabled={self.ramp_enabled})")
+        self.get_logger().info(
+            f"{res.message} (no_mans_land_enabled={self.no_mans_land_enabled}, ramp_enabled={self.ramp_enabled})"
+        )
         self.publish_state_if_changed(reason="state/set_recovery")
         return res
 
@@ -79,8 +80,9 @@ class StateMachine(Node):
 
         self.no_mans_land_enabled = req.data
         res.success = True
-        self.get_logger().info(res.message + f" (recovery_enabled={self.recovery_enabled})")
-        self.get_logger().info(res.message + f" (ramp_enabled={self.ramp_enabled})")
+        self.get_logger().info(
+            f"{res.message} (recovery_enabled={self.recovery_enabled}), (ramp_enabled={self.ramp_enabled})"
+        )
         self.publish_state_if_changed(reason="state/set_no_mans_land")
         return res
 
@@ -92,8 +94,9 @@ class StateMachine(Node):
 
         self.ramp_enabled = req.data
         res.success = True
-        self.get_logger().info(res.message + f" (recovery_enabled={self.recovery_enabled})")
-        self.get_logger().info(res.message + f" (no_mans_land_enabled={self.no_mans_land_enabled})")
+        self.get_logger().info(
+            f"{res.message} (recovery_enabled={self.recovery_enabled}, no_mans_land_enabled={self.no_mans_land_enabled})"
+        )
         self.publish_state_if_changed(reason="state/set_ramp")
         return res
 

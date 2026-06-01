@@ -34,7 +34,6 @@ In code, use `utils.qos.LATCHED`. In RViz, set the topic's **Durability Policy**
 - `state/set_ramp` (`std_srvs/SetBool`) - Enable or disable ramp mode
 - `state/set_recovery` (`std_srvs/SetBool`) - Enable or disable recovery mode
 
-
 ## Example Usage
 ```bash
 ros2 topic echo /state # Observe current state
