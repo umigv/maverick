@@ -81,7 +81,7 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         case "autonav":
             return [ekf_local_node, map_odom_publisher_node, lat_lon_converter_node]
         case "self_drive":
-            return [ekf_local_node, identity_map_odom_node]
+            return [ekf_local_node, identity_map_odom_node, lat_lon_converter_node]
         case "nav_test":
             return [enc_odom_node, identity_map_odom_node]
         case _:
