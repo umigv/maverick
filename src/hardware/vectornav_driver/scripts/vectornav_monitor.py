@@ -54,10 +54,12 @@ STALE_SIGNAL_HEALTH_BODY = (
     f"  {'Common RTK:':<20}---"
 )
 
+# fmt: off
 STALE_STARTUP_STATUS_BODY = (
     f"  {'PercentComplete:':<20}---\n"
     f"  {'CurrentHeading:':<20}---"
 )
+# fmt: on
 
 STALE_GNSS_BODY = (
     f"  {'Enabled:':<20}---\n"
@@ -214,10 +216,12 @@ class VectornavMonitor(Node):
         self.startup_status_last_time = self.get_clock().now()
         self.startup_status_last_timestamp_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         d = msg.data
+        # fmt: off
         self.startup_status_body = (
             f"  {'PercentComplete:':<20}{d[0]:.0f}%\n"
             f"  {'CurrentHeading:':<20}{d[1]:.2f} deg"
         )
+        # fmt: on
 
     def build_display_block(self, title, hex_val, last_time_ros, last_time_str, body_str, stale_body_str, now_ros):
         if last_time_ros is None:
