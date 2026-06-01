@@ -156,7 +156,7 @@ class AutonavGoalSelection(Node):
         if is_last:
             self.get_logger().info("Exiting ramp")
             self.set_ramp_client.call_async(SetBool.Request(data=False))
-            self.get_logger().info("Final waypoint reached, stopping navigation")
+            self.get_logger().info("Final waypoint reached, looping back")
             # Our last gps waypoint is collected before the starting line, but for IGVC we must cross the line so we
             # need to go further than our last gps waypoint. As a workaround we just loop back to the first point which
             # triggers autonav goal selection mode to drive forward then manually estop
