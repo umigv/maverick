@@ -10,7 +10,7 @@ from odrive.enums import AxisState, ControlMode, InputMode, ODriveError
 from playsound import playsound
 from rclpy.duration import Duration
 from rclpy.node import Node
-from std_msgs.msg import Header
+from std_msgs.msg import Float32MultiArray, Header
 
 from .odrive_driver_config import OdriveDriverConfig
 
@@ -29,6 +29,10 @@ class OdriveDriver(Node):
 
         self.create_timer(self.config.publish_period_s, self.publish_enc_vel)
         self.watchdog_timer = self.create_timer(self.config.cmd_vel_timeout_s, self.watchdog_callback)
+
+        if self.config.debug:
+            self.debug_publisher = self.create_publisher(Float32MultiArray, "~/debug", 10)
+            self.create_timer(self.config.publish_period_s, self.publish_debug_info)
 
     def init(self) -> bool:
         try:
@@ -116,6 +120,22 @@ class OdriveDriver(Node):
         except Exception:
             self.get_logger().error("EStop file not found", throttle_duration_sec=30.0)
             return True  # if the e-stop file doesn't exist / is corrupted we assume e-stop is off
+
+    def publish_debug_info(self) -> None:
+        self.debug_publisher.publish(
+            Float32MultiArray(
+                data=[
+                    self.odrive_left.axis0.motor.foc.Iq_setpoint,
+                    self.odrive_left.axis0.motor.foc.Iq_measured,
+                    self.odrive_left.axis0.controller.vel_setpoint,
+                    self.odrive_left.axis0.vel_estimate,
+                    self.odrive_right.axis0.motor.foc.Iq_setpoint,
+                    self.odrive_right.axis0.motor.foc.Iq_measured,
+                    self.odrive_right.axis0.controller.vel_setpoint,
+                    self.odrive_right.axis0.vel_estimate,
+                ]
+            )
+        )
 
 
 def main() -> None:
