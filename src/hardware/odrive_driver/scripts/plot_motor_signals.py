@@ -83,7 +83,9 @@ class MotorSignalPlotter(Node):
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--window", type=int, default=500, metavar="N", help="number of samples to display (default: 500)")
+    parser.add_argument(
+        "--window", type=int, default=500, metavar="N", help="number of samples to display (default: 500)"
+    )
     args = parser.parse_args()
 
     rclpy.init()
