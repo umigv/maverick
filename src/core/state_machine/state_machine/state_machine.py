@@ -11,6 +11,7 @@ class State(str, Enum):
     NORMAL = "normal"
     NO_MANS_LAND = "no_mans_land"
     RECOVERY = "recovery"
+    RAMP = "ramp"
 
 
 class StateMachine(Node):
@@ -29,11 +30,17 @@ class StateMachine(Node):
         self.set_recovery_service = self.create_service(SetBool, "state/set_recovery", self.set_recovery_callback)
         self.recovery_enabled: bool = False
 
+        self.set_ramp_service = self.create_service(SetBool, "state/set_ramp", self.set_ramp_callback)
+        self.ramp_enabled: bool = False
+
         self.publish_state_if_changed(reason="init")
 
     def compute_state(self) -> State:
         if self.recovery_enabled:
             return State.RECOVERY
+
+        if self.ramp_enabled:
+            return State.RAMP
 
         if self.no_mans_land_enabled:
             return State.NO_MANS_LAND
@@ -59,7 +66,9 @@ class StateMachine(Node):
 
         self.recovery_enabled = req.data
         res.success = True
-        self.get_logger().info(res.message + f" (no_mans_land_enabled={self.no_mans_land_enabled})")
+        self.get_logger().info(
+            f"{res.message} (no_mans_land_enabled={self.no_mans_land_enabled}, ramp_enabled={self.ramp_enabled})"
+        )
         self.publish_state_if_changed(reason="state/set_recovery")
         return res
 
@@ -71,8 +80,24 @@ class StateMachine(Node):
 
         self.no_mans_land_enabled = req.data
         res.success = True
-        self.get_logger().info(res.message + f" (recovery_enabled={self.recovery_enabled})")
+        self.get_logger().info(
+            f"{res.message} (recovery_enabled={self.recovery_enabled}), (ramp_enabled={self.ramp_enabled})"
+        )
         self.publish_state_if_changed(reason="state/set_no_mans_land")
+        return res
+
+    def set_ramp_callback(self, req: SetBool.Request, res: SetBool.Response) -> SetBool.Response:
+        if req.data == self.ramp_enabled:
+            res.message = f"Ramp already {'enabled' if req.data else 'disabled'}."
+        else:
+            res.message = f"Ramp {'enabled' if req.data else 'disabled'}."
+
+        self.ramp_enabled = req.data
+        res.success = True
+        self.get_logger().info(
+            f"{res.message} (recovery_enabled={self.recovery_enabled}, no_mans_land_enabled={self.no_mans_land_enabled})"
+        )
+        self.publish_state_if_changed(reason="state/set_ramp")
         return res
 
 

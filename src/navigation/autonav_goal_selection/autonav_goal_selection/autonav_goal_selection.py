@@ -48,6 +48,7 @@ class AutonavGoalSelection(Node):
 
         self.set_recovery_client = self.create_client(SetBool, "state/set_recovery")
         self.set_no_mans_land_client = self.create_client(SetBool, "state/set_no_mans_land")
+        self.set_ramp_client = self.create_client(SetBool, "state/set_ramp")
 
         self.create_subscription(Odometry, "odom", self.odom_callback, 10)
         self.create_subscription(OccupancyGrid, "occupancy_grid", self.occupancy_grid_callback, 10)
@@ -135,7 +136,14 @@ class AutonavGoalSelection(Node):
         if waypoint is None:
             return
 
-        if self.robot_pose.point.distance(waypoint) >= self.config.waypoint_reached_threshold_m:
+        distance = self.robot_pose.point.distance(waypoint)
+        is_last = self.current_waypoint_index == len(self.waypoints) - 1
+
+        if is_last and self.state != "ramp" and distance <= self.config.ramp_approach_radius_m:
+            self.get_logger().info("Entering ramp")
+            self.set_ramp_client.call_async(SetBool.Request(data=True))
+
+        if distance >= self.config.waypoint_reached_threshold_m:
             return
 
         if self.waypoints[self.current_waypoint_index].no_mans_land:
@@ -145,7 +153,9 @@ class AutonavGoalSelection(Node):
 
         self.current_waypoint_index += 1
 
-        if self.current_waypoint_index >= len(self.waypoints):
+        if is_last:
+            self.get_logger().info("Exiting ramp")
+            self.set_ramp_client.call_async(SetBool.Request(data=False))
             self.get_logger().info("Final waypoint reached, stopping navigation")
             # We don't call rclpy.shutdown() here because it causes a deadlock in humble
             # https://github.com/ros2/rclpy/issues/1646
@@ -165,8 +175,8 @@ class AutonavGoalSelection(Node):
         if waypoint is None:
             return
 
-        near_waypoint = self.robot_pose.point.distance(waypoint) < self.config.waypoint_approach_radius_m
-        if near_waypoint or self.state == "no_mans_land":
+        distance = self.robot_pose.point.distance(waypoint)
+        if distance < self.config.waypoint_approach_radius_m or self.state in ("no_mans_land", "ramp"):
             self.goal_selector.reset()
             self.goal_publisher.publish(
                 PointStamped(
