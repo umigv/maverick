@@ -4,7 +4,7 @@ from datetime import datetime
 import rclpy
 from rclpy.duration import Duration
 from rclpy.node import Node
-from std_msgs.msg import UInt16
+from std_msgs.msg import Float32MultiArray, UInt16
 
 C_GREEN = "\033[92m"
 C_RED = "\033[91m"
@@ -46,6 +46,21 @@ STALE_INS_BODY = (
     f"  {'GnssCompassFix:':<20}---"
 )
 
+STALE_SIGNAL_HEALTH_BODY = (
+    f"  {'PVT Sats:':<20}A=---  B=---\n"
+    f"  {'RTK Sats:':<20}A=---  B=---\n"
+    f"  {'Highest CN0:':<20}A=---  B=---\n"
+    f"  {'Common PVT:':<20}---\n"
+    f"  {'Common RTK:':<20}---"
+)
+
+# fmt: off
+STALE_STARTUP_STATUS_BODY = (
+    f"  {'PercentComplete:':<20}---\n"
+    f"  {'CurrentHeading:':<20}---"
+)
+# fmt: on
+
 STALE_GNSS_BODY = (
     f"  {'Enabled:':<20}---\n"
     f"  {'Operational:':<20}---\n"
@@ -73,20 +88,32 @@ class VectornavMonitor(Node):
         self.ins_body = STALE_INS_BODY
         self.gnss1_body = STALE_GNSS_BODY
         self.gnss2_body = STALE_GNSS_BODY
+        self.signal_health_body = STALE_SIGNAL_HEALTH_BODY
+        self.startup_status_body = STALE_STARTUP_STATUS_BODY
 
         self.ins_last_time = None
         self.gnss1_last_time = None
         self.gnss2_last_time = None
+        self.signal_health_last_time = None
+        self.startup_status_last_time = None
 
         self.ins_last_timestamp_str = "Never"
         self.gnss1_last_timestamp_str = "Never"
         self.gnss2_last_timestamp_str = "Never"
+        self.signal_health_last_timestamp_str = "Never"
+        self.startup_status_last_timestamp_str = "Never"
 
         self.timeout_duration = Duration(seconds=2)
 
         self.create_subscription(UInt16, "vectornav/ins_status", self.ins_callback, 10)
         self.create_subscription(UInt16, "vectornav/gnss_status", self.gnss1_callback, 10)
         self.create_subscription(UInt16, "vectornav/gnss2_status", self.gnss2_callback, 10)
+        self.create_subscription(
+            Float32MultiArray, "vectornav/gnss_compass_signal_health", self.signal_health_callback, 10
+        )
+        self.create_subscription(
+            Float32MultiArray, "vectornav/gnss_compass_startup_status", self.startup_status_callback, 10
+        )
 
         self.create_timer(0.1, self.update_display)
 
@@ -173,6 +200,29 @@ class VectornavMonitor(Node):
             f"  {'ppsUsedForTime:':<20}{TXT_YES if pps_used_for_time else TXT_NO}"
         )
 
+    def signal_health_callback(self, msg: Float32MultiArray):
+        self.signal_health_last_time = self.get_clock().now()
+        self.signal_health_last_timestamp_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        d = msg.data
+        self.signal_health_body = (
+            f"  {'PVT Sats:':<20}A={d[0]:.0f}  B={d[3]:.0f}\n"
+            f"  {'RTK Sats:':<20}A={d[1]:.0f}  B={d[4]:.0f}\n"
+            f"  {'Highest CN0:':<20}A={d[2]:.1f}  B={d[5]:.1f}\n"
+            f"  {'Common PVT:':<20}{d[6]:.0f}\n"
+            f"  {'Common RTK:':<20}{d[7]:.0f}"
+        )
+
+    def startup_status_callback(self, msg: Float32MultiArray):
+        self.startup_status_last_time = self.get_clock().now()
+        self.startup_status_last_timestamp_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        d = msg.data
+        # fmt: off
+        self.startup_status_body = (
+            f"  {'PercentComplete:':<20}{d[0]:.0f}%\n"
+            f"  {'CurrentHeading:':<20}{d[1]:.2f} deg"
+        )
+        # fmt: on
+
     def build_display_block(self, title, hex_val, last_time_ros, last_time_str, body_str, stale_body_str, now_ros):
         if last_time_ros is None:
             return f"--- {title} {C_YELLOW}[STALE]{C_RESET} ---\n  {'Last received:':<20}Never\n{stale_body_str}"
@@ -181,7 +231,11 @@ class VectornavMonitor(Node):
         delta_sec = delta.nanoseconds / 1e9
         is_stale = delta_sec > (self.timeout_duration.nanoseconds / 1e9)
 
-        header_title = f"{title} {C_YELLOW}[STALE]{C_RESET}" if is_stale else f"{title} 0x{hex_val:04X}"
+        header_title = (
+            f"{title} {C_YELLOW}[STALE]{C_RESET}"
+            if is_stale
+            else (f"{title} 0x{hex_val:04X}" if hex_val is not None else title)
+        )
         display_body = stale_body_str if is_stale else body_str
 
         time_ago_str = f"({delta_sec:.1f}s ago)"
@@ -237,6 +291,24 @@ class VectornavMonitor(Node):
             STALE_GNSS_BODY,
             now,
         )
+        signal_health_display = self.build_display_block(
+            "GNSS Compass Signal Health",
+            None,
+            self.signal_health_last_time,
+            self.signal_health_last_timestamp_str,
+            self.signal_health_body,
+            STALE_SIGNAL_HEALTH_BODY,
+            now,
+        )
+        startup_status_display = self.build_display_block(
+            "GNSS Compass Startup Status",
+            None,
+            self.startup_status_last_time,
+            self.startup_status_last_timestamp_str,
+            self.startup_status_body,
+            STALE_STARTUP_STATUS_BODY,
+            now,
+        )
 
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
@@ -250,6 +322,8 @@ class VectornavMonitor(Node):
         print(ins_display)
         print("\n" + gnss1_display)
         print("\n" + gnss2_display)
+        print("\n" + signal_health_display)
+        print("\n" + startup_status_display)
         # fmt: on
 
 
