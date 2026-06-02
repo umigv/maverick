@@ -29,8 +29,8 @@ class MomentumParams:
 
     alignment_gain: float = 2
     alignment_floor: float = 0.1
-    obstacle_threshold_m: float = 4.0
-    obstacle_gain: float = 2.0
+    obstacle_threshold_m: float = 5.0
+    obstacle_gain: float = 3.0
     ema_alpha: float = 0.1
 
     def __post_init__(self) -> None:

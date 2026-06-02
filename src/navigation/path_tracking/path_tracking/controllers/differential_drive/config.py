@@ -17,11 +17,11 @@ class DifferentialDriveConfig:
         goal_tolerance_m: Stop when the robot point is within this distance of the final path point (m).
     """
 
-    target_speed_mps: float = 1.35
+    target_speed_mps: float = 0.9
     kp_heading: float = 0.8
     kp_cross: float = 1.0
     max_angular_speed_radps: float = 1.5
-    max_lateral_speed_mps: float = 0.4
+    max_lateral_speed_mps: float = 0.3
     heading_lookahead_m: float = 1.0
     goal_tolerance_m: float = 0.3
 
