@@ -6,8 +6,12 @@ vectornav_driver:
     # Serial baud rate. Must be one of: 9600 19200 38400 57600 115200 128000 230400 460800 921600
     baud_rate: 230400
 
-    # Output rate in Hz. Must be a valid divisor of the sensor sample rate (800 Hz for VN-100/200, 400 Hz for VN-300)
-    publish_rate: 100
+    # Measurement publish period in seconds. Must correspond to an integer divisor of the 400 Hz sensor sample rate.
+    # Valid values: 1.0, 0.5, 0.25, 0.2, 0.125, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0025
+    publish_period_s: 0.01
+
+    # Status register poll period in seconds (GnssCompassSignalHealth, GnssCompassStartupStatus)
+    status_register_poll_period_s: 1.0
 
     # 3x3 row-major covariance matrix for linear acceleration (m/s^2)^2, in FLU body frame
     linear_accel_covariance: [0.01, 0.0, 0.0,

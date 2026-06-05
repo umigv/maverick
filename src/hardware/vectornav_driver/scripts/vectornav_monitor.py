@@ -1,10 +1,11 @@
 import os
+from dataclasses import dataclass
 from datetime import datetime
 
 import rclpy
 from rclpy.duration import Duration
 from rclpy.node import Node
-from std_msgs.msg import Float32MultiArray, UInt16
+from std_msgs.msg import Float32, Float32MultiArray, UInt16
 
 C_GREEN = "\033[92m"
 C_RED = "\033[91m"
@@ -54,13 +55,6 @@ STALE_SIGNAL_HEALTH_BODY = (
     f"  {'Common RTK:':<20}---"
 )
 
-# fmt: off
-STALE_STARTUP_STATUS_BODY = (
-    f"  {'PercentComplete:':<20}---\n"
-    f"  {'CurrentHeading:':<20}---"
-)
-# fmt: on
-
 STALE_GNSS_BODY = (
     f"  {'Enabled:':<20}---\n"
     f"  {'Operational:':<20}---\n"
@@ -73,6 +67,52 @@ STALE_GNSS_BODY = (
     f"  {'ppsUsedForTime:':<20}---"
 )
 
+CHK_OK = f"{C_GREEN}[✓]{C_RESET}"
+CHK_NO = f"{C_RED}[✗]{C_RESET}"
+CHK_UNK = f"{C_YELLOW}[?]{C_RESET}"
+
+
+def _color_pvt(v: float) -> str:
+    s = f"{v:.0f}"
+    if v >= 12:
+        return f"{C_GREEN}{s}{C_RESET}"
+    if v >= 8:
+        return f"{C_YELLOW}{s}{C_RESET}"
+    return f"{C_RED}{s}{C_RESET}"
+
+
+def _color_cn0(v: float) -> str:
+    s = f"{v:.1f}"
+    if v >= 47:
+        return f"{C_GREEN}{s}{C_RESET}"
+    if v >= 40:
+        return f"{C_YELLOW}{s}{C_RESET}"
+    return f"{C_RED}{s}{C_RESET}"
+
+
+def _color_com(v: float) -> str:
+    s = f"{v:.0f}"
+    if v >= 12:
+        return f"{C_GREEN}{s}{C_RESET}"
+    if v >= 9:
+        return f"{C_YELLOW}{s}{C_RESET}"
+    return f"{C_RED}{s}{C_RESET}"
+
+
+@dataclass
+class TopicState:
+    stale_body: str
+    last_time: object | None = None
+    last_timestamp_str: str = "Never"
+    hex_val: int | None = None
+
+    def __post_init__(self):
+        self.body = self.stale_body
+
+    def mark_received(self, ros_time, wall_time: datetime) -> None:
+        self.last_time = ros_time
+        self.last_timestamp_str = wall_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+
 
 class VectornavMonitor(Node):
     def __init__(self):
@@ -80,28 +120,21 @@ class VectornavMonitor(Node):
 
         self.start_time = self.get_clock().now()
 
-        self.ins_hex = None
-        self.gnss1_hex = None
-        self.gnss2_hex = None
+        self._mode: int | None = None
+        self._gnss_fix: int | None = None
+        self._gnss_compass: int | None = None
+        self._com_rtk: float = 0.0
+        self._startup_pct: float = 0.0
+        self._yaw_uncertainty_deg: float = float("inf")
 
         self.startup_phase_str = f"{C_YELLOW}Waiting for INS data...{C_RESET}"
-        self.ins_body = STALE_INS_BODY
-        self.gnss1_body = STALE_GNSS_BODY
-        self.gnss2_body = STALE_GNSS_BODY
-        self.signal_health_body = STALE_SIGNAL_HEALTH_BODY
-        self.startup_status_body = STALE_STARTUP_STATUS_BODY
 
-        self.ins_last_time = None
-        self.gnss1_last_time = None
-        self.gnss2_last_time = None
-        self.signal_health_last_time = None
-        self.startup_status_last_time = None
-
-        self.ins_last_timestamp_str = "Never"
-        self.gnss1_last_timestamp_str = "Never"
-        self.gnss2_last_timestamp_str = "Never"
-        self.signal_health_last_timestamp_str = "Never"
-        self.startup_status_last_timestamp_str = "Never"
+        self.ins = TopicState(STALE_INS_BODY)
+        self.gnss1 = TopicState(STALE_GNSS_BODY)
+        self.gnss2 = TopicState(STALE_GNSS_BODY)
+        self.signal_health = TopicState(STALE_SIGNAL_HEALTH_BODY)
+        self.startup_last_time = None
+        self.yaw_last_time = None
 
         self.timeout_duration = Duration(seconds=2)
 
@@ -114,37 +147,34 @@ class VectornavMonitor(Node):
         self.create_subscription(
             Float32MultiArray, "vectornav/gnss_compass_startup_status", self.startup_status_callback, 10
         )
+        self.create_subscription(Float32, "vectornav/yaw_uncertainty", self.yaw_uncertainty_callback, 10)
 
         self.create_timer(0.1, self.update_display)
+
+    @property
+    def _timeout_sec(self) -> float:
+        return self.timeout_duration.nanoseconds / 1e9
 
     def determine_startup_phase(self, mode: int, gnss_fix: int, gnss_compass: int) -> str:
         if mode == 3:
             return f"{C_RED}Event Outage: GNSS Lost (Attitude Only){C_RESET}"
-
         if mode == 2:
             return f"{C_GREEN}Event E: Ready / Tracking{C_RESET}"
-
         if mode == 1 and gnss_compass == 3:
             return f"{C_CYAN}Event D: Heading Convergence{C_RESET}"
-
         if mode == 1 and gnss_compass == 2:
             return f"{C_YELLOW}Event G1/G2: GNSS Compass Tracking{C_RESET}"
-
         if mode == 1 and gnss_compass == 0:
             return f"{C_YELLOW}Event C: Aligning (Valid Pos/Vel){C_RESET}"
-
         if mode == 0 and gnss_fix == 1:
             return f"{C_CYAN}Event B: GNSS Fix Acquired{C_RESET}"
-
         if mode == 0 and gnss_fix == 0:
             return f"{C_RED}Event A: Sensor Initialization{C_RESET}"
-
         return f"{C_YELLOW}Unknown Phase Transition{C_RESET}"
 
     def ins_callback(self, msg: UInt16):
-        self.ins_last_time = self.get_clock().now()
-        self.ins_last_timestamp_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-        self.ins_hex = msg.data
+        self.ins.mark_received(self.get_clock().now(), datetime.now())
+        self.ins.hex_val = msg.data
 
         v = msg.data & 0b0000001101110111
         mode = (v >> 0) & 0x03
@@ -154,9 +184,12 @@ class VectornavMonitor(Node):
         gnss_err = (v >> 6) & 0x01
         gnss_compass = (v >> 8) & 0x03
 
+        self._mode = mode
+        self._gnss_fix = gnss_fix
+        self._gnss_compass = gnss_compass
         self.startup_phase_str = self.determine_startup_phase(mode, gnss_fix, gnss_compass)
 
-        self.ins_body = (
+        self.ins.body = (
             f"  {'Mode:':<20}{MODE_ENUM.get(mode, 'UNKNOWN')}\n"
             f"  {'GnssFix:':<20}{TXT_YES if gnss_fix else TXT_NO}\n"
             f"  {'ImuErr:':<20}{TXT_ERR if imu_err else TXT_OK}\n"
@@ -166,16 +199,15 @@ class VectornavMonitor(Node):
         )
 
     def gnss1_callback(self, msg: UInt16):
-        self.gnss1_last_time = self.get_clock().now()
-        self.gnss1_last_timestamp_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-        self.gnss1_hex = msg.data
-        self.gnss1_body = self.format_gnss_body(msg.data)
+        self._update_gnss(self.gnss1, msg)
 
     def gnss2_callback(self, msg: UInt16):
-        self.gnss2_last_time = self.get_clock().now()
-        self.gnss2_last_timestamp_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-        self.gnss2_hex = msg.data
-        self.gnss2_body = self.format_gnss_body(msg.data)
+        self._update_gnss(self.gnss2, msg)
+
+    def _update_gnss(self, state: TopicState, msg: UInt16) -> None:
+        state.mark_received(self.get_clock().now(), datetime.now())
+        state.hex_val = msg.data
+        state.body = self.format_gnss_body(msg.data)
 
     def format_gnss_body(self, v: int) -> str:
         enabled = (v >> 0) & 0x01
@@ -201,59 +233,159 @@ class VectornavMonitor(Node):
         )
 
     def signal_health_callback(self, msg: Float32MultiArray):
-        self.signal_health_last_time = self.get_clock().now()
-        self.signal_health_last_timestamp_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        self.signal_health.mark_received(self.get_clock().now(), datetime.now())
         d = msg.data
-        self.signal_health_body = (
-            f"  {'PVT Sats:':<20}A={d[0]:.0f}  B={d[3]:.0f}\n"
-            f"  {'RTK Sats:':<20}A={d[1]:.0f}  B={d[4]:.0f}\n"
-            f"  {'Highest CN0:':<20}A={d[2]:.1f}  B={d[5]:.1f}\n"
-            f"  {'Common PVT:':<20}{d[6]:.0f}\n"
-            f"  {'Common RTK:':<20}{d[7]:.0f}"
+        pvt_a, rtk_a, cn0_a = d[0], d[1], d[2]
+        pvt_b, rtk_b, cn0_b = d[3], d[4], d[5]
+        com_pvt, com_rtk = d[6], d[7]
+
+        hints = []
+        if com_rtk < 6:
+            hints.append(f"  {C_RED}GNSS compass requires ≥6 common RTK sats{C_RESET}")
+
+        a_sky = pvt_a < 8 and rtk_a < 6 and cn0_a >= 50
+        b_sky = pvt_b < 8 and rtk_b < 6 and cn0_b >= 50
+        if a_sky and b_sky:
+            hints.append(f"  {C_YELLOW}Sky blockage likely (both antennas){C_RESET}")
+        elif a_sky:
+            hints.append(f"  {C_YELLOW}Antenna A: sky blockage likely{C_RESET}")
+        elif b_sky:
+            hints.append(f"  {C_YELLOW}Antenna B: sky blockage likely{C_RESET}")
+
+        a_jam = pvt_a >= 8 and rtk_a < 6 and cn0_a < 40
+        b_jam = pvt_b >= 8 and rtk_b < 6 and cn0_b < 40
+        if a_jam and b_jam:
+            hints.append(f"  {C_RED}Jamming / indoors / under canopy - check for nearby USB 3.0 cables{C_RESET}")
+        elif a_jam:
+            hints.append(
+                f"  {C_RED}Antenna A: local jamming or cable/antenna issue - check for nearby USB 3.0 cables{C_RESET}"
+            )
+        elif b_jam:
+            hints.append(
+                f"  {C_RED}Antenna B: local jamming or cable/antenna issue - check for nearby USB 3.0 cables{C_RESET}"
+            )
+
+        min_pvt = min(pvt_a, pvt_b)
+        if min_pvt >= 6 and com_pvt < min_pvt * 0.6:
+            hints.append(f"  {C_YELLOW}Few common satellites - sky blockage between antennas?{C_RESET}")
+
+        if hints:
+            hints.append(f"  {C_CYAN}See VectorNav manual §4.5.2 for GNSS compass troubleshooting{C_RESET}")
+
+        self._com_rtk = com_rtk
+        hint_str = ("\n" + "\n".join(hints)) if hints else ""
+
+        self.signal_health.body = (
+            f"  {'PVT Sats:':<20}A={_color_pvt(pvt_a)}  B={_color_pvt(pvt_b)}\n"
+            f"  {'RTK Sats:':<20}A={_color_pvt(rtk_a)}  B={_color_pvt(rtk_b)}\n"
+            f"  {'Highest CN0:':<20}A={_color_cn0(cn0_a)}  B={_color_cn0(cn0_b)}\n"
+            f"  {'Common PVT:':<20}{_color_com(com_pvt)}\n"
+            f"  {'Common RTK:':<20}{_color_com(com_rtk)}{hint_str}"
         )
 
     def startup_status_callback(self, msg: Float32MultiArray):
-        self.startup_status_last_time = self.get_clock().now()
-        self.startup_status_last_timestamp_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-        d = msg.data
-        # fmt: off
-        self.startup_status_body = (
-            f"  {'PercentComplete:':<20}{d[0]:.0f}%\n"
-            f"  {'CurrentHeading:':<20}{d[1]:.2f} deg"
-        )
-        # fmt: on
+        self.startup_last_time = self.get_clock().now()
+        self._startup_pct = msg.data[0]
 
-    def build_display_block(self, title, hex_val, last_time_ros, last_time_str, body_str, stale_body_str, now_ros):
-        if last_time_ros is None:
-            return f"--- {title} {C_YELLOW}[STALE]{C_RESET} ---\n  {'Last received:':<20}Never\n{stale_body_str}"
+    def yaw_uncertainty_callback(self, msg: Float32):
+        self.yaw_last_time = self.get_clock().now()
+        self._yaw_uncertainty_deg = msg.data
 
-        delta = now_ros - last_time_ros
-        delta_sec = delta.nanoseconds / 1e9
-        is_stale = delta_sec > (self.timeout_duration.nanoseconds / 1e9)
+    def build_transition_checklist(self, now) -> str:
+        def stale(t):
+            return t is None or (now - t).nanoseconds / 1e9 > self._timeout_sec
+
+        ins_stale = stale(self.ins.last_time)
+        sig_stale = stale(self.signal_health.last_time)
+        start_stale = stale(self.startup_last_time)
+        yaw_stale = stale(self.yaw_last_time)
+
+        if ins_stale:
+            return f"  {C_YELLOW}Waiting for INS data...{C_RESET}"
+
+        mode = self._mode
+        gnss_compass = self._gnss_compass
+
+        if mode == 3:
+            return f"  {C_RED}GNSS Lost - waiting for signal re-acquisition{C_RESET}"
+
+        if mode == 2:
+            return f"  {C_GREEN}System fully operational{C_RESET}"
+
+        if mode == 1 and gnss_compass == 3:
+            lines = [f"  Next → {C_GREEN}Event E (Tracking){C_RESET}:"]
+            if yaw_stale:
+                lines.append(f"    {CHK_UNK} Yaw uncertainty < 2°  (data stale)")
+            else:
+                chk = CHK_OK if self._yaw_uncertainty_deg < 2.0 else CHK_NO
+                lines.append(f"    {chk} Yaw uncertainty < 2°  (current: {self._yaw_uncertainty_deg:.2f}°)")
+            return "\n".join(lines)
+
+        if mode == 1 and gnss_compass == 2:
+            lines = [f"  Next → {C_CYAN}Event D (Heading Convergence){C_RESET}:"]
+            if start_stale:
+                lines.append(f"    {CHK_UNK} Startup % = 100%  (data stale)")
+            else:
+                chk = CHK_OK if self._startup_pct >= 100 else CHK_NO
+                lines.append(f"    {chk} Startup % = 100%  (current: {self._startup_pct:.0f}%)")
+            return "\n".join(lines)
+
+        if mode == 1 and gnss_compass == 0:
+            lines = [f"  Next → {C_YELLOW}Event G1/G2 (GNSS Compass Tracking){C_RESET}:"]
+            if sig_stale:
+                lines.append(f"    {CHK_UNK} Common RTK sats ≥ 6  (data stale)")
+            else:
+                rtk_ok = self._com_rtk >= 6
+                chk = CHK_OK if rtk_ok else CHK_NO
+                lines.append(f"    {chk} Common RTK sats ≥ 6  (current: {self._com_rtk:.0f})")
+                if rtk_ok:
+                    lines.append(
+                        f"    {C_YELLOW}Still in C despite RTK ≥ 6? Try unplugging and replugging the sensor{C_RESET}"
+                    )
+            return "\n".join(lines)
+
+        if mode == 0:
+            if self._gnss_fix:
+                return f"  Next → {C_CYAN}Event C (Aligning){C_RESET}:\n    Automatic (~1s after GNSS fix)"
+            else:
+                return (
+                    f"  Next → {C_CYAN}Event B (GNSS Fix){C_RESET}:\n"
+                    f"    {CHK_NO} GNSS fix  (waiting, ~30-45s with clear sky)"
+                )
+
+        return f"  {C_YELLOW}Unknown phase{C_RESET}"
+
+    def build_display_block(self, title: str, state: TopicState, now_ros) -> str:
+        if state.last_time is None:
+            return f"--- {title} {C_YELLOW}[STALE]{C_RESET} ---\n  {'Last received:':<20}Never\n{state.stale_body}"
+
+        delta_sec = (now_ros - state.last_time).nanoseconds / 1e9
+        is_stale = delta_sec > self._timeout_sec
 
         header_title = (
             f"{title} {C_YELLOW}[STALE]{C_RESET}"
             if is_stale
-            else (f"{title} 0x{hex_val:04X}" if hex_val is not None else title)
+            else (f"{title} 0x{state.hex_val:04X}" if state.hex_val is not None else title)
         )
-        display_body = stale_body_str if is_stale else body_str
-
+        display_body = state.stale_body if is_stale else state.body
         time_ago_str = f"({delta_sec:.1f}s ago)"
         if is_stale:
             time_ago_str = f"{C_YELLOW}{time_ago_str}{C_RESET}"
 
-        return f"--- {header_title} ---\n  {'Last received:':<20}{last_time_str} {time_ago_str}\n{display_body}"
+        return (
+            f"--- {header_title} ---\n  {'Last received:':<20}{state.last_timestamp_str} {time_ago_str}\n{display_body}"
+        )
 
     def update_display(self):
         os.system("")
 
         now = self.get_clock().now()
 
-        if self.ins_last_time is None:
+        if self.ins.last_time is None:
             phase_display = f"{C_YELLOW}Waiting for INS data...{C_RESET}"
         else:
-            delta = now - self.ins_last_time
-            if delta.nanoseconds / 1e9 > (self.timeout_duration.nanoseconds / 1e9):
+            delta = now - self.ins.last_time
+            if delta.nanoseconds / 1e9 > self._timeout_sec:
                 phase_display = f"{C_YELLOW}[STALE] Connection Lost{C_RESET}"
             else:
                 phase_display = self.startup_phase_str
@@ -264,66 +396,18 @@ class VectornavMonitor(Node):
         minutes, seconds = divmod(remainder, 60)
         uptime_str = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
-        ins_display = self.build_display_block(
-            "InsStatus",
-            self.ins_hex,
-            self.ins_last_time,
-            self.ins_last_timestamp_str,
-            self.ins_body,
-            STALE_INS_BODY,
-            now,
-        )
-        gnss1_display = self.build_display_block(
-            "GNSS1 Status",
-            self.gnss1_hex,
-            self.gnss1_last_time,
-            self.gnss1_last_timestamp_str,
-            self.gnss1_body,
-            STALE_GNSS_BODY,
-            now,
-        )
-        gnss2_display = self.build_display_block(
-            "GNSS2 Status",
-            self.gnss2_hex,
-            self.gnss2_last_time,
-            self.gnss2_last_timestamp_str,
-            self.gnss2_body,
-            STALE_GNSS_BODY,
-            now,
-        )
-        signal_health_display = self.build_display_block(
-            "GNSS Compass Signal Health",
-            None,
-            self.signal_health_last_time,
-            self.signal_health_last_timestamp_str,
-            self.signal_health_body,
-            STALE_SIGNAL_HEALTH_BODY,
-            now,
-        )
-        startup_status_display = self.build_display_block(
-            "GNSS Compass Startup Status",
-            None,
-            self.startup_status_last_time,
-            self.startup_status_last_timestamp_str,
-            self.startup_status_body,
-            STALE_STARTUP_STATUS_BODY,
-            now,
-        )
-
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-
         # fmt: off
         print("\033[H\033[2J", end="")
         print("==========================================================================")
-        print(f"  Vectornav Monitor | Live Time: {C_CYAN}{current_time}{C_RESET} | Uptime: {C_GREEN}{uptime_str}{C_RESET}")
+        print(f"  Vectornav Monitor | Live Time: {C_CYAN}{datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}{C_RESET} | Uptime: {C_GREEN}{uptime_str}{C_RESET}")
         print("==========================================================================")
         print(f"  System Phase: {phase_display}")
+        print(self.build_transition_checklist(now))
         print("==========================================================================\n")
-        print(ins_display)
-        print("\n" + gnss1_display)
-        print("\n" + gnss2_display)
-        print("\n" + signal_health_display)
-        print("\n" + startup_status_display)
+        print(self.build_display_block("InsStatus", self.ins, now))
+        print("\n" + self.build_display_block("GNSS1 Status", self.gnss1, now))
+        print("\n" + self.build_display_block("GNSS2 Status", self.gnss2, now))
+        print("\n" + self.build_display_block("GNSS Compass Signal Health", self.signal_health, now))
         # fmt: on
 
 

@@ -8,10 +8,9 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    while (rclcpp::ok()) {
-        node->publish_messages();
-        rclcpp::spin_some(node);
-    }
+    rclcpp::executors::MultiThreadedExecutor executor;
+    executor.add_node(node);
+    executor.spin();
 
     rclcpp::shutdown();
 }

@@ -1,59 +1,57 @@
 # vectornav_driver
-
-ROS 2 driver node for VectorNav VN-100, VN-200, and VN-300 IMU/INS devices.
+ROS 2 driver node for the VectorNav VN-300 IMU/INS. Publishes IMU, GNSS fix, body velocity, odometry, and status topics.
+At startup it reads TF transforms to configure sensor offsets on the device, then streams binary output packets at the configured rate.
 
 ## Published Topics
+- `vectornav/imu` (`sensor_msgs/Imu`) - IMU data in FLU body frame
+- `vectornav/fix` (`sensor_msgs/NavSatFix`) - GNSS position fix
+- `vectornav/velocity` (`geometry_msgs/TwistWithCovarianceStamped`) - body-frame velocity
+- `vectornav/odom` (`nav_msgs/Odometry`) - ENU odometry relative to datum (only published when `datum` is set)
+- `vectornav/ins_status` (`std_msgs/UInt16`) - raw INS status bitfield
+- `vectornav/gnss_status` (`std_msgs/UInt16`) - raw GNSS antenna A status bitfield
+- `vectornav/gnss2_status` (`std_msgs/UInt16`) - raw GNSS antenna B status bitfield
+- `vectornav/gnss_compass_signal_health` (`std_msgs/Float32MultiArray`) - GNSS compass signal health: `[numSatsPvtA, numSatsRtkA, highestCn0A, numSatsPvtB, numSatsRtkB, highestCn0B, numComSatsPvt, numComSatsRtk]`
+- `vectornav/gnss_compass_startup_status` (`std_msgs/Float32MultiArray`) - GNSS compass startup status: `[percentComplete, currentHeading]`
+- `vectornav/yaw_uncertainty` (`std_msgs/Float32`) - yaw uncertainty in degrees, published unconditionally regardless of INS mode. Useful for monitoring heading convergence during startup
 
-| Topic | Type | Models |
-|---|---|---|
-| `vectornav/imu` | `sensor_msgs/Imu` | All |
-| `vectornav/fix` | `sensor_msgs/NavSatFix` | VN-200, VN-300 |
-| `vectornav/velocity` | `geometry_msgs/TwistWithCovarianceStamped` | VN-200, VN-300 |
-| `vectornav/ins_status` | `std_msgs/UInt16` | VN-200, VN-300 |
-| `vectornav/gnss_status` | `std_msgs/UInt16` | VN-200, VN-300 |
-| `vectornav/gnss2_status` | `std_msgs/UInt16` | VN-300 |
-| `vectornav/odom` | `nav_msgs/Odometry` | VN-200, VN-300 |
-
-`vectornav/odom` is only published when `datum` is set.
-
-## Parameters
-
-| Parameter | Default | Description |
-|---|---|---|
-| `port` | `/dev/vn300` | Serial port the sensor is connected to |
-| `baud_rate` | `115200` | Serial baud rate. Valid: `9600 19200 38400 57600 115200 128000 230400 460800 921600` |
-| `publish_rate` | `100` | Output rate in Hz. Must be a valid divisor of the sensor sample rate (800 Hz for VN-100/200, 400 Hz for VN-300) |
-| `imu_frame_id` | `vectornav` | TF frame ID for the IMU origin |
-| `ins_frame_id` | `vectornav` | TF frame ID for the INS reference point. Set to a different frame if the INS reference is offset from the IMU |
-| `gnss_a_frame_id` | — | *(VN-200/300, required)* TF frame ID for GNSS antenna A |
-| `gnss_b_frame_id` | — | *(VN-300, required)* TF frame ID for GNSS antenna B |
-| `linear_accel_covariance` | `diag(0)` | 3×3 row-major covariance for linear acceleration (m/s²)² in FLU body frame |
-| `angular_vel_covariance` | `diag(0)` | 3×3 row-major covariance for angular velocity (rad/s)² in FLU body frame |
-| `datum` | — | *(VN-200/300, optional)* ENU odometry origin as `[lat, lon, alt]`. Required to publish odometry |
-| `map_frame_id` | `map` | TF frame ID for the odometry map frame |
+## Config Parameters
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `port` | `str` | `/dev/vn300` | Serial port the sensor is connected to |
+| `baud_rate` | `int` | `115200` | Serial baud rate. Valid: `9600 19200 38400 57600 115200 128000 230400 460800 921600` |
+| `publish_period_s` | `float` | `0.01` | Measurement publish period (s). Must correspond to an integer divisor of the 400 Hz sensor sample rate |
+| `status_register_poll_period_s` | `float` | `1.0` | Period (s) for polling the GNSS compass signal health and startup status registers |
+| `imu_frame_id` | `str` | `vectornav` | TF frame ID for the IMU origin |
+| `ins_frame_id` | `str` | `vectornav` | TF frame ID for the INS reference point |
+| `gnss_a_frame_id` | `str` | — | TF frame ID for GNSS antenna A (required) |
+| `gnss_b_frame_id` | `str` | — | TF frame ID for GNSS antenna B (required) |
+| `linear_accel_covariance` | `float[9]` | `diag(0)` | 3×3 row-major covariance for linear acceleration (m/s²)² in FLU body frame |
+| `angular_vel_covariance` | `float[9]` | `diag(0)` | 3×3 row-major covariance for angular velocity (rad/s)² in FLU body frame |
+| `datum` | `float[3]` | — | ENU odometry origin as `[lat, lon, alt]`. Required to publish odometry |
+| `map_frame_id` | `str` | `map` | TF frame ID for the odometry map frame |
+| `require_orientation` | `bool` | `true` | If true, drop IMU messages until the INS filter has valid orientation |
 
 ## TF Requirements
+At startup the driver waits up to 10 seconds for TF transforms to configure sensor offsets on the device. All transforms must be available or the driver will exit.
 
-At startup the driver looks up TF transforms to configure sensor offsets on the device. All transforms must be available 
-within 10 seconds or the driver will exit.
-
-| Transform | Required when |
+| Transform | Description |
 |---|---|
-| `imu_frame_id` → `ins_frame_id` | VN-200/300, and `imu_frame_id != ins_frame_id` |
-| `imu_frame_id` → `gnss_a_frame_id` | VN-200/300 |
-| `imu_frame_id` → `gnss_b_frame_id` | VN-300 |
+| `imu_frame_id` → `ins_frame_id` | INS reference point offset from IMU origin (used when frames differ) |
+| `imu_frame_id` → `gnss_a_frame_id` | GNSS antenna A position offset from IMU origin |
+| `imu_frame_id` → `gnss_b_frame_id` | GNSS antenna B position offset from IMU origin |
 
-Offsets are provided to the sensor in FRD body frame; the driver converts from FLU automatically.
+Offsets are written to the sensor in FRD body frame; the driver converts from FLU automatically. If the offset has 
+changed since last boot, the sensor is reset so the new offset takes effect.
 
 ## Message Filtering
-
 Messages are silently dropped when the sensor reports bad state.
 
 **IMU** — dropped when:
 - `imuErr != 0`
 - `mode == ALIGNING (1)` — INS filter is initializing, attitude not yet valid
+- `require_orientation = true` and orientation fields are unavailable
 
-**NavSatFix / Odometry** — additionally dropped when:
+**NavSatFix / Odometry** — dropped when:
 - `gnssErr != 0`
 - `gnssFix == 0`
 - `mode == NOT_TRACKING (0)` or `mode == GNSS_LOST (3)`
@@ -62,10 +60,7 @@ Messages are silently dropped when the sensor reports bad state.
 - `imuErr != 0`
 - `mode == NOT_TRACKING (0)` or `mode == GNSS_LOST (3)`
 
-**Odometry** — additionally requires `datum` to be set.
-
 ## Frame Conventions
-
 The sensor outputs data in NED (North-East-Down) / FRD (Forward-Right-Down). The driver converts all outputs to ROS-standard ENU (East-North-Up) / FLU (Forward-Left-Up) before publishing.
 
 - **Orientation** — rotated via `q_ned_to_enu * q_in * q_frd_to_flu`
@@ -81,7 +76,7 @@ just euler-monitor other/imu   # custom topic
 ```
 
 ### `scripts/vectornav_monitor.py`
-Live terminal display of INS and GNSS status, decoding the `ins_status`, `gnss_status`, and `gnss2_status` bitfields. 
+Live terminal display of INS and GNSS status, decoding the `ins_status`, `gnss_status`, and `gnss2_status` bitfields.
 Useful for monitoring startup progress and diagnosing fix issues.
 ```bash
 just vectornav-monitor
