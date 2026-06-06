@@ -22,7 +22,7 @@
 #include <linux/serial.h>
 #include <sys/ioctl.h>
 
-static bool optimize_serial_communication(const std::string& port) {
+inline bool optimize_serial_communication(const std::string& port) {
     const int fd = ::open(port.c_str(), O_RDWR | O_NOCTTY);
     if (fd == -1) {
         return false;
@@ -35,10 +35,10 @@ static bool optimize_serial_communication(const std::string& port) {
     return true;
 }
 #else
-static bool optimize_serial_communication(const std::string&) { return false; }
+inline bool optimize_serial_communication(const std::string&) { return false; }
 #endif
 
-static std::optional<VN::Sensor::BaudRate> to_baud_rate(int baud) {
+inline std::optional<VN::Sensor::BaudRate> to_baud_rate(int baud) {
     switch (baud) {
         case 9600:
             return VN::Sensor::BaudRate::Baud9600;
@@ -63,7 +63,7 @@ static std::optional<VN::Sensor::BaudRate> to_baud_rate(int baud) {
     }
 }
 
-static bool within_register_precision(float a, float b) { return std::abs(a - b) <= 1e-3f; }
+inline bool within_register_precision(float a, float b) { return std::abs(a - b) <= 1e-3f; }
 
 class VectornavDriver : public rclcpp::Node {
     static constexpr uint16_t SENSOR_SAMPLE_RATE = 400;
@@ -79,14 +79,14 @@ class VectornavDriver : public rclcpp::Node {
         velocity_publisher_ =
             create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>("vectornav/velocity", 10);
         ins_status_publisher_ = create_publisher<std_msgs::msg::UInt16>("vectornav/ins_status", 10);
+        odom_publisher_ = create_publisher<nav_msgs::msg::Odometry>("vectornav/odom", 10);
         gnss_status_publisher_ = create_publisher<std_msgs::msg::UInt16>("vectornav/gnss_status", 10);
         gnss2_status_publisher_ = create_publisher<std_msgs::msg::UInt16>("vectornav/gnss2_status", 10);
-        odom_publisher_ = create_publisher<nav_msgs::msg::Odometry>("vectornav/odom", 10);
+        yaw_uncertainty_publisher_ = create_publisher<std_msgs::msg::Float32>("vectornav/yaw_uncertainty", 10);
         gnss_compass_signal_health_publisher_ =
             create_publisher<std_msgs::msg::Float32MultiArray>("vectornav/gnss_compass_signal_health", 10);
         gnss_compass_startup_status_publisher_ =
             create_publisher<std_msgs::msg::Float32MultiArray>("vectornav/gnss_compass_startup_status", 10);
-        yaw_uncertainty_publisher_ = create_publisher<std_msgs::msg::Float32>("vectornav/yaw_uncertainty", 10);
 
         tf_buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
         tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_, this, false);
@@ -124,7 +124,6 @@ class VectornavDriver : public rclcpp::Node {
 
         measurement_timer_ = create_wall_timer(
             std::chrono::milliseconds(0), std::bind(&VectornavDriver::publish_measurements, this), measurement_group_);
-
         status_register_timer_ =
             create_wall_timer(std::chrono::duration<double>(status_register_poll_period_s_),
                               std::bind(&VectornavDriver::publish_status_register, this), status_register_group_);
@@ -136,20 +135,19 @@ class VectornavDriver : public rclcpp::Node {
     bool load_params() {
         declare_parameter<std::string>("port", "/dev/vn300");
         declare_parameter<int>("baud_rate", static_cast<int>(VN::Sensor::BaudRate::Baud115200));
-        declare_parameter<double>("publish_period_s", 0.01);
-        declare_parameter<double>("register_status_poll_period_s", 1.0);
-        declare_parameter<std::vector<double>>("linear_accel_covariance", std::vector<double>(9, 0.0));
-        declare_parameter<std::vector<double>>("angular_vel_covariance", std::vector<double>(9, 0.0));
+        declare_parameter<double>("measurement_publish_period_s", 0.01);
+        declare_parameter<double>("status_register_poll_period_s", 1.0);
         declare_parameter<std::string>("imu_frame_id", "vectornav");
         declare_parameter<std::string>("ins_frame_id", "vectornav");
         declare_parameter<std::string>("gnss_a_frame_id", "");
         declare_parameter<std::string>("gnss_b_frame_id", "");
+        declare_parameter<std::vector<double>>("linear_accel_covariance", std::vector<double>(9, 0.0));
+        declare_parameter<std::vector<double>>("angular_vel_covariance", std::vector<double>(9, 0.0));
         declare_parameter<std::vector<double>>("datum", std::vector<double>{});
         declare_parameter<std::string>("map_frame_id", "map");
-        declare_parameter<bool>("require_orientation", true);
+        declare_parameter<bool>("require_attitude", true);
 
         port_ = get_parameter("port").as_string();
-        require_orientation_ = get_parameter("require_orientation").as_bool();
 
         if (const auto baud_rate = to_baud_rate(get_parameter("baud_rate").as_int()); !baud_rate) {
             RCLCPP_ERROR(get_logger(),
@@ -160,8 +158,8 @@ class VectornavDriver : public rclcpp::Node {
             baud_rate_ = *baud_rate;
         }
 
-        if (const auto period = get_parameter("publish_period_s").as_double(); period <= 0.0) {
-            RCLCPP_ERROR(get_logger(), "publish_period_s must be positive");
+        if (const auto period = get_parameter("measurement_publish_period_s").as_double(); period <= 0.0) {
+            RCLCPP_ERROR(get_logger(), "measurement_publish_period_s must be positive");
             return false;
         } else {
             const auto divisor = static_cast<int>(std::round(SENSOR_SAMPLE_RATE * period));
@@ -179,20 +177,6 @@ class VectornavDriver : public rclcpp::Node {
             status_register_poll_period_s_ <= 0.0) {
             RCLCPP_ERROR(get_logger(), "status_register_poll_period_s must be positive");
             return false;
-        }
-
-        if (const auto cov = get_parameter("linear_accel_covariance").as_double_array(); cov.size() != 9) {
-            RCLCPP_ERROR(get_logger(), "linear_accel_covariance must have 9 elements");
-            return false;
-        } else {
-            linear_accel_covariance_ = to_covariance(cov);
-        }
-
-        if (const auto cov = get_parameter("angular_vel_covariance").as_double_array(); cov.size() != 9) {
-            RCLCPP_ERROR(get_logger(), "angular_vel_covariance must have 9 elements");
-            return false;
-        } else {
-            angular_vel_covariance_ = to_covariance(cov);
         }
 
         if (imu_frame_id_ = get_parameter("imu_frame_id").as_string(); imu_frame_id_.empty()) {
@@ -215,23 +199,39 @@ class VectornavDriver : public rclcpp::Node {
             return false;
         }
 
+        if (const auto cov = get_parameter("linear_accel_covariance").as_double_array(); cov.size() != 9) {
+            RCLCPP_ERROR(get_logger(), "linear_accel_covariance must have 9 elements");
+            return false;
+        } else {
+            linear_accel_covariance_ = to_covariance(cov);
+        }
+
+        if (const auto cov = get_parameter("angular_vel_covariance").as_double_array(); cov.size() != 9) {
+            RCLCPP_ERROR(get_logger(), "angular_vel_covariance must have 9 elements");
+            return false;
+        } else {
+            angular_vel_covariance_ = to_covariance(cov);
+        }
+
         if (const auto datum = get_parameter("datum").as_double_array(); !datum.empty()) {
             if (datum.size() != 3) {
                 RCLCPP_ERROR(get_logger(), "datum must have 3 elements: [lat, lon, alt]");
                 return false;
             }
 
+            datum_projection_.emplace(datum[0], datum[1], datum[2]);
+            RCLCPP_INFO(get_logger(), "Odometry datum: lat=%f lon=%f alt=%f", datum[0], datum[1], datum[2]);
+
             map_frame_id_ = get_parameter("map_frame_id").as_string();
             if (map_frame_id_.empty()) {
                 RCLCPP_ERROR(get_logger(), "map_frame_id must be set when datum is provided");
                 return false;
             }
-
-            datum_projection_.emplace(datum[0], datum[1], datum[2]);
-            RCLCPP_INFO(get_logger(), "Odometry datum: lat=%f lon=%f alt=%f", datum[0], datum[1], datum[2]);
         } else {
             RCLCPP_INFO(get_logger(), "No datum provided, odometry will not be published");
         }
+
+        require_attitude_ = get_parameter("require_attitude").as_bool();
 
         return true;
     }
@@ -257,39 +257,105 @@ class VectornavDriver : public rclcpp::Node {
             }
         }
 
-        VN::Registers::System::Model model_register;
-        if (vs_.readRegister(&model_register) != VN::Error::None) {
-            RCLCPP_ERROR(get_logger(), "Failed to read model register");
-            return false;
-        }
+        const uint32_t connected_baud_rate = static_cast<uint32_t>(*vs_.connectedBaudRate());
+        RCLCPP_INFO(get_logger(), "Connected to %s @ %d baud", port_.c_str(), connected_baud_rate);
 
-        if (model_register.model[3] != '3') {
+        VN::Registers::System::Model model_register;
+        if (const auto error = vs_.readRegister(&model_register); error != VN::Error::None) {
+            RCLCPP_ERROR(get_logger(), "Failed to read model register");
+            RCLCPP_ERROR(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
+            return false;
+        } else if (model_register.model.find("300") == VN::String<24>::npos) {
             RCLCPP_ERROR(get_logger(), "Unsupported sensor model: %s (only VN300 is supported)",
                          model_register.model.c_str());
             return false;
+        } else {
+            RCLCPP_INFO(get_logger(), "Model: %s", model_register.model.c_str());
         }
 
         VN::Registers::System::FwVer firmware_register;
-        VN::Registers::System::HwVer hardware_register;
-        VN::Registers::System::Serial serial_register;
-        VN::Registers::System::UserTag user_tag_register;
-
-        if (vs_.readRegister(&firmware_register) != VN::Error::None ||
-            vs_.readRegister(&hardware_register) != VN::Error::None ||
-            vs_.readRegister(&serial_register) != VN::Error::None ||
-            vs_.readRegister(&user_tag_register) != VN::Error::None) {
-            RCLCPP_WARN(get_logger(), "Failed to read one or more info registers");
+        if (const auto error = vs_.readRegister(&firmware_register); error != VN::Error::None) {
+            RCLCPP_WARN(get_logger(), "Failed to read firmware version register");
+            RCLCPP_WARN(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
+        } else {
+            RCLCPP_INFO(get_logger(), "Firmware Version: %s", firmware_register.fwVer.c_str());
         }
 
-        const uint32_t connected_baud_rate = static_cast<uint32_t>(*vs_.connectedBaudRate());
-        RCLCPP_INFO(get_logger(), "Connected to %s @ %d baud", port_.c_str(), connected_baud_rate);
-        RCLCPP_INFO(get_logger(), "Model: %s", model_register.model.c_str());
-        RCLCPP_INFO(get_logger(), "Firmware Version: %s", firmware_register.fwVer.c_str());
-        RCLCPP_INFO(get_logger(), "Hardware Version: %d", hardware_register.hwVer);
-        RCLCPP_INFO(get_logger(), "Serial Number: %d", serial_register.serialNum);
-        RCLCPP_INFO(get_logger(), "User Tag: \"%s\"", user_tag_register.tag.value_or("").c_str());
+        VN::Registers::System::HwVer hardware_register;
+        if (const auto error = vs_.readRegister(&hardware_register); error != VN::Error::None) {
+            RCLCPP_WARN(get_logger(), "Failed to read hardware version register");
+            RCLCPP_WARN(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
+        } else {
+            RCLCPP_INFO(get_logger(), "Hardware Version: %d", hardware_register.hwVer);
+        }
+
+        VN::Registers::System::Serial serial_register;
+        if (const auto error = vs_.readRegister(&serial_register); error != VN::Error::None) {
+            RCLCPP_WARN(get_logger(), "Failed to read serial number register");
+            RCLCPP_WARN(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
+        } else {
+            RCLCPP_INFO(get_logger(), "Serial Number: %d", serial_register.serialNum);
+        }
+
+        VN::Registers::System::UserTag user_tag_register;
+        if (const auto error = vs_.readRegister(&user_tag_register); error != VN::Error::None) {
+            RCLCPP_WARN(get_logger(), "Failed to read user tag register");
+            RCLCPP_WARN(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
+        } else {
+            RCLCPP_INFO(get_logger(), "User Tag: %s", user_tag_register.tag.value_or("").c_str());
+        }
 
         return true;
+    }
+
+    bool configure_sensor_transforms() {
+        RCLCPP_INFO(get_logger(), "Waiting for TF transforms...");
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+        while (rclcpp::ok()) {
+            rclcpp::spin_some(shared_from_this());
+            const bool ins_ready = tf_buffer_->canTransform(imu_frame_id_, ins_frame_id_, tf2::TimePointZero);
+            const bool gnss_a_ready = tf_buffer_->canTransform(imu_frame_id_, gnss_a_frame_id_, tf2::TimePointZero);
+            const bool gnss_b_ready = tf_buffer_->canTransform(imu_frame_id_, gnss_b_frame_id_, tf2::TimePointZero);
+
+            if (ins_ready && gnss_a_ready && gnss_b_ready) {
+                break;
+            }
+
+            if (std::chrono::steady_clock::now() > deadline) {
+                RCLCPP_ERROR(get_logger(), "Timed out waiting for TF transforms");
+
+                if (!ins_ready) {
+                    RCLCPP_ERROR(get_logger(), "Missing transform: %s -> %s", imu_frame_id_.c_str(),
+                                 ins_frame_id_.c_str());
+                }
+
+                if (!gnss_a_ready) {
+                    RCLCPP_ERROR(get_logger(), "Missing transform: %s -> %s", imu_frame_id_.c_str(),
+                                 gnss_a_frame_id_.c_str());
+                }
+
+                if (!gnss_b_ready) {
+                    RCLCPP_ERROR(get_logger(), "Missing transform: %s -> %s", imu_frame_id_.c_str(),
+                                 gnss_b_frame_id_.c_str());
+                }
+
+                return false;
+            }
+
+            rclcpp::sleep_for(std::chrono::milliseconds(100));
+        }
+
+        try {
+            const auto ins_tf = tf_buffer_->lookupTransform(imu_frame_id_, ins_frame_id_, tf2::TimePointZero);
+            const auto gnss_a_tf = tf_buffer_->lookupTransform(imu_frame_id_, gnss_a_frame_id_, tf2::TimePointZero);
+            const auto gnss_b_tf = tf_buffer_->lookupTransform(imu_frame_id_, gnss_b_frame_id_, tf2::TimePointZero);
+
+            return configure_ins_ref_offset(ins_tf) && configure_gnss_a_offset(ins_tf, gnss_a_tf) &&
+                   configure_gnss_compass_baseline(gnss_a_tf, gnss_b_tf);
+        } catch (const tf2::TransformException& ex) {
+            RCLCPP_ERROR(get_logger(), "TF transform error: %s", ex.what());
+            return false;
+        }
     }
 
     bool configure_ins_ref_offset(const geometry_msgs::msg::TransformStamped& ins_tf) {
@@ -325,28 +391,34 @@ class VectornavDriver : public rclcpp::Node {
             updated.refUncertX = u;
             updated.refUncertY = u;
             updated.refUncertZ = u;
-            if (vs_.writeRegister(&updated) != VN::Error::None) {
+            if (const auto error = vs_.writeRegister(&updated); error != VN::Error::None) {
                 RCLCPP_ERROR(get_logger(), "Failed to write InsRefOffset");
+                RCLCPP_ERROR(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
                 return false;
             }
 
-            if (vs_.writeSettings() != VN::Error::None) {
+            if (const auto error = vs_.writeSettings(); error != VN::Error::None) {
                 RCLCPP_ERROR(get_logger(), "Failed to save settings to NVRAM");
+                RCLCPP_ERROR(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
                 return false;
             }
 
             RCLCPP_INFO(get_logger(), "Resetting sensor for InsRefOffset to take effect...");
-            if (vs_.reset() != VN::Error::None) {
+            if (const auto error = vs_.reset(); error != VN::Error::None) {
                 RCLCPP_ERROR(get_logger(), "Failed to reset sensor");
+                RCLCPP_ERROR(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
                 return false;
             }
         }
 
         VN::Registers::INS::InsRefOffset reg;
-        if (vs_.readRegister(&reg) == VN::Error::None) {
+        if (const auto error = vs_.readRegister(&reg); error == VN::Error::None) {
             RCLCPP_INFO(get_logger(), "InsRefOffset [readback FLU]: %.3f %.3f %.3f (u=%.3f %.3f %.3f)",
                         reg.refOffsetX.value_or(0.f), -reg.refOffsetY.value_or(0.f), -reg.refOffsetZ.value_or(0.f),
                         reg.refUncertX.value_or(0.f), reg.refUncertY.value_or(0.f), reg.refUncertZ.value_or(0.f));
+        } else {
+            RCLCPP_WARN(get_logger(), "Failed to read back InsRefOffset register");
+            RCLCPP_WARN(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
         }
 
         return true;
@@ -371,8 +443,9 @@ class VectornavDriver : public rclcpp::Node {
             updated.positionX = x;
             updated.positionY = y;
             updated.positionZ = z;
-            if (vs_.writeRegister(&updated) != VN::Error::None) {
+            if (const auto error = vs_.writeRegister(&updated); error != VN::Error::None) {
                 RCLCPP_ERROR(get_logger(), "Failed to write GnssAOffset");
+                RCLCPP_ERROR(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
                 return false;
             }
         }
@@ -380,9 +453,12 @@ class VectornavDriver : public rclcpp::Node {
                     unchanged ? " [unchanged]" : "");
 
         VN::Registers::GNSS::GnssAOffset reg;
-        if (vs_.readRegister(&reg) == VN::Error::None) {
+        if (const auto error = vs_.readRegister(&reg); error == VN::Error::None) {
             RCLCPP_INFO(get_logger(), "GnssAOffset [readback FLU]: %.3f %.3f %.3f", reg.positionX.value_or(0.f),
                         -reg.positionY.value_or(0.f), -reg.positionZ.value_or(0.f));
+        } else {
+            RCLCPP_WARN(get_logger(), "Failed to read back GnssAOffset register");
+            RCLCPP_WARN(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
         }
 
         return true;
@@ -411,8 +487,9 @@ class VectornavDriver : public rclcpp::Node {
             updated.uncertaintyX = u;
             updated.uncertaintyY = u;
             updated.uncertaintyZ = u;
-            if (vs_.writeRegister(&updated) != VN::Error::None) {
+            if (const auto error = vs_.writeRegister(&updated); error != VN::Error::None) {
                 RCLCPP_ERROR(get_logger(), "Failed to write GnssCompassBaseline");
+                RCLCPP_ERROR(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
                 return false;
             }
         }
@@ -420,42 +497,16 @@ class VectornavDriver : public rclcpp::Node {
                     unchanged ? " [unchanged]" : "");
 
         VN::Registers::GNSSCompass::GnssCompassBaseline reg;
-        if (vs_.readRegister(&reg) == VN::Error::None) {
+        if (const auto error = vs_.readRegister(&reg); error == VN::Error::None) {
             RCLCPP_INFO(get_logger(), "GnssCompassBaseline [readback FLU]: %.3f %.3f %.3f (u=%.3f %.3f %.3f)",
                         reg.positionX.value_or(0.f), -reg.positionY.value_or(0.f), -reg.positionZ.value_or(0.f),
                         reg.uncertaintyX.value_or(0.f), reg.uncertaintyY.value_or(0.f), reg.uncertaintyZ.value_or(0.f));
+        } else {
+            RCLCPP_WARN(get_logger(), "Failed to read back GnssCompassBaseline register");
+            RCLCPP_WARN(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
         }
 
         return true;
-    }
-
-    bool configure_sensor_transforms() {
-        RCLCPP_INFO(get_logger(), "Waiting for TF transforms...");
-        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
-        while (rclcpp::ok()) {
-            rclcpp::spin_some(shared_from_this());
-            const bool ins_ready = tf_buffer_->canTransform(imu_frame_id_, ins_frame_id_, tf2::TimePointZero);
-            const bool gnss_a_ready = tf_buffer_->canTransform(imu_frame_id_, gnss_a_frame_id_, tf2::TimePointZero);
-            const bool gnss_b_ready = tf_buffer_->canTransform(imu_frame_id_, gnss_b_frame_id_, tf2::TimePointZero);
-
-            if (ins_ready && gnss_a_ready && gnss_b_ready) {
-                break;
-            }
-
-            if (std::chrono::steady_clock::now() > deadline) {
-                RCLCPP_ERROR(get_logger(), "Timed out waiting for TF transforms");
-                return false;
-            }
-
-            rclcpp::sleep_for(std::chrono::milliseconds(100));
-        }
-
-        const auto ins_tf = tf_buffer_->lookupTransform(imu_frame_id_, ins_frame_id_, tf2::TimePointZero);
-        const auto gnss_a_tf = tf_buffer_->lookupTransform(imu_frame_id_, gnss_a_frame_id_, tf2::TimePointZero);
-        const auto gnss_b_tf = tf_buffer_->lookupTransform(imu_frame_id_, gnss_b_frame_id_, tf2::TimePointZero);
-
-        return configure_ins_ref_offset(ins_tf) && configure_gnss_a_offset(ins_tf, gnss_a_tf) &&
-               configure_gnss_compass_baseline(gnss_a_tf, gnss_b_tf);
     }
 
     bool configure_sensor_output() {
@@ -496,8 +547,8 @@ class VectornavDriver : public rclcpp::Node {
 
         for (auto& reg : config_registers) {
             if (const VN::Error error = vs_.writeRegister(reg); error != VN::Error::None) {
-                RCLCPP_ERROR(get_logger(), "Unable to configure Register %d -> %s", reg->id(),
-                             VN::errorCodeToString(error).data());
+                RCLCPP_ERROR(get_logger(), "Unable to configure Register %d", reg->id());
+                RCLCPP_ERROR(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
                 return false;
             }
         }
@@ -532,9 +583,9 @@ class VectornavDriver : public rclcpp::Node {
         const auto& ins_status = cd->ins.insStatus;
 
         const bool imu_valid = ins_status && ins_status->imuErr == 0 && angular_vel;
-        const bool attitude_valid = quat && accel && ypr_u && ins_status->mode != MODE_ALIGNING;
+        const bool attitude_valid = quat && accel && ypr_u && ins_status && ins_status->mode != MODE_ALIGNING;
 
-        if (!imu_valid || (!attitude_valid && require_orientation_)) {
+        if (!imu_valid || (!attitude_valid && require_attitude_)) {
             return;
         }
 
@@ -724,27 +775,10 @@ class VectornavDriver : public rclcpp::Node {
         if (publisher->get_subscription_count() == 0 || !value) {
             return;
         }
+
         std_msgs::msg::UInt16 msg;
         msg.data = static_cast<uint16_t>(*value);
         publisher->publish(msg);
-    }
-
-    void publish_status_register() {
-        VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus signal_health;
-        if (vs_.readRegister(&signal_health) == VN::Error::None) {
-            std_msgs::msg::Float32MultiArray msg;
-            msg.data = {signal_health.numSatsPvtA,   signal_health.numSatsRtkA,  signal_health.highestCn0A,
-                        signal_health.numSatsPvtB,   signal_health.numSatsRtkB,  signal_health.highestCn0B,
-                        signal_health.numComSatsPvt, signal_health.numComSatsRtk};
-            gnss_compass_signal_health_publisher_->publish(msg);
-        }
-
-        VN::Registers::GNSSCompass::GnssCompassStartupStatus startup_status;
-        if (vs_.readRegister(&startup_status) == VN::Error::None) {
-            std_msgs::msg::Float32MultiArray msg;
-            msg.data = {static_cast<float>(startup_status.percentComplete), startup_status.currentHeading};
-            gnss_compass_startup_status_publisher_->publish(msg);
-        }
     }
 
     void publish_yaw_uncertainty(const VN::CompositeData* cd) {
@@ -762,19 +796,42 @@ class VectornavDriver : public rclcpp::Node {
         yaw_uncertainty_publisher_->publish(msg);
     }
 
+    void publish_status_register() {
+        VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus signal_health;
+        if (const auto error = vs_.readRegister(&signal_health); error == VN::Error::None) {
+            std_msgs::msg::Float32MultiArray msg;
+            msg.data = {signal_health.numSatsPvtA,   signal_health.numSatsRtkA,  signal_health.highestCn0A,
+                        signal_health.numSatsPvtB,   signal_health.numSatsRtkB,  signal_health.highestCn0B,
+                        signal_health.numComSatsPvt, signal_health.numComSatsRtk};
+            gnss_compass_signal_health_publisher_->publish(msg);
+        } else {
+            RCLCPP_WARN(get_logger(), "Failed to read GnssCompassSignalHealthStatus register");
+            RCLCPP_WARN(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
+        }
+
+        VN::Registers::GNSSCompass::GnssCompassStartupStatus startup_status;
+        if (const auto error = vs_.readRegister(&startup_status); error == VN::Error::None) {
+            std_msgs::msg::Float32MultiArray msg;
+            msg.data = {static_cast<float>(startup_status.percentComplete), startup_status.currentHeading};
+            gnss_compass_startup_status_publisher_->publish(msg);
+        } else {
+            RCLCPP_WARN(get_logger(), "Failed to read GnssCompassStartupStatus register");
+            RCLCPP_WARN(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
+        }
+    }
+
     VN::Sensor vs_;
 
     rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_publisher_;
     rclcpp::Publisher<sensor_msgs::msg::NavSatFix>::SharedPtr fix_publisher_;
     rclcpp::Publisher<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr velocity_publisher_;
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_publisher_;
     rclcpp::Publisher<std_msgs::msg::UInt16>::SharedPtr ins_status_publisher_;
     rclcpp::Publisher<std_msgs::msg::UInt16>::SharedPtr gnss_status_publisher_;
     rclcpp::Publisher<std_msgs::msg::UInt16>::SharedPtr gnss2_status_publisher_;
-    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_publisher_;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr yaw_uncertainty_publisher_;
     rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr gnss_compass_signal_health_publisher_;
     rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr gnss_compass_startup_status_publisher_;
-    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr yaw_uncertainty_publisher_;
-
     std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
@@ -782,15 +839,15 @@ class VectornavDriver : public rclcpp::Node {
     VN::Sensor::BaudRate baud_rate_;
     uint16_t rate_divisor_;
     double status_register_poll_period_s_;
-    std::array<double, 9> linear_accel_covariance_;
-    std::array<double, 9> angular_vel_covariance_;
     std::string imu_frame_id_;
     std::string ins_frame_id_;
     std::string gnss_a_frame_id_;
     std::string gnss_b_frame_id_;
-    std::string map_frame_id_;
-    bool require_orientation_ = true;
+    std::array<double, 9> linear_accel_covariance_;
+    std::array<double, 9> angular_vel_covariance_;
     std::optional<GeographicLib::LocalCartesian> datum_projection_;
+    std::string map_frame_id_;
+    bool require_attitude_;
     Rotation imu_to_ins_;
 
     rclcpp::CallbackGroup::SharedPtr measurement_group_;
