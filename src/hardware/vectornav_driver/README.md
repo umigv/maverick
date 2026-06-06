@@ -1,6 +1,7 @@
 # vectornav_driver
 ROS 2 driver node for the VectorNav VN-300 IMU/INS. Publishes IMU, GNSS fix, body velocity, odometry, and status topics.
-At startup it reads TF transforms to configure sensor offsets on the device, then streams binary output packets at the configured rate.
+At startup it reads TF transforms to configure sensor offsets on the device, then streams binary output packets at the
+configured rate.
 
 ## Published Topics
 - `vectornav/imu` (`sensor_msgs/Imu`) - IMU data in FLU body frame
@@ -10,9 +11,12 @@ At startup it reads TF transforms to configure sensor offsets on the device, the
 - `vectornav/ins_status` (`std_msgs/UInt16`) - raw INS status bitfield
 - `vectornav/gnss_status` (`std_msgs/UInt16`) - raw GNSS antenna A status bitfield
 - `vectornav/gnss2_status` (`std_msgs/UInt16`) - raw GNSS antenna B status bitfield
-- `vectornav/yaw_uncertainty` (`std_msgs/Float32`) - yaw uncertainty in degrees, published unconditionally regardless of INS mode. Useful for monitoring heading convergence during startup
-- `vectornav/gnss_compass_signal_health` (`std_msgs/Float32MultiArray`) - GNSS compass signal health: `[numSatsPvtA, numSatsRtkA, highestCn0A, numSatsPvtB, numSatsRtkB, highestCn0B, numComSatsPvt, numComSatsRtk]`
-- `vectornav/gnss_compass_startup_status` (`std_msgs/Float32MultiArray`) - GNSS compass startup status: `[percentComplete, currentHeading]`
+- `vectornav/yaw_uncertainty` (`std_msgs/Float32`) - yaw uncertainty in degrees, published unconditionally regardless of
+INS mode. Useful for monitoring heading convergence during startup
+- `vectornav/gnss_compass_signal_health` (`std_msgs/Float32MultiArray`) - GNSS compass signal health: `[numSatsPvtA, 
+numSatsRtkA, highestCn0A, numSatsPvtB, numSatsRtkB, highestCn0B, numComSatsPvt, numComSatsRtk]`
+- `vectornav/gnss_compass_startup_status` (`std_msgs/Float32MultiArray`) - GNSS compass startup status: 
+`[percentComplete, currentHeading]`
 
 ## Config Parameters
 | Parameter | Type | Default | Description |
@@ -32,7 +36,8 @@ At startup it reads TF transforms to configure sensor offsets on the device, the
 | `require_attitude` | `bool` | `true` | If true, drop IMU messages until the INS filter has valid attitude |
 
 ## TF Requirements
-At startup the driver waits up to 10 seconds for TF transforms to configure sensor offsets on the device. All transforms must be available or the driver will exit.
+At startup the driver waits up to 10 seconds for TF transforms to configure sensor offsets on the device. All transforms
+must be available or the driver will exit.
 
 | Transform | Description |
 |---|---|
@@ -40,8 +45,9 @@ At startup the driver waits up to 10 seconds for TF transforms to configure sens
 | `imu_frame_id` → `gnss_a_frame_id` | GNSS antenna A position offset from IMU origin |
 | `imu_frame_id` → `gnss_b_frame_id` | GNSS antenna B position offset from IMU origin |
 
-Offsets are written to the sensor in FRD body frame; the driver converts from FLU automatically. If the offset has 
-changed since last boot, the sensor is reset so the new offset takes effect.
+Offsets are written to the sensor in FRD body frame; the driver converts from FLU automatically. If 
+`imu_frame_id` → `ins_frame_id` has changed since last boot, the sensor is reset so the new offset takes effect as
+InsRefOffset is a static register.
 
 ## Message Filtering
 Messages are silently dropped when the sensor reports bad state.
@@ -61,7 +67,8 @@ Messages are silently dropped when the sensor reports bad state.
 - `mode == NOT_TRACKING (0)` or `mode == GNSS_LOST (3)`
 
 ## Frame Conventions
-The sensor outputs data in NED (North-East-Down) / FRD (Forward-Right-Down). The driver converts all outputs to ROS-standard ENU (East-North-Up) / FLU (Forward-Left-Up) before publishing.
+The sensor outputs data in NED (North-East-Down) / FRD (Forward-Right-Down). The driver converts all outputs to 
+ROS-standard ENU (East-North-Up) / FLU (Forward-Left-Up) before publishing.
 
 - **Orientation** — rotated via `q_ned_to_enu * q_in * q_frd_to_flu`
 - **Angular velocity, linear acceleration, body velocity** — FRD→FLU by negating Y and Z axes

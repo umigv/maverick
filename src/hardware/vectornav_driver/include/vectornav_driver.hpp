@@ -403,6 +403,7 @@ class VectornavDriver : public rclcpp::Node {
                 return false;
             }
 
+            // InsRefOffset is a static register so we must reset the sensor for the change to take effect
             RCLCPP_INFO(get_logger(), "Resetting sensor for InsRefOffset to take effect...");
             if (const auto error = vs_.reset(); error != VN::Error::None) {
                 RCLCPP_ERROR(get_logger(), "Failed to reset sensor");
