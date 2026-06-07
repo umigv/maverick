@@ -104,6 +104,7 @@ module = [
     "tf_transformations.*",
     "tf2_geometry_msgs",
 
+    "maverick_msgs.*",
     "robot_localization.*",
     "pyproj",
     "PyKDL",
