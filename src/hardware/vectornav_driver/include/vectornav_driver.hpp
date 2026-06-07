@@ -124,8 +124,8 @@ class VectornavDriver : public rclcpp::Node {
         measurement_group_ = create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
         status_register_group_ = create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
 
-        measurement_timer_ =
-            create_wall_timer(std::chrono::milliseconds(0), [this] { publish_measurements(); }, measurement_group_);
+        measurement_timer_ = create_wall_timer(
+            std::chrono::milliseconds(0), [this] { publish_measurements(); }, measurement_group_);
         status_register_timer_ = create_wall_timer(
             std::chrono::duration<double>(status_register_poll_period_s_), [this] { publish_status_register(); },
             status_register_group_);
