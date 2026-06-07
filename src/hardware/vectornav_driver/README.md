@@ -11,8 +11,7 @@ configured rate.
 - `vectornav/ins_status` (`std_msgs/UInt16`) - raw INS status bitfield
 - `vectornav/gnss_status` (`std_msgs/UInt16`) - raw GNSS antenna A status bitfield
 - `vectornav/gnss2_status` (`std_msgs/UInt16`) - raw GNSS antenna B status bitfield
-- `vectornav/yaw_uncertainty` (`std_msgs/Float32`) - yaw uncertainty in degrees, published unconditionally regardless of
-INS mode. Useful for monitoring heading convergence during startup
+- `vectornav/yaw_uncertainty` (`std_msgs/Float32`) - yaw uncertainty in degrees, not gated on INS mode. Useful for monitoring heading convergence during startup
 - `vectornav/gnss_compass_signal_health` (`std_msgs/Float32MultiArray`) - GNSS compass signal health: `[numSatsPvtA, 
 numSatsRtkA, highestCn0A, numSatsPvtB, numSatsRtkB, highestCn0B, numComSatsPvt, numComSatsRtk]`
 - `vectornav/gnss_compass_startup_status` (`std_msgs/Float32MultiArray`) - GNSS compass startup status: 

@@ -1,10 +1,8 @@
 import argparse
 import math
-import sys
 
 import rclpy
 from rclpy.node import Node
-from rclpy.utilities import remove_ros_args
 from sensor_msgs.msg import Imu
 
 
@@ -46,10 +44,11 @@ class ImuEulerNode(Node):
 def main():
     parser = argparse.ArgumentParser(description="Print IMU orientation as Euler angles")
     parser.add_argument("topic", nargs="?", default="vectornav/imu", help="IMU topic name")
-    args = parser.parse_args(remove_ros_args(sys.argv)[1:])
+    args = parser.parse_args()
 
     rclpy.init()
     node = ImuEulerNode(args.topic)
+
     try:
         rclpy.spin(node)
     finally:
