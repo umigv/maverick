@@ -27,25 +27,36 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         ],
     )
 
+    autonav_mission_control_node = Node(
+        package="autonav_mission_control",
+        executable="autonav_mission_control",
+        name="autonav_mission_control",
+        parameters=[
+            {"waypoints_file_path": f"{bringup_share()}/courses/{course}/gps.json"},
+            {"map_frame_id": frames["map_frame"]},
+        ],
+        remappings=[
+            ("odom", "odom/global"),
+            ("fromLL", "fromLL"),
+            ("mission_state", "mission_state"),
+            ("request_recovery", "request_recovery"),
+            ("recovery_complete", "recovery_complete"),
+        ],
+    )
+
     autonav_goal_selection_node = Node(
         package="autonav_goal_selection",
         executable="autonav_goal_selection",
         name="autonav_goal_selection",
         parameters=[
-            {"waypoints_file_path": f"{bringup_share()}/courses/{course}/gps.json"},
-            {"map_frame_id": frames["map_frame"]},
             {"world_frame_id": frames["odom_frame"]},
         ],
         remappings=[
             ("occupancy_grid", "occupancy_grid/transformed"),
             ("odom", "odom/local"),
-            ("state", "state"),
-            ("fromLL", "fromLL"),
-            ("state/set_recovery", "state/set_recovery"),
-            ("state/set_no_mans_land", "state/set_no_mans_land"),
-            ("state/set_ramp", "state/set_ramp"),
+            ("mission_state", "mission_state"),
+            ("request_recovery", "request_recovery"),
             ("goal", "goal"),
-            ("waypoint", "waypoint"),
             ("goal_selection_debug", "goal_selection_debug"),
         ],
     )
@@ -100,7 +111,7 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
 
     shutdown_on_completion = RegisterEventHandler(
         OnProcessExit(
-            target_action=autonav_goal_selection_node,
+            target_action=autonav_mission_control_node,
             on_exit=[EmitEvent(event=Shutdown())],
         )
     )
@@ -112,6 +123,7 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
                 path_planning_node,
                 path_smoothing_node,
                 path_tracking_node,
+                autonav_mission_control_node,
                 autonav_goal_selection_node,
                 recovery_behavior_node,
                 shutdown_on_completion,
@@ -136,7 +148,7 @@ def generate_launch_description() -> LaunchDescription:
                 choices=MODES,
                 description=format_mode_description(
                     {
-                        "autonav": "occupancy grid transform + path planning + path smoothing + path tracking + autonav goal selection + recovery",
+                        "autonav": "occupancy grid transform + path planning + path smoothing + path tracking + mission control + autonav goal selection + recovery",
                         "self_drive": "occupancy grid transform + path planning + path smoothing + path tracking + recovery",
                         "nav_test": "occupancy grid transform + path planning + path smoothing + path tracking + recovery",
                     }

@@ -9,7 +9,7 @@
         {
             "latitude": 42.667960058,
             "longitude": -83.218432656,
-            "no_mans_land": true
+            "no_mans_land_enter": true
         },
         {
             "latitude": 42.668085961,
@@ -18,7 +18,7 @@
         {
             "latitude": 42.668211819,
             "longitude": -83.218458733,
-            "no_mans_land": true
+            "no_mans_land_exit": true
         },
         {
             "latitude": 88.888888,

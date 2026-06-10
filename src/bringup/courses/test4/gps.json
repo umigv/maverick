@@ -8,7 +8,7 @@
         {
             "x": 30.0,
             "y": 10.0,
-            "no_mans_land": true
+            "no_mans_land_enter": true
         },
         {
             "x": 30.0,
@@ -17,7 +17,7 @@
         {
             "x": 30.0,
             "y": 20.0,
-            "no_mans_land": true
+            "no_mans_land_exit": true
         }
     ]
 }

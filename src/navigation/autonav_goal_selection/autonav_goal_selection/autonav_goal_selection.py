@@ -1,18 +1,14 @@
-import json
-from dataclasses import dataclass
-
 import rclpy
 import tf2_geometry_msgs  # noqa: F401 — registers PointStamped transform
 import tf2_ros
 import utils.config
 import utils.qos
-from geographic_msgs.msg import GeoPoint
 from geometry_msgs.msg import PointStamped, Vector3
+from maverick_msgs.msg import MissionState
 from nav_msgs.msg import OccupancyGrid, Odometry
 from rclpy.node import Node
-from robot_localization.srv import FromLL
-from std_msgs.msg import ColorRGBA, Header, String
-from std_srvs.srv import SetBool
+from std_msgs.msg import ColorRGBA, Header
+from std_srvs.srv import Trigger
 from tf2_ros import TransformException
 from utils.geometry import Point2d, Pose2d
 from utils.world_occupancy_grid import WorldOccupancyGrid
@@ -20,12 +16,6 @@ from visualization_msgs.msg import Marker, MarkerArray
 
 from .autonav_goal_selection_config import AutonavGoalSelectionConfig
 from .autonav_goal_selection_impl import GoalSelector
-
-
-@dataclass(frozen=True)
-class Waypoint:
-    point: Point2d
-    no_mans_land: bool = False
 
 
 class AutonavGoalSelection(Node):
@@ -36,31 +26,22 @@ class AutonavGoalSelection(Node):
 
         self.robot_pose: Pose2d | None = None
         self.grid: WorldOccupancyGrid | None = None
+        self.mission_state: MissionState | None = None
         self.goal_selector = GoalSelector(self.config.goal_selection_params)
-        self.in_no_mans_land: bool = False
-        self.state: str = "normal"
-
-        self.waypoints: list[Waypoint] = self.load_waypoints()
-        self.current_waypoint_index = 0
 
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
 
-        self.set_recovery_client = self.create_client(SetBool, "state/set_recovery")
-        self.set_no_mans_land_client = self.create_client(SetBool, "state/set_no_mans_land")
-        self.set_ramp_client = self.create_client(SetBool, "state/set_ramp")
+        self.request_recovery_client = self.create_client(Trigger, "request_recovery")
 
         self.create_subscription(Odometry, "odom", self.odom_callback, 10)
         self.create_subscription(OccupancyGrid, "occupancy_grid", self.occupancy_grid_callback, 10)
-        self.create_subscription(String, "state", self.state_callback, utils.qos.LATCHED)
+        self.create_subscription(MissionState, "mission_state", self.mission_state_callback, utils.qos.LATCHED)
 
         self.goal_publisher = self.create_publisher(PointStamped, "goal", 10)
-        self.waypoint_publisher = self.create_publisher(PointStamped, "waypoint", utils.qos.LATCHED)
         self.debug_publisher = self.create_publisher(MarkerArray, "goal_selection_debug", 10)
 
         self.create_timer(self.config.goal_publish_period_s, self.publish_goal)
-
-        self.publish_gps_waypoint()
 
     def odom_callback(self, msg: Odometry) -> None:
         if msg.header.frame_id != self.config.world_frame_id:
@@ -70,7 +51,6 @@ class AutonavGoalSelection(Node):
             return
 
         self.robot_pose = Pose2d.from_ros(msg.pose.pose)
-        self.advance_waypoint_if_reached()
 
     def occupancy_grid_callback(self, msg: OccupancyGrid) -> None:
         if msg.header.frame_id != self.config.world_frame_id:
@@ -81,103 +61,39 @@ class AutonavGoalSelection(Node):
 
         self.grid = WorldOccupancyGrid(msg)
 
-    def state_callback(self, msg: String) -> None:
-        self.state = msg.data
+    def mission_state_callback(self, msg: MissionState) -> None:
+        self.mission_state = msg
 
-    def load_waypoints(self) -> list[Waypoint]:
-        with open(self.config.waypoints_file_path) as f:
-            data = json.load(f)
+    def transform_to_world(self, stamped: PointStamped) -> Point2d | None:
+        # Drop the stamp so tf uses the latest available transform instead of looking up the exact time. Since the state
+        # is only updated on change, the timestamp can get stale which would stop us from getting the latest odom error
+        # corrections
+        stamped = PointStamped(header=Header(frame_id=stamped.header.frame_id), point=stamped.point)
 
-        from_ll_client = self.create_client(FromLL, "fromLL")
-
-        self.get_logger().info("Waiting for fromLL service...")
-        from_ll_client.wait_for_service()
-        self.get_logger().info("fromLL service available, loading waypoints")
-
-        waypoints = []
-        for w in data["waypoints"]:
-            if "latitude" in w:
-                request = FromLL.Request(ll_point=GeoPoint(latitude=w["latitude"], longitude=w["longitude"]))
-                future = from_ll_client.call_async(request)
-                rclpy.spin_until_future_complete(self, future)
-                point = Point2d.from_ros(future.result().map_point)
-            else:
-                point = Point2d(x=float(w["x"]), y=float(w["y"]))
-
-            waypoints.append(Waypoint(point=point, no_mans_land=bool(w.get("no_mans_land", False))))
-
-        return waypoints
-
-    def transform_map_to_world(self, point: Point2d) -> Point2d | None:
         try:
-            stamped = PointStamped(header=Header(frame_id=self.config.map_frame_id), point=point.to_ros())
             return Point2d.from_ros(self.tf_buffer.transform(stamped, self.config.world_frame_id).point)
         except TransformException as e:
             self.get_logger().error(f"TF transform failed: {e}")
             return None
 
-    def publish_gps_waypoint(self) -> None:
-        map_point = self.waypoints[self.current_waypoint_index].point
-        self.get_logger().info(
-            f"Publishing waypoint ({map_point.x:.2f}, {map_point.y:.2f}) in {self.config.map_frame_id} frame"
-        )
-        self.waypoint_publisher.publish(
-            PointStamped(
-                header=Header(frame_id=self.config.map_frame_id, stamp=self.get_clock().now().to_msg()),
-                point=map_point.to_ros(),
-            )
-        )
-
-    def advance_waypoint_if_reached(self) -> None:
-        if self.robot_pose is None or self.current_waypoint_index >= len(self.waypoints):
-            return
-
-        waypoint = self.transform_map_to_world(self.waypoints[self.current_waypoint_index].point)
-        if waypoint is None:
-            return
-
-        distance = self.robot_pose.point.distance(waypoint)
-        is_last = self.current_waypoint_index == len(self.waypoints) - 1
-
-        if is_last and self.state != "ramp" and distance <= self.config.ramp_approach_radius_m:
-            self.get_logger().info("Entering ramp")
-            self.set_ramp_client.call_async(SetBool.Request(data=True))
-
-        if distance >= self.config.waypoint_reached_threshold_m:
-            return
-
-        if self.waypoints[self.current_waypoint_index].no_mans_land:
-            self.in_no_mans_land = not self.in_no_mans_land
-            self.get_logger().info(f"{'Entering' if self.in_no_mans_land else 'Exiting'} no man's land")
-            self.set_no_mans_land_client.call_async(SetBool.Request(data=self.in_no_mans_land))
-
-        self.current_waypoint_index += 1
-
-        if is_last:
-            self.get_logger().info("Exiting ramp")
-            self.set_ramp_client.call_async(SetBool.Request(data=False))
-            self.get_logger().info("Final waypoint reached, looping back")
-            # Our last gps waypoint is collected before the starting line, but for IGVC we must cross the line so we
-            # need to go further than our last gps waypoint. As a workaround we just loop back to the first point which
-            # triggers autonav goal selection mode to drive forward then manually estop
-            self.current_waypoint_index = 0
-
-        self.get_logger().info(f"Waypoint reached, advancing to index {self.current_waypoint_index}")
-        self.publish_gps_waypoint()
-
     def publish_goal(self) -> None:
-        if self.robot_pose is None or self.grid is None or self.current_waypoint_index >= len(self.waypoints):
+        if self.robot_pose is None or self.grid is None or self.mission_state is None:
             return
 
-        if self.state == "recovery":
+        if self.mission_state.in_recovery or self.mission_state.mission_complete:
             return
 
-        waypoint = self.transform_map_to_world(self.waypoints[self.current_waypoint_index].point)
+        waypoint = self.transform_to_world(self.mission_state.current_waypoint)
         if waypoint is None:
             return
 
         distance = self.robot_pose.point.distance(waypoint)
-        if distance < self.config.waypoint_approach_radius_m or self.state in ("no_mans_land", "ramp"):
+        drive_directly_to_waypoint = (
+            distance < self.config.waypoint_approach_radius_m
+            or self.mission_state.in_no_mans_land
+            or self.mission_state.in_ramp_approach
+        )
+        if drive_directly_to_waypoint:
             self.goal_selector.reset()
             self.goal_publisher.publish(
                 PointStamped(
@@ -196,7 +112,7 @@ class AutonavGoalSelection(Node):
         if goal is None:
             self.get_logger().warn("No drivable goal found in occupancy grid")
             self.goal_selector.reset()
-            self.set_recovery_client.call_async(SetBool.Request(data=True))
+            self.request_recovery_client.call_async(Trigger.Request())
             return
 
         self.goal_publisher.publish(

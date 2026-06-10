@@ -4,10 +4,10 @@ import rclpy
 import serial
 import utils.qos
 from geometry_msgs.msg import Twist
+from maverick_msgs.msg import MissionState
 from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
-from std_msgs.msg import String
-from std_srvs.srv import SetBool
+from std_srvs.srv import Trigger
 
 recovery_executable = None
 THRESHOLD_DISTANCE = 60  # centimeters, distance needed to start backing up
@@ -32,11 +32,12 @@ class RecoveryExecutable(Node):
         self.arduino_timer = self.create_timer(0.05, self.updateArduinoReading)
 
         self.subscription = self.create_subscription(
-            String,
-            "state",
+            MissionState,
+            "mission_state",
             self.listener_callback,
             utils.qos.LATCHED,
         )
+        self.last_in_recovery = False
 
         self.ultrasoundReading = 2000.0
         self.ultrasoundReadingHistory = []  # Store last 5 readings for median filter
@@ -60,10 +61,10 @@ class RecoveryExecutable(Node):
             self.get_logger().error("Could not open serial port")
             self.arduino = None
 
-        self.cli = self.create_client(SetBool, "state/set_recovery")
+        self.cli = self.create_client(Trigger, "recovery_complete")
         while not self.cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info("service not available, waiting again...")
-        self.req = SetBool.Request()
+        self.req = Trigger.Request()
 
     # This gets in the arduino reading and updates the self.ultrasoundReading, which is where we use the ultrasound readigns in the rest of the code
     def updateArduinoReading(self):
@@ -97,8 +98,12 @@ class RecoveryExecutable(Node):
                 self.end_recovery()
 
     def listener_callback(self, msg):
-        if msg.data == "recovery":
+        # Even though the mission state is latched its possible something else triggers a new state while we're already
+        # in recovery (i.e. recovering into end of no man's land). To avoid triggering multiple recoveries we store the
+        # current recovery status and guard by it
+        if msg.in_recovery and not self.last_in_recovery:
             self.begin_recovery()
+        self.last_in_recovery = msg.in_recovery
 
     # This funciton is called periodically. It actually publishes the velocity messages and has the logic of whether to call the function that just drives teh robot backwards or call the sweep function
     def velocity_publishing(self):
@@ -167,7 +172,7 @@ class RecoveryExecutable(Node):
         self.publisher_Twist.publish(msg)
         self.state = "noPublishing"
         self.get_logger().info("recovery ended")
-        self.send_request(False)
+        self.send_request()
 
     def begin_recovery(self):
         self.state = "beginRecovery"
@@ -195,8 +200,7 @@ class RecoveryExecutable(Node):
             self.state = "startSweep"
 
     # This should publish the message back to nav
-    def send_request(self, set_recovery):
-        self.req.data = set_recovery
+    def send_request(self):
         future = self.cli.call_async(self.req)
         future.add_done_callback(self.handle_response)
 

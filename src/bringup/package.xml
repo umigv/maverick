@@ -18,6 +18,7 @@
   <exec_depend>joint_state_publisher</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
   <exec_depend>autonav_goal_selection</exec_depend>
+  <exec_depend>autonav_mission_control</exec_depend>
   <exec_depend>path_planning</exec_depend>
   <exec_depend>occupancy_grid_transform</exec_depend>
   <exec_depend>path_tracking</exec_depend>
