@@ -4,9 +4,9 @@ import rclpy
 import utils.config
 import utils.qos
 from geometry_msgs.msg import Twist
+from maverick_msgs.msg import MissionState
 from nav_msgs.msg import Odometry, Path
 from rclpy.node import Node
-from std_msgs.msg import String
 from typing_extensions import assert_never
 from utils.geometry import Path2d, Pose2d
 
@@ -35,11 +35,11 @@ class PathTracking(Node):
 
         self.pose: Pose2d | None = None
         self.current_speed: float = 0.0
-        self.state: str = "normal"
+        self.mission_state: MissionState | None = None
 
         self.create_subscription(Odometry, "odom", self.odom_callback, 10)
         self.create_subscription(Path, "path", self.path_callback, 10)
-        self.create_subscription(String, "state", self.state_callback, utils.qos.LATCHED)
+        self.create_subscription(MissionState, "mission_state", self.mission_state_callback, utils.qos.LATCHED)
 
         self.cmd_vel_publisher = self.create_publisher(Twist, "nav_cmd_vel", 10)
 
@@ -59,8 +59,8 @@ class PathTracking(Node):
         self.pose = Pose2d.from_ros(msg.pose.pose)
         self.current_speed = math.hypot(msg.twist.twist.linear.x, msg.twist.twist.linear.y)
 
-    def state_callback(self, msg: String) -> None:
-        self.state = msg.data
+    def mission_state_callback(self, msg: MissionState) -> None:
+        self.mission_state = msg
 
     def path_callback(self, path_msg: Path) -> None:
         if path_msg.header.frame_id != self.config.odom_frame_id:
@@ -82,11 +82,14 @@ class PathTracking(Node):
         if self.pose is None:
             return
 
+        if self.mission_state is not None and self.mission_state.mission_complete:
+            return
+
         cmd = self.controller.compute_command(self.pose, self.current_speed)
 
         if cmd is not None:
-            if self.state == "ramp":
-                cmd.linear.x = min(cmd.linear.x, self.config.ramp_max_speed_m_s)
+            if self.mission_state is not None and self.mission_state.in_ramp_approach:
+                cmd.linear.x = min(cmd.linear.x, self.config.ramp_max_speed_mps)
             self.cmd_vel_publisher.publish(cmd)
 
 

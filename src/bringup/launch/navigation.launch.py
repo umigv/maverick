@@ -99,6 +99,7 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
             ("path", "smoothed_path"),
             ("nav_cmd_vel", "nav_cmd_vel"),
             ("smoothed_path", "smoothed_path"),
+            ("mission_state", "mission_state"),
         ],
     )
 
@@ -134,7 +135,6 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
                 path_planning_node,
                 path_smoothing_node,
                 path_tracking_node,
-                recovery_behavior_node,
             ]
         case _:
             assert_never(mode)
@@ -148,9 +148,9 @@ def generate_launch_description() -> LaunchDescription:
                 choices=MODES,
                 description=format_mode_description(
                     {
-                        "autonav": "occupancy grid transform + path planning + path smoothing + path tracking + mission control + autonav goal selection + recovery",
-                        "self_drive": "occupancy grid transform + path planning + path smoothing + path tracking + recovery",
-                        "nav_test": "occupancy grid transform + path planning + path smoothing + path tracking + recovery",
+                        "autonav": "occupancy grid transform + path planning + path smoothing + path tracking + mission control + goal selection + recovery",
+                        "self_drive": "occupancy grid transform + path planning + path smoothing + path tracking",
+                        "nav_test": "occupancy grid transform + path planning + path smoothing + path tracking",
                     }
                 ),
             ),
