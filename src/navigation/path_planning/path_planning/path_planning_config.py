@@ -18,8 +18,8 @@ class PathPlanningConfig:
     """
 
     frame_id: str = "odom"
-    max_unknown_forward_m: float = 2.0
-    max_unknown_sideways_m: float = 1.0
+    max_unknown_forward_m: float = 5.0
+    max_unknown_sideways_m: float = 2.5
     line_of_sight_step_m: float = 0.05
 
     def __post_init__(self) -> None:
