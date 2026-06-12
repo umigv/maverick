@@ -1,17 +1,9 @@
 # bringup
 Launch files and configuration for the navigation stack.
 
-
-## Modes
-| Mode | `odom`→`base_link` | `map`→`odom` | /goal source |
-|---|---|---|---|
-| `autonav` | EKF | EKF | autonav_goal_selection |
-| `self_drive` | EKF | identity | CV |
-| `nav_test` | enc_odom | identity | manual |
-
-Pass `simulation:=true` to use simulated sensors instead of hardware. `course` is required for `autonav` and when 
-`simulation:=true`.
-
+## Configurations
+There are three modes: `autonav`, `self_drive` and `nav_test` and should be passed in with the `mode` flag. Pass 
+`simulation:=true` to use simulated sensors instead of hardware
 
 ### Course Configuration
 Frame IDs and node parameters are defined in `bringup/config/`. 
@@ -162,7 +154,7 @@ ros2 launch bringup localization.launch.py mode:=<mode> [course:=<course>]
 
 **`nav_test`**: `enc_odom_publisher` + identity `map` → `odom`
 - `odom` → `base_link`: direct encoder velocity integration, no IMU
-- `map` → `odom`: fixed identity transform
+- `map` → `odom`: fixed identity transform (no global correction)
 
 ### Parameters
 - `mode`: Operation mode (required)
