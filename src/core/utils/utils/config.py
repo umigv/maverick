@@ -11,6 +11,10 @@ Mapping rules:
   the default is used when the key is not supplied in YAML.
 - If the field has no default, the parameter is required; `load()` will raise if it is missing / unset.
 - Nested dataclasses are supported and map to nested parameter dictionaries.
+- A nested dataclass field may carry a default instance (a frozen instance directly, or any instance via
+  `field(default_factory=...)`). Its attribute values become the per-leaf defaults for that subtree, taking
+  precedence over the nested dataclass's own field defaults and making the whole subtree optional. YAML keys
+  still override individual leaves.
 
 Supported field types:
 - Primitives: `bool`, `int`, `float`, `str`, `bytes`
@@ -60,9 +64,8 @@ class Planner(Node):
 ```
 """
 
-import sys
 from collections.abc import Callable
-from dataclasses import MISSING, dataclass, fields, is_dataclass
+from dataclasses import MISSING, Field, dataclass, fields, is_dataclass
 from pathlib import Path
 from typing import Any, Generic, Literal, TypeVar, cast, get_args, get_origin, get_type_hints
 
@@ -122,7 +125,16 @@ def _literal_entry(field_type: Any, key: str) -> _Entry[Any, Any]:
     return _Entry(base.raw_type, base.ros_type, deserialize, base.serialize)
 
 
-def load(node: Node, cls: type[T], _prefix: str = "") -> T:
+def _field_default(f: "Field[Any]") -> Any:
+    """The field's declared default, or MISSING if the field is required."""
+    if f.default is not MISSING:
+        return f.default
+    if f.default_factory is not MISSING:
+        return f.default_factory()
+    return MISSING
+
+
+def load(node: Node, cls: type[T]) -> T:
     """
     Load ROS 2 parameters from `node` into a dataclass instance of type `cls`.
     Args:
@@ -133,54 +145,45 @@ def load(node: Node, cls: type[T], _prefix: str = "") -> T:
     Raises:
         RuntimeError: If a required parameter (field without a default) is missing or unset.
     """
+    return _load(node, cls, prefix="", defaults=None)
+
+
+def _load(node: Node, cls: type[T], prefix: str, defaults: Any) -> T:
     if not is_dataclass(cls):
         raise TypeError(f"{cls!r} is not a dataclass type")
 
     try:
-        frame = sys._getframe(1)
-        type_hints = get_type_hints(cls, globalns=frame.f_globals, localns=frame.f_locals)
-    except (NameError, AttributeError, ValueError):
-        try:
-            type_hints = get_type_hints(cls)
-        except Exception:
-            type_hints = {}
+        type_hints = get_type_hints(cls)
+    except Exception:
+        type_hints = {}
 
     kwargs: dict[str, Any] = {}
 
     for f in fields(cls):
-        key = f"{_prefix}{f.name}"
+        key = f"{prefix}{f.name}"
         field_type = type_hints.get(f.name, f.type)
-        try:
-            if is_dataclass(field_type):
-                kwargs[f.name] = load(node, cast(type, field_type), _prefix=f"{key}.")
-                continue
-        except (TypeError, AttributeError):
-            pass
+        # A default instance passed down from the enclosing field overrides the dataclass's own field defaults
+        default_value = getattr(defaults, f.name) if defaults is not None else _field_default(f)
+
+        if is_dataclass(field_type):
+            nested_defaults = default_value if default_value is not MISSING else None
+            kwargs[f.name] = _load(node, cast(type, field_type), prefix=f"{key}.", defaults=nested_defaults)
+            continue
 
         entry = _literal_entry(field_type, key) if get_origin(field_type) is Literal else _ENTRIES.get(field_type)
 
         if entry is None:
-            raise TypeError(
-                f"Parameter '{key}' has unsupported type {field_type!r}. "
-                f"Supported types: {', '.join(t.__name__ for t in _ENTRIES)}"
-            )
-
-        # fmt: off
-        default_value = (
-            f.default if f.default is not MISSING
-            else f.default_factory() if f.default_factory is not MISSING
-            else MISSING
-        )
-        # fmt: on
+            supported = ", ".join(t.__name__ if isinstance(t, type) else str(t) for t in _ENTRIES)
+            raise TypeError(f"Parameter '{key}' has unsupported type {field_type!r}. Supported types: {supported}")
 
         if default_value is MISSING:
             node.declare_parameter(key, descriptor=ParameterDescriptor(type=entry.ros_type.value))
-            value = node.get_parameter(key).value
-            if value is None:
-                raise RuntimeError(f"Required parameter '{key}' not set for node '{node.get_name()}'")
-            kwargs[f.name] = entry.deserialize(value)
         else:
             node.declare_parameter(key, entry.serialize(default_value))
-            kwargs[f.name] = entry.deserialize(node.get_parameter(key).value)
+
+        value = node.get_parameter(key).value
+        if value is None:
+            raise RuntimeError(f"Required parameter '{key}' not set for node '{node.get_name()}'")
+        kwargs[f.name] = entry.deserialize(value)
 
     return cls(**kwargs)

@@ -29,7 +29,7 @@ class MockNode:
 
 
 def test_load_required_param_success():
-    @dataclass
+    @dataclass(frozen=True)
     class Config:
         rate: int
 
@@ -41,7 +41,7 @@ def test_load_required_param_success():
 
 
 def test_load_required_param_missing_raises():
-    @dataclass
+    @dataclass(frozen=True)
     class Config:
         rate: int
 
@@ -51,7 +51,7 @@ def test_load_required_param_missing_raises():
 
 
 def test_load_default_is_used_if_missing():
-    @dataclass
+    @dataclass(frozen=True)
     class Config:
         rate: int = 20
 
@@ -62,7 +62,7 @@ def test_load_default_is_used_if_missing():
 
 
 def test_load_default_overridden_if_present():
-    @dataclass
+    @dataclass(frozen=True)
     class Config:
         rate: int = 20
 
@@ -73,7 +73,7 @@ def test_load_default_overridden_if_present():
 
 
 def test_load_default_factory():
-    @dataclass
+    @dataclass(frozen=True)
     class Config:
         ids: list[int] = field(default_factory=lambda: [1, 2, 3])
 
@@ -83,19 +83,17 @@ def test_load_default_factory():
     assert config.ids == [1, 2, 3]
 
 
-@dataclass
-class Inner:
-    gain: float = 0.5
-    name: str = "abc"
-
-
-@dataclass
-class Outer:
-    inner: Inner
-    rate: int = 10
-
-
 def test_load_nested_dataclass():
+    @dataclass(frozen=True)
+    class Inner:
+        gain: float = 0.5
+        name: str = "abc"
+
+    @dataclass(frozen=True)
+    class Config:
+        inner: Inner
+        rate: int = 10
+
     node = MockNode(
         initial={
             "inner.gain": 1.25,
@@ -103,15 +101,105 @@ def test_load_nested_dataclass():
         }
     )
 
-    config = load(node, Outer)
+    config = load(node, Config)
 
     assert config.rate == 42
     assert config.inner.gain == 1.25
     assert config.inner.name == "abc"
 
 
+def test_load_nested_default_instance():
+
+    @dataclass(frozen=True)
+    class Inner:
+        gain: float = 0.5
+        name: str = "abc"
+
+    @dataclass(frozen=True)
+    class Config:
+        inner: Inner = Inner(gain=2.0)
+
+    node = MockNode(initial={})
+    config = load(node, Config)
+
+    assert config.inner.gain == 2.0
+    assert config.inner.name == "abc"
+
+
+def test_load_nested_default_instance_overridden_by_params():
+    @dataclass(frozen=True)
+    class Inner:
+        gain: float = 0.5
+        name: str = "abc"
+
+    @dataclass(frozen=True)
+    class Config:
+        inner: Inner = Inner(gain=2.0)
+
+    node = MockNode(initial={"inner.gain": 3.5})
+    config = load(node, Config)
+
+    assert config.inner.gain == 3.5
+    assert config.inner.name == "abc"
+
+
+def test_load_nested_default_factory_makes_required_leaf_optional():
+    @dataclass(frozen=True)
+    class InnerWithRequired:
+        gain: float
+        name: str = "abc"
+
+    @dataclass(frozen=True)
+    class Config:
+        inner: InnerWithRequired = field(default_factory=lambda: InnerWithRequired(gain=1.5))
+
+    node = MockNode(initial={})
+    config = load(node, Config)
+
+    assert config.inner.gain == 1.5
+    assert config.inner.name == "abc"
+
+
+def test_load_nested_without_default_instance_keeps_leaf_required():
+    @dataclass(frozen=True)
+    class InnerWithRequired:
+        gain: float
+        name: str = "abc"
+
+    @dataclass(frozen=True)
+    class Config:
+        inner: InnerWithRequired
+
+    node = MockNode(initial={})
+    with pytest.raises(RuntimeError, match=r"Required parameter 'inner.gain' not set"):
+        load(node, Config)
+
+
+def test_load_nested_default_instance_recurses():
+    @dataclass(frozen=True)
+    class Inner:
+        gain: float = 0.5
+        name: str = "abc"
+
+    @dataclass(frozen=True)
+    class Middle:
+        inner: Inner = Inner()
+        scale: float = 1.0
+
+    @dataclass(frozen=True)
+    class Config:
+        middle: Middle = Middle(inner=Inner(gain=4.0), scale=2.0)
+
+    node = MockNode(initial={"middle.inner.name": "xyz"})
+    config = load(node, Config)
+
+    assert config.middle.scale == 2.0
+    assert config.middle.inner.gain == 4.0
+    assert config.middle.inner.name == "xyz"
+
+
 def test_load_bytes():
-    @dataclass
+    @dataclass(frozen=True)
     class Config:
         data: bytes
 
@@ -122,7 +210,7 @@ def test_load_bytes():
 
 
 def test_load_list():
-    @dataclass
+    @dataclass(frozen=True)
     class Config:
         ids: list[int]
 
@@ -133,7 +221,7 @@ def test_load_list():
 
 
 def test_load_path_required():
-    @dataclass
+    @dataclass(frozen=True)
     class Config:
         log_dir: Path
 
@@ -145,7 +233,7 @@ def test_load_path_required():
 
 
 def test_load_path_default():
-    @dataclass
+    @dataclass(frozen=True)
     class Config:
         log_dir: Path = Path("/var/log")
 
@@ -157,7 +245,7 @@ def test_load_path_default():
 
 
 def test_load_path_default_overridden():
-    @dataclass
+    @dataclass(frozen=True)
     class Config:
         log_dir: Path = Path("/var/log")
 
@@ -168,7 +256,7 @@ def test_load_path_default_overridden():
 
 
 def test_load_unsupported_type_raises():
-    @dataclass
+    @dataclass(frozen=True)
     class Config:
         value: tuple
 
