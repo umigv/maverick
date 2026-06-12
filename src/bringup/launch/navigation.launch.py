@@ -1,4 +1,4 @@
-from bringup.launch_utils import MODES, Mode, bringup_share, format_mode_description, load_frames
+from bringup.launch_utils import MODES, Mode, gps_file_path, load_frames
 from launch import LaunchDescription, LaunchDescriptionEntity
 from launch.actions import DeclareLaunchArgument, EmitEvent, OpaqueFunction, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
@@ -32,7 +32,7 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         executable="autonav_mission_control",
         name="autonav_mission_control",
         parameters=[
-            {"waypoints_file_path": f"{bringup_share()}/courses/{course}/gps.json"},
+            {"waypoints_file_path": gps_file_path(course)},
             {"map_frame_id": frames["map_frame"]},
         ],
         remappings=[
@@ -129,18 +129,12 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument(
                 "mode",
                 choices=MODES,
-                description=format_mode_description(
-                    {
-                        "autonav": "occupancy grid transform + path planning + path smoothing + path tracking + mission control + goal selection + recovery",
-                        "self_drive": "occupancy grid transform + path planning + path smoothing + path tracking",
-                        "nav_test": "occupancy grid transform + path planning + path smoothing + path tracking",
-                    }
-                ),
+                description="See bringup/README.md",
             ),
             DeclareLaunchArgument(
                 "course",
                 default_value="default",
-                description="Course profile in courses/ to load waypoints from (required for autonav, autonav_sim)",
+                description="See bringup/README.md",
             ),
             OpaqueFunction(function=launch_setup),
         ]

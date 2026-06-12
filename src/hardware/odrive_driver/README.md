@@ -4,7 +4,7 @@ publishes encoder-derived velocity with propagated covariance. Motors are zeroed
 `cmd_vel_timeout_s` or if the e-stop is active.
 
 ## Read Files
-- `/tmp/estop_value.txt` - e-stop state written by `estop_driver`; commands zero velocity to both motors while estopped
+- `estop_file_path` (wired by `hardware.launch.py` from `launch_utils.ESTOP_FILE_PATH`) - e-stop state written by `estop_driver`; commands zero velocity to both motors while estopped
 
 ## Subscribed Topics
 - `cmd_vel` (`geometry_msgs/Twist`)
@@ -17,14 +17,14 @@ covariance
 See [`odrive_driver_config.py`](odrive_driver/odrive_driver_config.py) for all parameters, defaults, and descriptions.
 
 ### ODrive Units
-Each ODrive is identified by its USB serial number and a polarity correction. `left_odrive` and `right_odrive` each take the same parameters:
+Each ODrive is identified by its USB serial number and a polarity correction. `left_odrive` and `right_odrive` each take
+the same parameters:
 
 ### Controller
 All parameters are specified in SI / robot-frame units and converted to motor-native units before being written to the ODrive.
 
 ### Covariance
 Variance scales with speed to reflect increased uncertainty at higher velocities:
-
 - `linear_variance  = linear_variance_static  + linear_variance_gain  * linear_mps²`
 - `angular_variance = angular_variance_static + angular_variance_gain * (linear_mps² / track_width_m² + angular_radps²)`
 

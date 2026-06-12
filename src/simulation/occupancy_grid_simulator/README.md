@@ -22,16 +22,8 @@ The map file is a JSON file with the following structure:
 periodically
 - `occupancy_grid/ground_truth` (`nav_msgs/OccupancyGrid`) - Full static obstacle map in `map` frame
 
-The `occupancy_grid/ground_truth` topic uses a non-default QoS profile:
-| Setting | Value | Effect |
-|---|---|---|
-| Reliability | `RELIABLE` | Guaranteed delivery |
-| Durability | `TRANSIENT_LOCAL` | Late-joining subscribers immediately receive the last published state |
-| History | `KEEP_LAST` (depth 1) | Only the most recent message is retained |
-
-Subscribers to `occupancy_grid/ground_truth` **must use a compatible QoS** (`RELIABLE` + `TRANSIENT_LOCAL`) or they will
-not receive the latched message on connect. A subscriber with default QoS (`BEST_EFFORT` or `VOLATILE`) will silently
-receive nothing. In code, use `utils.qos.LATCHED`. In RViz, set the topic's **Durability Policy** to `Transient Local`.
+`occupancy_grid/ground_truth` is latched: publisher and subscribers must both use `utils.qos.LATCHED` — see the
+[utils README](../../core/utils/README.md#utilsqos).
 
 ## Grid Conventions
 Follows the standard [`nav_msgs/OccupancyGrid`](https://docs.ros2.org/foxy/api/nav_msgs/msg/OccupancyGrid.html) 

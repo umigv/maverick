@@ -60,7 +60,7 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument(
                 "course",
                 default_value="default",
-                description="Course profile in courses/ to load map and GPS datum from",
+                description="See bringup/README.md",
             ),
             OpaqueFunction(function=launch_setup),
         ]

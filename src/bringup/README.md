@@ -95,6 +95,11 @@ ros2 launch bringup hardware.launch.py mode:=<mode> [course:=<course>]
 - `mode`: Operation mode (required)
 - `course`: Course profile in `courses/` to load GPS datum from, default `default` (required for `autonav`)
 
+### Modes
+- `autonav`: estop + LED + ODrive + VectorNav + INS odometry
+- `self_drive`: estop + LED + ODrive + VectorNav
+- `nav_test`: estop + LED + ODrive
+
 ### Subscribed Topics
 - `cmd_vel` (`geometry_msgs/Twist`) - Multiplexed velocity command driven by ODrive (all modes)
 - `teleop_cmd_vel` (`geometry_msgs/Twist`) - Joystick velocity, used by led_driver to detect teleop activity (all modes)
@@ -189,6 +194,10 @@ ros2 launch bringup navigation.launch.py mode:=<mode> [course:=<course>]
 ### Parameters
 - `mode`: Operation mode (required)
 - `course`: Course profile in `courses/` to load waypoints from, default `default` (required for `autonav`)
+
+### Modes
+All modes run occupancy grid transform + path planning + path smoothing + path tracking. `autonav` additionally runs
+mission control + goal selection + recovery.
 
 ### Subscribed Topics
 - `goal` (`geometry_msgs/PointStamped`) - Goal for path planning (`self_drive`, `nav_test` only)

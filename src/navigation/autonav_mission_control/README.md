@@ -66,9 +66,8 @@ unbalanced or out of order.
 |---|---|---|
 | `mission_state` | `maverick_msgs/msg/MissionState` | Latched mission state; published on every state transition |
 
-The `mission_state` topic uses a latched QoS profile (`TRANSIENT_LOCAL`, depth 1). Late-joining subscribers receive the
-current state immediately on connect. Subscribers must use a compatible QoS (`TRANSIENT_LOCAL`) or they will not receive
-the message. In code, use `utils.qos.LATCHED`. In RViz, set **Durability Policy** to `Transient Local`.
+`mission_state` is latched: late-joining subscribers receive the current state on connect, and publisher and
+subscribers must both use `utils.qos.LATCHED` — see the [utils README](../../core/utils/README.md#utilsqos).
 
 ### MissionState fields
 See [`MissionState.msg`](../../core/maverick_msgs/msg/MissionState.msg) for the field definitions and what each one

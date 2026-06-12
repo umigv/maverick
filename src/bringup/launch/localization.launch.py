@@ -1,4 +1,4 @@
-from bringup.launch_utils import MODES, Mode, bringup_share, format_mode_description, load_frames, load_gps_file
+from bringup.launch_utils import MODES, Mode, bringup_share, load_frames, load_gps_file
 from launch import LaunchDescription, LaunchDescriptionEntity
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
@@ -94,18 +94,12 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument(
                 "mode",
                 choices=MODES,
-                description=format_mode_description(
-                    {
-                        "autonav": "EKF local + map_odom_publisher + lat_lon_converter",
-                        "self_drive": "EKF local + identity map->odom",
-                        "nav_test": "enc_odom + identity map->odom",
-                    }
-                ),
+                description="See bringup/README.md",
             ),
             DeclareLaunchArgument(
                 "course",
                 default_value="default",
-                description="Course profile in courses/ to load GPS datum from (required for autonav)",
+                description="See bringup/README.md",
             ),
             OpaqueFunction(function=launch_setup),
         ]

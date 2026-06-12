@@ -15,18 +15,18 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument(
                 "mode",
                 choices=MODES,
-                description="Operation mode, passed through to hardware/simulation and localization launch files",
+                description="See bringup/README.md",
             ),
             DeclareLaunchArgument(
                 "simulation",
                 default_value="false",
                 choices=["true", "false"],
-                description="Use simulation instead of hardware sensors",
+                description="See bringup/README.md",
             ),
             DeclareLaunchArgument(
                 "course",
                 default_value="default",
-                description="Course profile (required for mode:=autonav or simulation:=true)",
+                description="See bringup/README.md",
             ),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(PathJoinSubstitution([bringup_share, "launch", "core.launch.py"])),
