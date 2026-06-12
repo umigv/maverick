@@ -34,13 +34,5 @@ the robot keeps more distance from obstacles where lane markings are absent. Whe
 (e.g. in modes where mission control is not running), `inflation_params` is used.
 
 ## Config Parameters
-| Parameter | Default | Description |
-|---|---|---|
-| `frame_id` | `odom` | TF frame the transformed grids are published in |
-
-### Inflation Parameters (`inflation_params`)
-| Parameter | Default | Description |
-|---|---|---|
-| `inflation_radius_cells` | `12` | Radius (cells) of the fully inflated obstacle core |
-| `inflation_falloff_extent_cells` | `0` | Extent (cells) of the falloff region applied beyond the hard core |
-| `inflation_decay_factor` | `0.9` | Decay factor in the falloff region (0–1, higher = slower decay) |
+See [`occupancy_grid_transform_config.py`](occupancy_grid_transform/occupancy_grid_transform_config.py) for all 
+parameters, defaults, and descriptions.

@@ -101,26 +101,8 @@ Goal publishing also stops once `mission_complete` is set.
 | `request_recovery` | `std_srvs/srv/Trigger` | Triggers recovery when no drivable goal is found |
 
 ## Config Parameters (`AutonavGoalSelectionConfig`)
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `goal_selection_params` | `GoalSelectionParams` | required | Ray-cast goal selection parameters (see below) |
-| `goal_publish_period_s` | `float` | `1` | Timer period (s) for goal selection and publishing |
-| `waypoint_approach_radius_m` | `float` | `5.0` | Distance (m) from the waypoint within which ray-casting is bypassed and the waypoint is published directly |
-| `world_frame_id` | `str` | `"odom"` | TF frame for the world/robot pose coordinates |
-| `publish_debug` | `bool` | `true` | When true, publish the `goal_selection_debug` MarkerArray |
-
-### Goal Selection Parameters (`GoalSelectionParams`)
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `momentum` | `MomentumParams` | required | Momentum behavior parameters (see below) |
-| `arc_angle_rad` | `float` | `π` | Full angular width of the forward arc; rays span symmetrically around the robot's heading |
-| `ray_interval_rad` | `float` | `1.25°` | Angular spacing between rays; num_rays = `int(arc / interval) + 1` |
-| `step_size_m` | `float` | `0.05` | Step size when walking each ray; should be ≈ grid resolution |
-| `min_goal_progress_m` | `float` | `0.9` | Minimum ray length for a goal to be published; below this, no goal is published and recovery is triggered |
-| `safety_margin_m` | `float` | `0.9` | Distance (m) the goal endpoint is pulled back from where the ray terminated |
-| `neighbor_smoothing_window` | `int` | `2` | Number of neighbors per side averaged into each ray's score before picking |
-| `max_unknown_forward_m` | `float` | `5.0` | How far forward unknown cells are treated as drivable |
-| `max_unknown_sideways_m` | `float` | `2.5` | How far sideways unknown cells are treated as drivable |
+See [`autonav_goal_selection_config.py`](autonav_goal_selection/autonav_goal_selection_config.py) for all parameters, 
+defaults, and descriptions.
 
 ### Momentum Parameters (`MomentumParams`)
 Each tick the highest-scoring ray's angle is EMA-smoothed into a stored momentum angle. Scoring multiplies each ray's 
@@ -137,14 +119,6 @@ $$\text{factor} = (1 - s) + s \left[ f + (1 - f) \left(\frac{1 + \cos\theta}{2}\
 
 When $s = 1$ (momentum direction is clear), factor equals the alignment term. When $s = 0$ (momentum direction is 
 blocked), factor equals 1 and all rays score equally on direction, letting the longest ray win.
-
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `alignment_gain` | `float` | `2.0` | Sharpness of the directional penalty. `0` disables momentum bias; higher values penalize off-axis rays more aggressively |
-| `alignment_floor` | `float` | `0.1` | Minimum alignment factor regardless of angle; prevents any ray from scoring zero due to direction alone |
-| `obstacle_threshold_m` | `float` | `4.0` | Momentum ray length (m) below which momentum weight begins scaling down |
-| `obstacle_gain` | `float` | `2.0` | Shape of the obstacle scaling curve: `<1` drops quickly, `1` is linear, `>1` stays near 1 until very close to 0 |
-| `ema_alpha` | `float` | `0.1` | EMA smoothing factor for the momentum angle. Lower = more stable; higher = reacts faster to direction changes |
 
 ## Debug Visualization
 With `publish_debug: true`, subscribe to `goal_selection_debug` in RViz (MarkerArray display). You will see:

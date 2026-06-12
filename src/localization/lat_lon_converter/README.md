@@ -9,6 +9,5 @@ Uses `pyproj` (topocentric pipeline) for WGS84 → ENU conversion relative to a 
   `geometry_msgs/Point` in the map frame
 
 ## Config Parameters
-| Parameter | Default | Description |
-|---|---|---|
-| `datum` | required | ENU origin as `[latitude (deg), longitude (deg), altitude (m)]` |
+See [`lat_lon_converter_config.py`](lat_lon_converter/lat_lon_converter_config.py) for all parameters, defaults, and 
+descriptions.

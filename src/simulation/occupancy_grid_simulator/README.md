@@ -45,14 +45,5 @@ The robot-centric grid is sized `width_m × height_m` centered such that the rob
 forward so the grid extends mostly in front of the robot).
 
 ## Config Parameters
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `map_file_path` | `str` | required | Path to the JSON map file |
-| `width_m` | `float` | `5.0` | Width of the published robot-centric grid (m, x-axis) |
-| `height_m` | `float` | `5.0` | Height of the published robot-centric grid (m, y-axis) |
-| `offset_x_m` | `float` | `0.0` | X offset of the grid origin from the robot (m) |
-| `offset_y_m` | `float` | `-2.5` | Y offset of the grid origin from the robot (m) |
-| `map_frame_id` | `str` | `map` | TF frame ID for the map frame |
-| `base_frame_id` | `str` | `base_link` | TF frame ID stamped on the published occupancy grid, matching what a real perception stack would use |
-| `ground_truth_base_frame_id` | `str` | `base_link_ground_truth` | TF frame ID for the true robot pose, used to generate grid cell positions |
-| `publish_period_s` | `float` | `0.03` | Publish period for the robot-centric occupancy grid (s) |
+See [`occupancy_grid_simulator_config.py`](occupancy_grid_simulator/occupancy_grid_simulator_config.py) for all 
+parameters, defaults, and descriptions.
