@@ -70,11 +70,6 @@ Loads `maverick_description/urdf/maverick.xacro` and publishes TF transforms for
 ### Published Topics
 - `robot_description` (`std_msgs/String`) - URDF robot description
 - `cmd_vel` (`geometry_msgs/Twist`) - Multiplexed output velocity
-- `state` (`std_msgs/msg/String`) - State (`normal`, `no_mans_land` or `recovery`)
-
-### Services
-- `state/set_recovery` (`std_srvs/SetBool`) - Set whether we are in recovery mode
-- `state/set_no_mans_land` (`std_srvs/SetBool`) - Set whether we are in no mans land mode
 
 ### Broadcasted TF Frames
 See `maverick_description` for the full list of published frames.
@@ -99,6 +94,12 @@ ros2 launch bringup hardware.launch.py mode:=<mode> [course:=<course>]
 ### Parameters
 - `mode`: Operation mode (required)
 - `course`: Course profile in `courses/` to load GPS datum from, default `default` (required for `autonav`)
+
+### Subscribed Topics
+- `cmd_vel` (`geometry_msgs/Twist`) - Multiplexed velocity command driven by ODrive (all modes)
+- `teleop_cmd_vel` (`geometry_msgs/Twist`) - Joystick velocity, used by led_driver to detect teleop activity (all modes)
+- `nav_cmd_vel` (`geometry_msgs/Twist`) - Nav velocity, used by led_driver to detect nav stack activity when no mission state is available (from `navigation.launch.py`; all modes)
+- `mission_state` (`maverick_msgs/MissionState`) - Latched mission state used by led_driver for the state LEDs (from `navigation.launch.py`)
 
 ### Published Topics
 - `enc_vel/raw` (`geometry_msgs/TwistWithCovarianceStamped`) - Encoder velocity from ODrive (all modes)
@@ -193,16 +194,19 @@ ros2 launch bringup navigation.launch.py mode:=<mode> [course:=<course>]
 - `goal` (`geometry_msgs/PointStamped`) - Goal for path planning (`self_drive`, `nav_test` only)
 - `occupancy_grid/raw` (`nav_msgs/OccupancyGrid`) - Raw occupancy grid from CV
 - `odom/local` (`nav_msgs/Odometry`) - Odometry from localization
+- `odom/global` (`nav_msgs/Odometry`) - INS odometry in the map frame, used by autonav_mission_control for waypoint tracking (`autonav` only)
 
 ### Published Topics
-- `waypoint` (`geometry_msgs/PointStamped`) - Current GPS waypoint target, latched (`autonav` only)
+- `mission_state` (`maverick_msgs/MissionState`) - Latched mission state from autonav_mission_control (`autonav` only)
 - `nav_cmd_vel` (`geometry_msgs/Twist`) - Velocity command consumed by twist_mux
-- `recovery_cmd_vel` (`geometry_msgs/Twist`) - Recovery velocity command consumed by twist_mux (all modes)
+- `recovery_cmd_vel` (`geometry_msgs/Twist`) - Recovery velocity command consumed by twist_mux (`autonav` only)
+
+### Services
+- `request_recovery` (`std_srvs/Trigger`) - Sets `in_recovery` in the mission state (`autonav` only)
+- `recovery_complete` (`std_srvs/Trigger`) - Clears `in_recovery` in the mission state (`autonav` only)
 
 ### Service Clients
-- `fromLL` (`robot_localization/FromLL`) - Converts GPS coordinates to map-frame points; called at startup by autonav_goal_selection (`autonav` only)
-- `state/set_recovery` (`std_srvs/SetBool`) - Signals recovery state transitions (all modes)
-- `state/set_no_mans_land` (`std_srvs/SetBool`) - Signals no-man's-land transitions when a flagged waypoint is reached (`autonav` only)
+- `fromLL` (`robot_localization/FromLL`) - Converts GPS coordinates to map-frame points; called at startup by autonav_mission_control (`autonav` only)
 
 
 ## teleop.launch.py

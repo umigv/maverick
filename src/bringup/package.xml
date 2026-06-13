@@ -25,7 +25,6 @@
   <exec_depend>joy</exec_depend>
   <exec_depend>teleop_twist_joy</exec_depend>
   <exec_depend>twist_mux</exec_depend>
-  <exec_depend>state_machine</exec_depend>
   <exec_depend>foxglove_bridge</exec_depend>
   <exec_depend>occupancy_grid_visualization</exec_depend>
   <exec_depend>python3-typing-extensions</exec_depend>

@@ -1,14 +1,13 @@
 import time
-import typing
 
 import rclpy
 import serial
 import utils.config
 import utils.qos
 from geometry_msgs.msg import Twist
+from maverick_msgs.msg import MissionState
 from rclpy.node import Node
 from rclpy.time import Time
-from std_msgs.msg import String
 
 from .led_driver_config import LedDriverConfig
 
@@ -16,12 +15,11 @@ from .led_driver_config import LedDriverConfig
 class LedDriver(Node):
     LED_ESTOP = 6  # Flashing red
     LED_TELEOP = 1  # Solid blue
-    LED_STATE: typing.ClassVar[dict[str, int]] = {
-        "normal": 2,  # Flashing blue
-        "no_mans_land": 3,  # Flashing green
-        "ramp": 5,  # Flashing purple
-        "recovery": 4,  # Flashing yellow
-    }
+    LED_NORMAL = 2  # Flashing blue
+    LED_NO_MANS_LAND = 3  # Flashing green
+    LED_RECOVERY = 4  # Flashing yellow
+    LED_RAMP = 5  # Flashing purple
+    LED_MISSION_COMPLETE = 7  # Solid green
     LED_UNKNOWN = 9  # Rainbow
 
     def __init__(self) -> None:
@@ -30,10 +28,12 @@ class LedDriver(Node):
         self.config = utils.config.load(self, LedDriverConfig)
 
         self.create_subscription(Twist, "teleop_cmd_vel", self.teleop_callback, 10)
-        self.create_subscription(String, "state", self.state_callback, utils.qos.LATCHED)
+        self.create_subscription(Twist, "nav_cmd_vel", self.nav_callback, 10)
+        self.create_subscription(MissionState, "mission_state", self.mission_state_callback, utils.qos.LATCHED)
 
         self.last_teleop_time: Time | None = None
-        self.state: str | None = None
+        self.last_nav_time: Time | None = None
+        self.mission_state: MissionState | None = None
         self.last_sent: int | None = None
         self.serial: serial.Serial | None = None
 
@@ -64,8 +64,11 @@ class LedDriver(Node):
     def teleop_callback(self, msg):
         self.last_teleop_time = self.get_clock().now()
 
-    def state_callback(self, msg):
-        self.state = msg.data
+    def nav_callback(self, msg):
+        self.last_nav_time = self.get_clock().now()
+
+    def mission_state_callback(self, msg):
+        self.mission_state = msg
 
     def is_robot_enabled(self) -> bool:
         try:
@@ -74,22 +77,34 @@ class LedDriver(Node):
         except Exception:
             return True  # if the e-stop file doesn't exist / is corrupted we assume e-stop is off
 
-    def is_teleop_active(self) -> bool:
-        if self.last_teleop_time is None:
+    def is_active(self, last_time: Time | None) -> bool:
+        if last_time is None:
             return False
 
-        elapsed = (self.get_clock().now() - self.last_teleop_time).nanoseconds / 1e9
-        return elapsed <= self.config.teleop_timeout_s
+        elapsed = (self.get_clock().now() - last_time).nanoseconds / 1e9
+        return elapsed <= self.config.cmd_vel_timeout_s
+
+    def mission_led_value(self) -> int:
+        if self.mission_state is None:
+            # In modes without mission control the nav stack still drives the robot autonomously
+            return self.LED_NORMAL if self.is_active(self.last_nav_time) else self.LED_UNKNOWN
+        if self.mission_state.mission_complete:
+            return self.LED_MISSION_COMPLETE
+        if self.mission_state.in_recovery:
+            return self.LED_RECOVERY
+        if self.mission_state.in_ramp_approach:
+            return self.LED_RAMP
+        if self.mission_state.in_no_mans_land:
+            return self.LED_NO_MANS_LAND
+        return self.LED_NORMAL
 
     def update(self) -> None:
         if not self.is_robot_enabled():
             value = self.LED_ESTOP
-        elif self.is_teleop_active():
+        elif self.is_active(self.last_teleop_time):
             value = self.LED_TELEOP
-        elif self.state in self.LED_STATE:
-            value = self.LED_STATE[self.state]
         else:
-            value = self.LED_UNKNOWN
+            value = self.mission_led_value()
 
         self.send_led_value(value)
 

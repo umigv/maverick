@@ -70,7 +70,7 @@ class Planner(Node):
 Shared QoS profiles for use across nodes.
 
 ### `LATCHED`
-`RELIABLE` + `TRANSIENT_LOCAL` + `KEEP_LAST` (depth 1). Use this for topics where late-joining subscribers must receive the last published message immediately on connect (e.g. ground truth map, robot state, GPS waypoint).
+`RELIABLE` + `TRANSIENT_LOCAL` + `KEEP_LAST` (depth 1). Use this for topics where late-joining subscribers must receive the last published message immediately on connect (e.g. ground truth map, mission state).
 
 Both the publisher **and** subscriber must use the same profile — a mismatch silently drops all messages. Always use `utils.qos.LATCHED` on both sides rather than constructing the profile inline.
 
@@ -78,10 +78,10 @@ Both the publisher **and** subscriber must use the same profile — a mismatch s
 import utils.qos
 
 # publisher
-self.create_publisher(String, "state", utils.qos.LATCHED)
+self.create_publisher(MissionState, "mission_state", utils.qos.LATCHED)
 
 # subscriber
-self.create_subscription(String, "state", self.callback, utils.qos.LATCHED)
+self.create_subscription(MissionState, "mission_state", self.callback, utils.qos.LATCHED)
 ```
 
 In RViz, set the topic's **Durability Policy** to `Transient Local` to receive latched messages.
