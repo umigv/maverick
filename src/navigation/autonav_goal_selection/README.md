@@ -1,13 +1,14 @@
 # autonav_goal_selection
-Map waypoint following with local goal selection for autonomous navigation.
+Local goal selection toward the mission's current waypoint for autonomous navigation.
 
 ## How it works
 
 ### The big picture
-The robot is given a list of coarse GPS/map waypoints (think: "go to this field corner, then that one"). The waypoints
-are far apart and don't account for obstacles between them. This node's job is to bridge that gap: every publish period 
-it picks a local goal a few meters ahead that keeps the robot moving toward the current waypoint while staying in 
-drivable space.
+The mission is a list of coarse GPS/map waypoints (think: "go to this field corner, then that one") tracked by 
+`autonav_mission_control`, which publishes the current target waypoint on the latched `mission_state` topic. The 
+waypoints are far apart and don't account for obstacles between them. This node's job is to bridge that gap: every 
+publish period it picks a local goal a few meters ahead that keeps the robot moving toward the current waypoint while 
+staying in drivable space.
 
 ### Step 1 — Ray casting
 Each tick, the node shoots a fan of rays outward from the robot's current position. The fan spans `arc_angle_rad`
@@ -66,67 +67,45 @@ Low `ema_alpha` (default 0.1) means momentum changes slowly; high values make it
 ### Waypoint approach
 When the robot is within `waypoint_approach_radius_m` (default 5 m) of the current waypoint, ray casting is skipped
 entirely and the waypoint itself is published as the goal. This ensures the robot reaches waypoints precisely rather
-than stopping short. Once within `waypoint_reached_threshold_m` (default 1.5m), the waypoint is marked reached and the
-next one becomes active.
+than stopping short. The same bypass applies while `in_no_mans_land` or `in_ramp_approach` is set in the mission state.
+Waypoint advancement itself is handled by `autonav_mission_control`; this node always drives toward whatever
+`current_waypoint` the latest `mission_state` message contains.
 
-## Waypoints File Format
-```json
-{
-    "waypoints": [
-        {"x": 5.0, "y": 0.0},
-        {"latitude": 42.2946, "longitude": -83.7238},
-        {"x": 10.0, "y": 5.0, "no_mans_land": true}
-    ]
-}
-```
-Each waypoint is either map frame `x`/`y` (meters) or GPS `latitude`/`longitude` (converted via `fromLL` at
-startup). Setting `no_mans_land: true` toggles no man's land state when that waypoint is reached.
-
-## State Machine Integration
-This node both reads and writes state via the `state` topic and two service clients.
+## Mission Control Integration
+This node reads mission state from the latched `mission_state` topic published by `autonav_mission_control` (see that 
+package's README for the waypoints file format and state semantics).
 
 **Recovery** is triggered when all rays are shorter than `min_goal_progress_m` (the robot is surrounded by obstacles). 
-The node calls `state/set_recovery true`, resets momentum, and stops publishing goals. The external state machine is 
-responsible for driving the robot out of the stuck situation and calling `state/set_recovery false` when done.
+The node calls the `request_recovery` service, resets momentum, and stops publishing goals while `in_recovery` is set. 
+The recovery behavior node is responsible for driving the robot out of the stuck situation and calling 
+`recovery_complete` when done.
 
-**No-man's land** is toggled each time a waypoint flagged `no_mans_land: true` is reached. The node calls 
-`state/set_no_mans_land` with the new boolean value and logs the transition. No man's land waypoints act as region 
-boundary markers: the first one entering a region sets the flag true, the next one exiting sets it false.
+Goal publishing also stops once `mission_complete` is set.
 
 ## Subscribed Topics
 | Topic | Type | Description |
 |---|---|---|
 | `odom` | `nav_msgs/msg/Odometry` | Robot pose in the world frame |
 | `occupancy_grid` | `nav_msgs/msg/OccupancyGrid` | Local occupancy grid rays are cast through |
-| `state` | `std_msgs/msg/String` | State machine state; `"recovery"` suppresses goal publishing |
+| `mission_state` | `maverick_msgs/msg/MissionState` | Mission state (latched); provides the current waypoint and behavior flags |
 
 ## Published Topics
 | Topic | Type | Description |
 |---|---|---|
 | `goal` | `geometry_msgs/msg/PointStamped` | Selected local goal in the world frame |
-| `waypoint` | `geometry_msgs/msg/PointStamped` | Current map-frame waypoint (latched) |
 | `goal_selection_debug` | `visualization_msgs/msg/MarkerArray` | Ray visualization; only published when `publish_debug` is true |
-
-The `waypoint` topic uses a latched QoS profile (`TRANSIENT_LOCAL`, depth 1). Late-joining subscribers receive the
-current waypoint immediately on connect. Subscribers **must** use a compatible QoS (`TRANSIENT_LOCAL`) or they will
-not receive the message. In code, use `utils.qos.LATCHED`. In RViz, set **Durability Policy** to `Transient Local`.
 
 ## Service Clients
 | Service | Type | Description |
 |---|---|---|
-| `fromLL` | `robot_localization/srv/FromLL` | Converts GPS waypoints to map-frame coordinates at startup |
-| `state/set_recovery` | `std_srvs/srv/SetBool` | Triggers recovery when no drivable goal is found |
-| `state/set_no_mans_land` | `std_srvs/srv/SetBool` | Toggles no-man's-land state when a flagged waypoint is reached |
+| `request_recovery` | `std_srvs/srv/Trigger` | Triggers recovery when no drivable goal is found |
 
 ## Config Parameters (`AutonavGoalSelectionConfig`)
 | Parameter | Type | Default | Description |
 |---|---|---|---|
 | `goal_selection_params` | `GoalSelectionParams` | required | Ray-cast goal selection parameters (see below) |
-| `waypoints_file_path` | `Path` | required | Path to the JSON waypoints file |
-| `goal_publish_period_s` | `float` | `0.25` | Timer period (s) for goal selection and publishing |
-| `waypoint_reached_threshold_m` | `float` | `1.5` | Distance (m) within which a waypoint is considered reached |
+| `goal_publish_period_s` | `float` | `1` | Timer period (s) for goal selection and publishing |
 | `waypoint_approach_radius_m` | `float` | `5.0` | Distance (m) from the waypoint within which ray-casting is bypassed and the waypoint is published directly |
-| `map_frame_id` | `str` | `"map"` | TF frame for map-frame waypoint coordinates |
 | `world_frame_id` | `str` | `"odom"` | TF frame for the world/robot pose coordinates |
 | `publish_debug` | `bool` | `true` | When true, publish the `goal_selection_debug` MarkerArray |
 

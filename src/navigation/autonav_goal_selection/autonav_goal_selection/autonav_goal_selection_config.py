@@ -1,5 +1,4 @@
 import math
-import pathlib
 from dataclasses import dataclass
 
 from utils.geometry import Rotation2d
@@ -120,33 +119,22 @@ class AutonavGoalSelectionConfig:
 
     Attributes:
         goal_selection_params: Parameters for the ray-cast goal selection algorithm.
-        waypoints_file_path: Path to a JSON file containing the list of map-frame waypoints.
         goal_publish_period_s: How often (seconds) to publish a new local goal.
-        waypoint_reached_threshold_m: Distance (m) within which a waypoint is considered reached.
-        waypoint_approach_radius_m: Distance (m) from the waypoint within which ray-cast goal selection is bypassed and
-            the waypoint itself is published directly as the goal.
-        ramp_approach_radius_m: Distance (m) from the waypoint within which ray-cast goal selection is bypassed and
-            the waypoint itself is published directly as the goal when the waypoint is the ramp waypoint.
-        map_frame_id: TF frame ID for the map coordinate frame.
+        waypoint_approach_radius_m: Distance (m) from the current waypoint within which ray-cast goal selection is
+            bypassed and the waypoint itself is published directly as the goal.
         world_frame_id: TF frame ID for the world coordinate frame.
         publish_debug: When true, publish a MarkerArray on `goal_selection_debug` showing all rays, the chosen ray, the
             chosen endpoint, and the waypoint direction.
     """
 
     goal_selection_params: GoalSelectionParams
-    waypoints_file_path: pathlib.Path
     goal_publish_period_s: float = 1
-    waypoint_reached_threshold_m: float = 0.5
     waypoint_approach_radius_m: float = 5.0
-    ramp_approach_radius_m: float = 12.0
-    map_frame_id: str = "map"
     world_frame_id: str = "odom"
     publish_debug: bool = True
 
     def __post_init__(self) -> None:
         if self.goal_publish_period_s <= 0:
             raise ValueError("AutonavGoalSelectionConfig: goal_publish_period_s must be > 0")
-        if self.waypoint_reached_threshold_m <= 0:
-            raise ValueError("AutonavGoalSelectionConfig: waypoint_reached_threshold_m must be > 0")
         if self.waypoint_approach_radius_m < 0:
             raise ValueError("AutonavGoalSelectionConfig: waypoint_approach_radius_m must be >= 0")

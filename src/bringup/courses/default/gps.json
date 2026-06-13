@@ -12,12 +12,12 @@
         {
             "x": 25.2,
             "y": 23.8,
-            "no_mans_land": true
+            "no_mans_land_enter": true
         },
         {
             "latitude": 42.29462457,
             "longitude": -83.70792126,
-            "no_mans_land": true
+            "no_mans_land_exit": true
         },
         {
             "x": 0.0,

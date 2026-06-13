@@ -8,7 +8,7 @@
         {
             "latitude": 42.667927706,
             "longitude": -83.219327642,
-            "no_mans_land": true
+            "no_mans_land_enter": true
         },
         {
             "latitude": 42.668076633,
@@ -21,11 +21,12 @@
         {
             "latitude": 42.668269722,
             "longitude": -83.219340303,
-            "no_mans_land": true
+            "no_mans_land_exit": true
         },
         {
             "latitude": 42.66808296,
-            "longitude": -83.21891701
+            "longitude": -83.21891701,
+            "ramp_approach": true
         }
     ]
 }
