@@ -29,9 +29,9 @@ cells are inflated based on their distance:
 - Cells beyond `inflation_radius_cells + inflation_falloff_extent_cells` are unaffected
 
 Two parameter sets are configured: `inflation_params` is used normally, and `no_mans_land_inflation_params` is used
-while the mission state has `in_no_mans_land` set. The no man's land set defaults to a larger fully inflated core so
-the robot keeps more distance from obstacles where lane markings are absent. When no mission state has been received
-(e.g. in modes where mission control is not running), `inflation_params` is used.
+while the mission state has `in_no_mans_land` set. Since spaced out obstacles form the border of no man's land instead 
+of the usual lane lines, the no man's land set uses a larger inflation radius to keep the robot further from obstacles 
+and therefore within the border.
 
 ## Config Parameters
 | Parameter | Default | Description |
