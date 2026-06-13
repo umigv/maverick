@@ -29,10 +29,4 @@ unmodified.
 - `nav_cmd_vel` (`geometry_msgs/msg/Twist`) — Velocity command for the robot base
 
 ## Config Parameters
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `algorithm` | `str` | `"differential_drive"` | Which controller to run. One of `"pure_pursuit"`, `"stanley"`, `"differential_drive"`. |
-| `control_period_s` | `float` | `0.01` | Period of the control loop timer (s). |
-| `base_frame_id` | `str` | `"base_link"` | Frame ID of the robot base, used to validate the child frame of incoming odometry. |
-| `odom_frame_id` | `str` | `"odom"` | Frame ID of the odometry frame, used to validate incoming odometry and path messages. |
-| `ramp_max_speed_mps` | `float` | `1.0` | Maximum forward speed (m/s) while `in_ramp_approach` is set. |
+See [`path_tracking_config.py`](path_tracking/path_tracking_config.py) for all parameters, defaults, and descriptions.

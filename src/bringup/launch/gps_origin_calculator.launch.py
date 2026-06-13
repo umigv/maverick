@@ -1,4 +1,4 @@
-from bringup.launch_utils import bringup_share
+from bringup.launch_utils import gps_file_path
 from launch import LaunchDescription, LaunchDescriptionEntity
 from launch.actions import DeclareLaunchArgument, EmitEvent, OpaqueFunction, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
@@ -14,7 +14,7 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         package="gps_origin_calculator",
         executable="gps_origin_calculator",
         output="screen",
-        parameters=[{"output_file": f"{bringup_share()}/courses/{course}/gps.json"}],
+        parameters=[{"output_file": gps_file_path(course)}],
         remappings=[("gps", "gps/raw")],
     )
 
@@ -34,7 +34,7 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument(
                 "course",
                 default_value="default",
-                description="Course profile in courses/ to write the computed GPS datum into.",
+                description="See bringup/README.md",
             ),
             OpaqueFunction(function=launch_setup),
         ]

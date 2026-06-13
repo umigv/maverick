@@ -68,38 +68,5 @@ base_link_ground_truth`)
 - `base_link` → `imu_link` - IMU mounting orientation (used to compute yaw offset for IMU topic)
 
 ## Config Parameters
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `datum` | `list[float]` | required | ENU origin as `[latitude, longitude, altitude]` (deg, deg, m). Map `(0, 0, 0)` maps to this point. |
-| `initial_yaw_rad` | `float` | `0.0` | Initial robot heading in true-north ENU map frame (rad) |
-| `map_frame_id` | `str` | `map` | TF frame ID for the map frame |
-| `base_frame_id` | `str` | `base_link` | TF frame ID for the robot base frame |
-| `ground_truth_base_frame_id` | `str` | `base_link_ground_truth` | TF frame for the true robot pose |
-| `cmd_vel_timeout_s` | `float` | `0.5` | Seconds without a cmd_vel before velocity is zeroed |
-| `update_period_s` | `float` | `0.01` | Publish period for all sensors (s) |
-
-### `enc_vel`
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `vx_noise_std_mps` | `float` | `0.0` | Per-sample Gaussian noise std on linear.x (m/s) |
-| `wz_noise_std_radps` | `float` | `0.0` | Per-sample Gaussian noise std on angular.z (rad/s) |
-| `vx_drift_std` | `float` | `0.0` | OU scale-factor steady-state std on linear.x (unitless) |
-| `wz_drift_std` | `float` | `0.0` | OU scale-factor steady-state std on angular.z (unitless) |
-| `drift_time_constant_s` | `float` | `30.0` | OU mean-reversion time constant for both scale factors (s) |
-
-### `vn300`
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `imu_frame_id` | `str` | `imu_link` | TF frame ID for the IMU sensor |
-| `ins_frame_id` | `str` | `base_link` | TF frame ID for the INS reference point (frame for GPS, ins_vel, odom) |
-| `position_noise_std_m` | `float` | `0.0` | Per-sample Gaussian noise std on horizontal position (m) |
-| `position_drift_std_m` | `float` | `0.0` | OU position-drift steady-state std (m). Set to `0` to disable. |
-| `position_drift_time_constant_s` | `float` | `120.0` | OU mean-reversion time constant for position drift (s) |
-| `vx_noise_std_mps` | `float` | `0.0` | Per-sample Gaussian noise std on linear.x (m/s) |
-| `wz_noise_std_radps` | `float` | `0.0` | Per-sample Gaussian noise std on angular.z (rad/s) |
-| `vx_drift_std_mps` | `float` | `0.0` | OU velocity-drift steady-state std on linear.x (m/s) |
-| `wz_drift_std_radps` | `float` | `0.0` | OU drift steady-state std on angular.z (rad/s) |
-| `vel_drift_time_constant_s` | `float` | `120.0` | OU mean-reversion time constant for velocity drift (s) |
-| `yaw_noise_std_rad` | `float` | `0.0` | Per-sample Gaussian noise std on absolute yaw (rad) |
-| `yaw_drift_std_rad` | `float` | `0.0` | OU yaw-drift steady-state std (rad). Set to `0` to disable. |
-| `yaw_drift_time_constant_s` | `float` | `300.0` | OU mean-reversion time constant for yaw drift (s) |
+See [`sensor_simulator_config.py`](sensor_simulator/sensor_simulator_config.py) for all parameters, defaults, and 
+descriptions.

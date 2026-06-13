@@ -22,16 +22,8 @@ The map file is a JSON file with the following structure:
 periodically
 - `occupancy_grid/ground_truth` (`nav_msgs/OccupancyGrid`) - Full static obstacle map in `map` frame
 
-The `occupancy_grid/ground_truth` topic uses a non-default QoS profile:
-| Setting | Value | Effect |
-|---|---|---|
-| Reliability | `RELIABLE` | Guaranteed delivery |
-| Durability | `TRANSIENT_LOCAL` | Late-joining subscribers immediately receive the last published state |
-| History | `KEEP_LAST` (depth 1) | Only the most recent message is retained |
-
-Subscribers to `occupancy_grid/ground_truth` **must use a compatible QoS** (`RELIABLE` + `TRANSIENT_LOCAL`) or they will
-not receive the latched message on connect. A subscriber with default QoS (`BEST_EFFORT` or `VOLATILE`) will silently
-receive nothing. In code, use `utils.qos.LATCHED`. In RViz, set the topic's **Durability Policy** to `Transient Local`.
+`occupancy_grid/ground_truth` is latched: publisher and subscribers must both use `utils.qos.LATCHED` — see the
+[utils README](../../core/utils/README.md#utilsqos).
 
 ## Grid Conventions
 Follows the standard [`nav_msgs/OccupancyGrid`](https://docs.ros2.org/foxy/api/nav_msgs/msg/OccupancyGrid.html) 
@@ -45,14 +37,5 @@ The robot-centric grid is sized `width_m × height_m` centered such that the rob
 forward so the grid extends mostly in front of the robot).
 
 ## Config Parameters
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `map_file_path` | `str` | required | Path to the JSON map file |
-| `width_m` | `float` | `5.0` | Width of the published robot-centric grid (m, x-axis) |
-| `height_m` | `float` | `5.0` | Height of the published robot-centric grid (m, y-axis) |
-| `offset_x_m` | `float` | `0.0` | X offset of the grid origin from the robot (m) |
-| `offset_y_m` | `float` | `-2.5` | Y offset of the grid origin from the robot (m) |
-| `map_frame_id` | `str` | `map` | TF frame ID for the map frame |
-| `base_frame_id` | `str` | `base_link` | TF frame ID stamped on the published occupancy grid, matching what a real perception stack would use |
-| `ground_truth_base_frame_id` | `str` | `base_link_ground_truth` | TF frame ID for the true robot pose, used to generate grid cell positions |
-| `publish_period_s` | `float` | `0.03` | Publish period for the robot-centric occupancy grid (s) |
+See [`occupancy_grid_simulator_config.py`](occupancy_grid_simulator/occupancy_grid_simulator_config.py) for all 
+parameters, defaults, and descriptions.

@@ -17,9 +17,4 @@ Transformed to `frame_id` via TF if necessary.
 - `path` (`nav_msgs/msg/Path`) — Planned path from the robot to the goal
 
 ## Config Parameters
-| Parameter | Default | Description |
-|---|---|---|
-| `frame_id` | `odom` | TF frame ID for the occupancy grid, odometry, goal, and published path |
-| `max_unknown_forward_m` | `5.0` | How far forward of the robot (m) unknown cells are treated as traversable by A* |
-| `max_unknown_sideways_m` | `2.5` | How far sideways of the robot (m) unknown cells are treated as traversable by A* |
-| `line_of_sight_step_m` | `0.05` | Step size (m) for sampling segments during string-pulling line-of-sight checks. Smaller values give more accurate collision checking at the cost of more computation |
+See [`path_planning_config.py`](path_planning/path_planning_config.py) for all parameters, defaults, and descriptions.

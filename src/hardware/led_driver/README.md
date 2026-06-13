@@ -4,7 +4,7 @@ state.
 Waits up to `ready_timeout_s` for the Arduino to send `READY` before starting.
 
 ## Read Files
-- `/tmp/estop_value.txt` - e-stop state written by `estop_driver`
+- `estop_file_path` (wired by `hardware.launch.py` from `launch_utils.ESTOP_FILE_PATH`) - e-stop state written by `estop_driver`
 
 ## Subscribed Topics
 - `teleop_cmd_vel` (`geometry_msgs/Twist`) - marks teleop as active for `cmd_vel_timeout_s` after the last message
@@ -14,7 +14,7 @@ Waits up to `ready_timeout_s` for the Arduino to send `READY` before starting.
 ## LED Priority
 | Priority | Condition | Code | Effect |
 |---|---|---|---|
-| 1 | `/tmp/estop_value.txt` is `"1"` | `6` | Flashing red |
+| 1 | e-stop file is `"1"` | `6` | Flashing red |
 | 2 | `teleop_cmd_vel` received within `cmd_vel_timeout_s` | `1` | Solid blue |
 | 3 | `mission_complete` | `7` | Solid green |
 | 4 | `in_recovery` | `4` | Flashing yellow |
@@ -25,11 +25,4 @@ Waits up to `ready_timeout_s` for the Arduino to send `READY` before starting.
 | 9 | no mission state, nav stack inactive | `9` | Rainbow |
 
 ## Config Parameters
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `serial_port` | `Path` | `/dev/led` | Path to the serial device |
-| `baud_rate` | `int` | `9600` | Serial baud rate |
-| `ready_timeout_s` | `float` | `5.0` | Seconds to wait for the Arduino `READY` message before giving up |
-| `cmd_vel_timeout_s` | `float` | `1.0` | Seconds after the last teleop/nav command before that source is considered inactive |
-| `update_period_s` | `float` | `0.1` | Period (s) at which the LED state is evaluated and sent |
-| `estop_file_path` | `Path` | `/tmp/estop_value.txt` | Path to the file containing the e-stop state |
+See [`led_driver_config.py`](led_driver/led_driver_config.py) for all parameters, defaults, and descriptions.

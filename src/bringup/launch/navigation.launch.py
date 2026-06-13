@@ -1,4 +1,4 @@
-from bringup.launch_utils import MODES, Mode, bringup_share, format_mode_description, load_frames
+from bringup.launch_utils import MODES, Mode, gps_file_path, load_frames
 from launch import LaunchDescription, LaunchDescriptionEntity
 from launch.actions import DeclareLaunchArgument, EmitEvent, OpaqueFunction, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
@@ -32,15 +32,11 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         executable="autonav_mission_control",
         name="autonav_mission_control",
         parameters=[
-            {"waypoints_file_path": f"{bringup_share()}/courses/{course}/gps.json"},
+            {"waypoints_file_path": gps_file_path(course)},
             {"map_frame_id": frames["map_frame"]},
         ],
         remappings=[
             ("odom", "odom/global"),
-            ("fromLL", "fromLL"),
-            ("mission_state", "mission_state"),
-            ("request_recovery", "request_recovery"),
-            ("recovery_complete", "recovery_complete"),
         ],
     )
 
@@ -54,10 +50,6 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         remappings=[
             ("occupancy_grid", "occupancy_grid/transformed"),
             ("odom", "odom/local"),
-            ("mission_state", "mission_state"),
-            ("request_recovery", "request_recovery"),
-            ("goal", "goal"),
-            ("goal_selection_debug", "goal_selection_debug"),
         ],
     )
 
@@ -71,8 +63,6 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         remappings=[
             ("occupancy_grid", "occupancy_grid/inflated"),
             ("odom", "odom/local"),
-            ("goal", "goal"),
-            ("path", "path"),
         ],
     )
 
@@ -80,10 +70,6 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         package="path_smoothing",
         executable="path_smoothing",
         name="path_smoothing",
-        remappings=[
-            ("path", "path"),
-            ("smoothed_path", "smoothed_path"),
-        ],
     )
 
     path_tracking_node = Node(
@@ -97,9 +83,6 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         remappings=[
             ("odom", "odom/local"),
             ("path", "smoothed_path"),
-            ("nav_cmd_vel", "nav_cmd_vel"),
-            ("smoothed_path", "smoothed_path"),
-            ("mission_state", "mission_state"),
         ],
     )
 
@@ -146,18 +129,12 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument(
                 "mode",
                 choices=MODES,
-                description=format_mode_description(
-                    {
-                        "autonav": "occupancy grid transform + path planning + path smoothing + path tracking + mission control + goal selection + recovery",
-                        "self_drive": "occupancy grid transform + path planning + path smoothing + path tracking",
-                        "nav_test": "occupancy grid transform + path planning + path smoothing + path tracking",
-                    }
-                ),
+                description="See bringup/README.md",
             ),
             DeclareLaunchArgument(
                 "course",
                 default_value="default",
-                description="Course profile in courses/ to load waypoints from (required for autonav, autonav_sim)",
+                description="See bringup/README.md",
             ),
             OpaqueFunction(function=launch_setup),
         ]

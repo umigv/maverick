@@ -44,7 +44,7 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument(
                 "controller",
                 choices=list(CONTROLLERS),
-                description="Controller profile",
+                description="See bringup/README.md",
             ),
             OpaqueFunction(function=launch_setup),
         ]

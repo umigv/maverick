@@ -19,9 +19,9 @@ class InflationParams:
             1.0 result in slower decay and more conservative paths; values closer to 0.0 decay more aggressively.
     """
 
-    inflation_radius_cells: int = 12
-    inflation_falloff_extent_cells: int = 0
-    inflation_decay_factor: float = 0.9
+    inflation_radius_cells: int
+    inflation_falloff_extent_cells: int
+    inflation_decay_factor: float
 
     def __post_init__(self) -> None:
         if self.inflation_radius_cells < 0:
@@ -38,8 +38,20 @@ class OccupancyGridTransformConfig:
 
     Attributes:
         inflation_params: Parameters controlling obstacle inflation applied to the grid prior to publishing.
+        no_mans_land_inflation_params: Inflation parameters used instead of `inflation_params` while the mission
+            state has `in_no_mans_land` set. Defaults to a larger fully inflated core so the robot keeps more
+            distance from obstacles where lane markings are absent.
         frame_id: TF frame the transformed grids are published in.
     """
 
-    inflation_params: InflationParams
+    inflation_params: InflationParams = InflationParams(
+        inflation_radius_cells=12,
+        inflation_falloff_extent_cells=0,
+        inflation_decay_factor=0.9,
+    )
+    no_mans_land_inflation_params: InflationParams = InflationParams(
+        inflation_radius_cells=22,
+        inflation_falloff_extent_cells=0,
+        inflation_decay_factor=0.9,
+    )
     frame_id: str = "odom"
