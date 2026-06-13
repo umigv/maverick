@@ -13,6 +13,11 @@ Mapping rules:
 is not supplied in YAML.
 - If the field has no default, the parameter is required; `load()` will raise if it is missing / unset.
 - Nested dataclasses are supported and map to nested parameter dictionaries.
+- A nested dataclass field may carry a default instance (a frozen instance directly, or any instance via
+`field(default_factory=...)`). Its attribute values become the per-leaf defaults for that subtree, taking precedence
+over the nested dataclass's own field defaults and making the whole subtree optional. YAML keys still override
+individual leaves. This allows several fields of the same nested dataclass type to have different defaults, e.g.
+`fast: SpeedParams = SpeedParams(max_mps=2.0)` and `slow: SpeedParams = SpeedParams(max_mps=0.5)`.
 
 Supported field types:
 - Primitives: `bool`, `int`, `float`, `str`, `bytes`
