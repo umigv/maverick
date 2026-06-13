@@ -16,18 +16,6 @@ covariance
 ## Config Parameters
 See [`odrive_driver_config.py`](odrive_driver/odrive_driver_config.py) for all parameters, defaults, and descriptions.
 
-### ODrive Units
-Each ODrive is identified by its USB serial number and a polarity correction. `left_odrive` and `right_odrive` each take
-the same parameters:
-
-### Controller
-All parameters are specified in SI / robot-frame units and converted to motor-native units before being written to the ODrive.
-
-### Covariance
-Variance scales with speed to reflect increased uncertainty at higher velocities:
-- `linear_variance  = linear_variance_static  + linear_variance_gain  * linear_mps²`
-- `angular_variance = angular_variance_static + angular_variance_gain * (linear_mps² / track_width_m² + angular_radps²)`
-
 ## Scripts
 Before running any script, make sure `odrivetool` and this node is closed first as they hold the USB connection.
 

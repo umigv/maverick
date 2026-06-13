@@ -104,7 +104,7 @@ Goal publishing also stops once `mission_complete` is set.
 See [`autonav_goal_selection_config.py`](autonav_goal_selection/autonav_goal_selection_config.py) for all parameters, 
 defaults, and descriptions.
 
-### Momentum Parameters (`MomentumParams`)
+## Momentum Parameters (`MomentumParams`)
 Each tick the highest-scoring ray's angle is EMA-smoothed into a stored momentum angle. Scoring multiplies each ray's 
 free length by a momentum factor in `[0, 1]` that rewards alignment with the momentum direction and scales down when the 
 momentum-aligned ray itself is short (obstacle ahead).
