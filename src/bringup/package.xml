@@ -13,7 +13,6 @@
   <exec_depend>gps_origin_calculator</exec_depend>
   <exec_depend>robot_localization</exec_depend>
   <exec_depend>vectornav_driver</exec_depend>
-  <exec_depend>marvin_description</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>joint_state_publisher</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
