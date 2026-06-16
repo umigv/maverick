@@ -91,16 +91,10 @@ If errors persist or if the scripts can't detect an ODrive, troubleshoot in the 
 5. Restart the laptop
 
 ### `scripts/plot_motor_signals.py`
-Live-plots left/right Iq setpoint vs measured (A) and velocity setpoint vs estimate (rps) from the
-`odrive_driver/debug` topic. Useful for tuning the velocity controller and diagnosing motor behavior. Requires
-`odrive_driver` to be running with `debug: true` in its config. Unlike the calibration and error-clearing scripts, this
-script reads only the ROS topic and does not hold the USB connection, so it can run alongside the node.
+Live-plots left/right Iq setpoint vs measured (A) and velocity setpoint vs estimate (rps) from the `odrive_driver/debug`
+topic. Useful for tuning the velocity controller and diagnosing motor behavior. Requires `odrive_driver` to be running 
+with `debug: true` in its config.
 ```bash
 just plot-odrive                              # 500-sample window, 10 Hz redraw
 just plot-odrive --window 1000 --frame-rate 15
 ```
-
-| Argument | Default | Description |
-|---|---|---|
-| `--window N` | `500` | Number of samples to display |
-| `--frame-rate HZ` | `10` | Plot redraw rate (Hz) |

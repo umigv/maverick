@@ -1,16 +1,3 @@
-#!/usr/bin/env python3
-"""
-Live-plot motor current and velocity for both ODrive controllers.
-
-Subscribes to odrive_driver/debug (Float32MultiArray) and displays four real-time plots: left/right Iq setpoint vs
-measured (A), and left/right velocity setpoint vs estimate (rps).
-
-Requires odrive_driver to be running with debug: true in its config.
-
-Usage:
-    just plot-odrive [--window 1000] [--frame-rate 15]
-"""
-
 import argparse
 from collections import deque
 
@@ -68,7 +55,7 @@ class MotorSignalPlotter(Node):
             self.data[key].append(val)
 
     def render(self) -> None:
-        # Once the window is closed its canvas is freed; drawing on it would be a use-after-free in the GUI backend
+        # Once the window is closed its canvas is freed, drawing on it would be a use after free in the GUI backend
         if not plt.fignum_exists(self.fig.number):
             # TODO: We don't call rclpy.shutdown() here because it causes a deadlock in humble
             # https://github.com/ros2/rclpy/issues/1646
@@ -98,6 +85,7 @@ def main() -> None:
 
     rclpy.init()
     node = MotorSignalPlotter(window=args.window, frame_rate=args.frame_rate)
+
     try:
         rclpy.spin(node)
     finally:
