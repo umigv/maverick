@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import odrive
 import odrive.utils
 from odrive.enums import AxisState
