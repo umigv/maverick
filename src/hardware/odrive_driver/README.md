@@ -12,6 +12,8 @@ publishes encoder-derived velocity with propagated covariance. Motors are zeroed
 ## Published Topics
 - `enc_vel` (`geometry_msgs/TwistWithCovarianceStamped`) - encoder derived linear/angular velocity with dynamic 
 covariance
+- `odrive_driver/debug` (`std_msgs/Float32MultiArray`) - per-motor Iq and velocity signals, only published when `debug`
+is true: `[l_iq_sp, l_iq_meas, l_vel_sp, l_vel_est, r_iq_sp, r_iq_meas, r_vel_sp, r_vel_est]`. Iq in A, velocity in rps
 
 ## Config Parameters
 | Parameter | Type | Default | Description |
@@ -21,6 +23,7 @@ covariance
 | `timestamp_delay_s` | `float` | `0.0` | Subtracted from the publish timestamp to compensate read and processing latency (s) |
 | `frame_id` | `str` | `"base_link"` | TF frame ID attached to the published twist header |
 | `estop_file_path` | `Path` | `/tmp/estop_value.txt` | Path to the e-stop flag file |
+| `debug` | `bool` | `false` | Whether to publish per-motor Iq and velocity signals on `odrive_driver/debug` |
 
 ### ODrive Units
 Each ODrive is identified by its USB serial number and a polarity correction. `left_odrive` and `right_odrive` each take the same parameters:
@@ -86,3 +89,18 @@ If errors persist or if the scripts can't detect an ODrive, troubleshoot in the 
 3. Run `odrivetool` and see if the official tool is able to detect them
 4. Close the terminal and open a new one
 5. Restart the laptop
+
+### `scripts/plot_motor_signals.py`
+Live-plots left/right Iq setpoint vs measured (A) and velocity setpoint vs estimate (rps) from the
+`odrive_driver/debug` topic. Useful for tuning the velocity controller and diagnosing motor behavior. Requires
+`odrive_driver` to be running with `debug: true` in its config. Unlike the calibration and error-clearing scripts, this
+script reads only the ROS topic and does not hold the USB connection, so it can run alongside the node.
+```bash
+just plot-odrive                              # 500-sample window, 10 Hz redraw
+just plot-odrive --window 1000 --frame-rate 15
+```
+
+| Argument | Default | Description |
+|---|---|---|
+| `--window N` | `500` | Number of samples to display |
+| `--frame-rate HZ` | `10` | Plot redraw rate (Hz) |
