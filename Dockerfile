@@ -1,4 +1,5 @@
-FROM ros:humble
+ARG ROS_DISTRO=humble
+FROM ros:${ROS_DISTRO}
 
 ENV ROS_HOME=/opt/ros_home
 

@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/${{ github.repository }}:latest
       credentials:
@@ -44,7 +44,7 @@ jobs:
         shell: bash
         run: |
           ccache --zero-stats
-          source /opt/ros/humble/setup.bash
+          source /opt/ros/$ROS_DISTRO/setup.bash
           just build
 
       - name: Cache stats
@@ -53,7 +53,7 @@ jobs:
       - name: Test
         shell: bash
         run: |
-          source /opt/ros/humble/setup.bash
+          source /opt/ros/$ROS_DISTRO/setup.bash
           source install/setup.bash
           just test
 

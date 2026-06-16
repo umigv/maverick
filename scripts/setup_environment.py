@@ -7,7 +7,7 @@ from pathlib import Path
 
 from common import ROOT, run
 
-ROS_DISTRO = os.environ.get("ROS_DISTRO", "humble")
+ROS_DISTRO = os.environ.get("ROS_DISTRO")
 
 
 def log(msg: str) -> None:
@@ -19,6 +19,10 @@ def note(msg: str) -> None:
 
 
 def main() -> None:
+    if not ROS_DISTRO:
+        print("ROS_DISTRO is not set. Source /opt/ros/<distro>/setup.bash first.", file=sys.stderr)
+        sys.exit(1)
+
     if not Path(f"/opt/ros/{ROS_DISTRO}").exists():
         print(f"ROS not found at /opt/ros/{ROS_DISTRO}", file=sys.stderr)
         sys.exit(1)
