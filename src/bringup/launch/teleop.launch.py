@@ -43,11 +43,7 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
 def generate_launch_description() -> LaunchDescription:
     return LaunchDescription(
         [
-            DeclareLaunchArgument(
-                "controller",
-                choices=list(CONTROLLERS),
-                description="Controller profile",
-            ),
+            DeclareLaunchArgument("controller", choices=list(CONTROLLERS)),
             OpaqueFunction(function=launch_setup),
         ]
     )

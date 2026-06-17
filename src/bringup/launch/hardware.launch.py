@@ -1,14 +1,6 @@
 from typing import Any
 
-from bringup.launch_utils import (
-    ESTOP_FILE_PATH,
-    MODES,
-    Mode,
-    bringup_share,
-    format_mode_description,
-    load_frames,
-    load_gps_file,
-)
+from bringup.launch_utils import ESTOP_FILE_PATH, MODES, Mode, bringup_share, load_frames, load_gps_file
 from launch import LaunchContext, LaunchDescription, LaunchDescriptionEntity
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
@@ -97,22 +89,8 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
 def generate_launch_description() -> LaunchDescription:
     return LaunchDescription(
         [
-            DeclareLaunchArgument(
-                "mode",
-                choices=MODES,
-                description=format_mode_description(
-                    {
-                        "autonav": "estop + LED + ODrive + Vectornav + odom",
-                        "self_drive": "estop + LED + ODrive + Vectornav",
-                        "nav_test": "estop + LED + ODrive",
-                    }
-                ),
-            ),
-            DeclareLaunchArgument(
-                "course",
-                default_value="default",
-                description="Course profile in courses/ to load map and GPS datum from",
-            ),
+            DeclareLaunchArgument("mode", choices=MODES),
+            DeclareLaunchArgument("course", default_value="default"),
             OpaqueFunction(function=launch_setup),
         ]
     )

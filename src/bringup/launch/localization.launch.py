@@ -1,6 +1,6 @@
 from typing import Any
 
-from bringup.launch_utils import MODES, Mode, bringup_share, format_mode_description, load_frames, load_gps_file
+from bringup.launch_utils import MODES, Mode, bringup_share, load_frames, load_gps_file
 from launch import LaunchContext, LaunchDescription, LaunchDescriptionEntity
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
@@ -93,22 +93,8 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
 def generate_launch_description() -> LaunchDescription:
     return LaunchDescription(
         [
-            DeclareLaunchArgument(
-                "mode",
-                choices=MODES,
-                description=format_mode_description(
-                    {
-                        "autonav": "EKF local + map_odom_publisher + lat_lon_converter",
-                        "self_drive": "EKF local + identity map->odom",
-                        "nav_test": "enc_odom + identity map->odom",
-                    }
-                ),
-            ),
-            DeclareLaunchArgument(
-                "course",
-                default_value="default",
-                description="Course profile in courses/ to load GPS datum from (required for autonav)",
-            ),
+            DeclareLaunchArgument("mode", choices=MODES),
+            DeclareLaunchArgument("course", default_value="default"),
             OpaqueFunction(function=launch_setup),
         ]
     )

@@ -1,6 +1,6 @@
 from typing import Any
 
-from bringup.launch_utils import MODES, Mode, format_mode_description, gps_file_path, load_frames
+from bringup.launch_utils import MODES, Mode, gps_file_path, load_frames
 from launch import LaunchContext, LaunchDescription, LaunchDescriptionEntity
 from launch.actions import DeclareLaunchArgument, EmitEvent, OpaqueFunction, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
@@ -128,22 +128,8 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
 def generate_launch_description() -> LaunchDescription:
     return LaunchDescription(
         [
-            DeclareLaunchArgument(
-                "mode",
-                choices=MODES,
-                description=format_mode_description(
-                    {
-                        "autonav": "occupancy grid transform + path planning + path smoothing + path tracking + mission control + goal selection + recovery",
-                        "self_drive": "occupancy grid transform + path planning + path smoothing + path tracking",
-                        "nav_test": "occupancy grid transform + path planning + path smoothing + path tracking",
-                    }
-                ),
-            ),
-            DeclareLaunchArgument(
-                "course",
-                default_value="default",
-                description="Course profile in courses/ to load waypoints from (required for autonav, autonav_sim)",
-            ),
+            DeclareLaunchArgument("mode", choices=MODES),
+            DeclareLaunchArgument("course", default_value="default"),
             OpaqueFunction(function=launch_setup),
         ]
     )

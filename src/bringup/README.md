@@ -1,26 +1,23 @@
 # bringup
 Launch files and configuration for the navigation stack.
 
+## Configurations
 
-## Modes
-| Mode | `odom`→`base_link` | `map`→`odom` | /goal source |
-|---|---|---|---|
-| `autonav` | EKF | EKF | autonav_goal_selection |
-| `self_drive` | EKF | identity | CV |
-| `nav_test` | enc_odom | identity | manual |
+### Mode
+There are three modes: `autonav`, `self_drive` and `nav_test`. They should be passed in with the `mode` flag. See the
+documentation of each launch file to see what different modes do.
 
-Pass `simulation:=true` to use simulated sensors instead of hardware. `course` is required for `autonav` and when 
-`simulation:=true`.
+### Simulation
+Pass `simulation:=true` to use simulated sensors instead of hardware
 
-
-### Course Configuration
-Frame IDs and node parameters are defined in `bringup/config/`. 
+### Course
 To configure a new course, add a subfolder under `bringup/courses/` containing:
 - `gps.json` — GPS datum and waypoints
 - `map.json` — simulation obstacle map
 
 Courses can be generated using the [course creation tool](https://github.com/umigv/course_creation_tool). The `default`
-course is used when no `course` argument is provided. See `bringup/courses/default/` for the expected schema.
+course is used when no `course` argument is provided. See `bringup/courses/default/` for the expected schema. Pass the
+subfolder name into launch files to select a course
 
 
 ## gps_origin_calculator.launch.py
@@ -95,6 +92,11 @@ ros2 launch bringup hardware.launch.py mode:=<mode> [course:=<course>]
 - `mode`: Operation mode (required)
 - `course`: Course profile in `courses/` to load GPS datum from, default `default` (required for `autonav`)
 
+### Modes
+- `autonav`: estop + LED + ODrive + VectorNav + INS odometry
+- `self_drive`: estop + LED + ODrive + VectorNav
+- `nav_test`: estop + LED + ODrive
+
 ### Subscribed Topics
 - `cmd_vel` (`geometry_msgs/Twist`) - Multiplexed velocity command driven by ODrive (all modes)
 - `teleop_cmd_vel` (`geometry_msgs/Twist`) - Joystick velocity, used by led_driver to detect teleop activity (all modes)
@@ -144,7 +146,11 @@ Launches localization
 ros2 launch bringup localization.launch.py mode:=<mode> [course:=<course>]
 ```
 
-### Localization Strategy
+### Parameters
+- `mode`: Operation mode (required)
+- `course`: Course profile in `courses/` to load GPS datum from, default `default` (required for `autonav`)
+
+### Modes
 
 **`autonav`**: `ekf_local` + `map_odom_publisher` + `lat_lon_converter`
 - `odom` → `base_link`: EKF fusing encoder vx and IMU yaw rate
@@ -157,11 +163,7 @@ ros2 launch bringup localization.launch.py mode:=<mode> [course:=<course>]
 
 **`nav_test`**: `enc_odom_publisher` + identity `map` → `odom`
 - `odom` → `base_link`: direct encoder velocity integration, no IMU
-- `map` → `odom`: fixed identity transform
-
-### Parameters
-- `mode`: Operation mode (required)
-- `course`: Course profile in `courses/` to load GPS datum from, default `default` (required for `autonav`)
+- `map` → `odom`: fixed identity transform (no global correction)
 
 ### Subscribed Topics
 - `enc_vel/raw` (`geometry_msgs/TwistWithCovarianceStamped`) - Encoder velocity (`autonav`, `self_drive`, `nav_test`)
@@ -189,6 +191,10 @@ ros2 launch bringup navigation.launch.py mode:=<mode> [course:=<course>]
 ### Parameters
 - `mode`: Operation mode (required)
 - `course`: Course profile in `courses/` to load waypoints from, default `default` (required for `autonav`)
+
+### Modes
+All modes run occupancy grid transform + path planning + path smoothing + path tracking. `autonav` additionally runs
+mission control + goal selection + recovery.
 
 ### Subscribed Topics
 - `goal` (`geometry_msgs/PointStamped`) - Goal for path planning (`self_drive`, `nav_test` only)
