@@ -12,7 +12,7 @@ DecimalWaypoint = tuple[str, float, float]  # (name, latitude, longitude) in dec
 
 
 def packed_dms_to_decimal(value: float) -> float:
-    """Convert a packed DMS float (DD.MMSSssss) to decimal degrees."""
+    """Convert a packed DMS float (DD.MMSSsssss) to decimal degrees."""
     sign = -1 if value < 0 else 1
     value = abs(value)
 
@@ -68,10 +68,7 @@ def write(waypoints: list[DecimalWaypoint], output_path: Path) -> None:
         writer = csv.writer(f)
         writer.writerow(["name", "latitude", "longitude"])
         for name, latitude, longitude in waypoints:
-            # We pick 7dp for latitude / longitude here because
-            # 1. It's around 1cm precision which is finer than what we can measure
-            # 2. Doesn't match the 9dp precision of the data IGVC provides to prevent confusion
-            # Keep in sync with gps_origin_calculator and course creation tool
+            # 7dp for latitude / longitude. See waypoints/README.md for the rationale; keep these in sync.
             writer.writerow([name, f"{latitude:.7f}", f"{longitude:.7f}"])
 
 

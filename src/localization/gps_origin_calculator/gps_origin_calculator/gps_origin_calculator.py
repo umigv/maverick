@@ -79,10 +79,7 @@ class GpsOriginCalculator(Node):
 
     def compute_and_print_origin(self) -> None:
         self.get_logger().info(f"Collected {len(self.samples)} samples:")
-        # We pick 7dp for lat / lon and 2dp for alt here because
-        # 1. It's around 1cm precision which is finer than what we can measure
-        # 2. Doesn't match the 9dp precision of the data IGVC provides to prevent confusion
-        # Keep in sync with scripts/convert_waypoints.py and course creation tool
+        # 7dp for lat / lon, 2dp for alt. See waypoints/README.md for the rationale; keep these in sync.
         latitude = round(median(sample.latitude for sample in self.samples), 7)
         longitude = round(median(sample.longitude for sample in self.samples), 7)
         altitude = round(median(sample.altitude for sample in self.samples), 2)
