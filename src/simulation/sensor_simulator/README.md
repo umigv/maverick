@@ -1,12 +1,7 @@
 # Sensor Simulator
-Simulates encoder velocity, IMU, and INS sensors for testing the stack without real hardware.
-Subscribes to `cmd_vel`, integrates velocity into a ground-truth pose, and publishes noisy sensor measurements that
-mimic real hardware behavior.
+Simulates encoder velocity, IMU, and INS sensors for testing the stack without real hardware. Subscribes to `cmd_vel`, integrates velocity into a ground-truth pose, and publishes noisy sensor measurements that mimic real hardware behavior.
 
-Sensor noise is modeled using two components: per-sample **Gaussian white noise** for instantaneous measurement error,
-and [**Ornstein-Uhlenbeck (OU) processes**](https://en.wikipedia.org/wiki/Ornstein%E2%80%93Uhlenbeck_process) for
-slow-drifting correlated errors (e.g. scale factor bias on encoders, multipath drift on GPS). OU processes are
-mean-reverting, so errors stay bounded over time rather than growing without bound like a random walk.
+Sensor noise is modeled using two components: per-sample **Gaussian white noise** for instantaneous measurement error, and [**Ornstein-Uhlenbeck (OU) processes**](https://en.wikipedia.org/wiki/Ornstein%E2%80%93Uhlenbeck_process) for slow-drifting correlated errors (e.g. scale factor bias on encoders, multipath drift on GPS). OU processes are mean-reverting, so errors stay bounded over time rather than growing without bound like a random walk.
 
 ## Behavior
 - Integrates `cmd_vel` using 2D unicycle kinematics (Euler integration) at `update_period_s`
@@ -18,15 +13,12 @@ mean-reverting, so errors stay bounded over time rather than growing without bou
 
 ### Encoder Velocity
 - Publishes `TwistWithCovarianceStamped` in the `base_frame_id` frame
-- Applies OU multiplicative scale-factor drift to both linear and angular velocity proportional to speed so a
-stationary robot always reads near zero and odom drift only accumulates while moving
+- Applies OU multiplicative scale-factor drift to both linear and angular velocity proportional to speed so a stationary robot always reads near zero and odom drift only accumulates while moving
 - Applies per-sample Gaussian white noise on top of the drifting measurement
 - Reported covariance is state-dependent: `var = noise_std² + (measurement × drift_std)²`
 
 ### VN-300 INS (IMU, GPS, INS velocity, INS odometry)
-The VN-300 is modeled as a single sensor with one shared Kalman filter state per quantity, matching how the real
-hardware works — all four outputs share the same OU drift states, so `gps`, `imu`, `ins_vel`, and `odom` stay
-mutually consistent.
+The VN-300 is modeled as a single sensor with one shared Kalman filter state per quantity, matching how the real hardware works — all four outputs share the same OU drift states, so `gps`, `imu`, `ins_vel`, and `odom` stay mutually consistent.
 
 #### IMU
 - Publishes `Imu` in the `imu_frame_id` frame
@@ -58,8 +50,7 @@ mutually consistent.
 - `gps` (`sensor_msgs/NavSatFix`) - Simulated VN-300 GPS fix in `ins_frame_id`
 - `ins_vel` (`geometry_msgs/TwistWithCovarianceStamped`) - Simulated VN-300 INS velocity in `ins_frame_id`
 - `odom` (`nav_msgs/Odometry`) - Simulated VN-300 INS odometry in `map` frame
-- `odom/ground_truth` (`nav_msgs/Odometry`) - Noiseless true pose in `map` frame (`child_frame_id = 
-base_link_ground_truth`)
+- `odom/ground_truth` (`nav_msgs/Odometry`) - Noiseless true pose in `map` frame (`child_frame_id = base_link_ground_truth`)
 
 ## Broadcasted TF
 - `map` → `base_link_ground_truth` - Noiseless true robot pose, broadcast every update

@@ -4,20 +4,14 @@ Small utilities for ROS 2 Python nodes:
 ## utils.config
 Adds a simple config-loading utility for ROS 2.
 
-To use, you will want to create a python dataclass where each field in the config dataclass corresponds to a ROS 2 
-parameter key. The field’s default value (if provided) is used as the parameter’s default.
+To use, you will want to create a python dataclass where each field in the config dataclass corresponds to a ROS 2 parameter key. The field’s default value (if provided) is used as the parameter’s default.
 
 Mapping rules:
 - Each dataclass field name corresponds to a ROS 2 parameter key.
-- If the field has a default value (or default_factory), the parameter is optional and the default is used when the key
-is not supplied in YAML.
+- If the field has a default value (or default_factory), the parameter is optional and the default is used when the key is not supplied in YAML.
 - If the field has no default, the parameter is required; `load()` will raise if it is missing / unset.
 - Nested dataclasses are supported and map to nested parameter dictionaries.
-- A nested dataclass field may carry a default instance (a frozen instance directly, or any instance via
-`field(default_factory=...)`). Its attribute values become the per-leaf defaults for that subtree, taking precedence
-over the nested dataclass's own field defaults and making the whole subtree optional. YAML keys still override
-individual leaves. This allows several fields of the same nested dataclass type to have different defaults, e.g.
-`fast: SpeedParams = SpeedParams(max_mps=2.0)` and `slow: SpeedParams = SpeedParams(max_mps=0.5)`.
+- A nested dataclass field may carry a default instance (a frozen instance directly, or any instance via `field(default_factory=...)`). Its attribute values become the per-leaf defaults for that subtree, taking precedence over the nested dataclass's own field defaults and making the whole subtree optional. YAML keys still override individual leaves. This allows several fields of the same nested dataclass type to have different defaults, e.g. `fast: SpeedParams = SpeedParams(max_mps=2.0)` and `slow: SpeedParams = SpeedParams(max_mps=0.5)`.
 
 Supported field types:
 - Primitives: `bool`, `int`, `float`, `str`, `bytes`
@@ -87,8 +81,7 @@ self.create_subscription(MissionState, "mission_state", self.callback, utils.qos
 In RViz, set the topic's **Durability Policy** to `Transient Local` to receive latched messages.
 
 ## utils.lifecycle
-Runs a node's init / spin / shutdown lifecycle so each node's `main` is a single line. All the rclpy / node lifetime is
-automatically managed and all shutdown exceptions are handled internally.
+Runs a node's init / spin / shutdown lifecycle so each node's `main` is a single line. All the rclpy / node lifetime is automatically managed and all shutdown exceptions are handled internally.
 ```py
 utils.lifecycle.run_node(Planner)
 
@@ -125,10 +118,7 @@ An ordered sequence of 2D waypoints. Requires at least 2 points with no consecut
 ## utils.world_occupancy_grid
 This class provides a world-coordinate view of a discrete, robot-centric occupancy grid.
 
-It allows planners to operate entirely on world points - querying occupancy, expanding neighbors, and hashing
-locations - without directly interacting with grid indices. Conceptually, the occupancy grid is treated as an infinite
-world representation: world points are projected into grid cells on demand, and any point outside the underlying grid
-bounds is treated as unknown.
+It allows planners to operate entirely on world points - querying occupancy, expanding neighbors, and hashing locations - without directly interacting with grid indices. Conceptually, the occupancy grid is treated as an infinite world representation: world points are projected into grid cells on demand, and any point outside the underlying grid bounds is treated as unknown.
 
 ### Conventions / Transformations
 The supplied occupancy grid is assumed to have the following conventions (matching ROS conventions):
@@ -138,8 +128,7 @@ The supplied occupancy grid is assumed to have the following conventions (matchi
 - data is row major
 
 ### State
-State of the occupancy grid at some point can be queried using `state(point)`, which returns a `CellState`. Points
-outside `[0..width) × [0..height)` return an unknown cell.
+State of the occupancy grid at some point can be queried using `state(point)`, which returns a `CellState`. Points outside `[0..width) × [0..height)` return an unknown cell.
 
 `CellState` exposes the following properties:
 
@@ -149,8 +138,7 @@ outside `[0..width) × [0..height)` return an unknown cell.
 | `is_drivable` | True if occupancy probability is ≤ 30 |
 
 ### Full grid iteration in continuous space via in_bound_points
-To iterate through all in-bound cells, `WorldOccupancyGrid` provides `in_bound_points()`, which yields the `Point2d`
-center of every in-bound cell.
+To iterate through all in-bound cells, `WorldOccupancyGrid` provides `in_bound_points()`, which yields the `Point2d` center of every in-bound cell.
 
 Example pattern:
 ```py
@@ -160,8 +148,7 @@ for candidate in grid.in_bound_points():
 ```
 
 ### Discrete “search” in continuous space via neighbors
-Although planner code operates on continuous world points, discrete graph search can still be performed using
-`neighbors4(point)`, `neighbors8(point)`, or `neighbors_forward(point)`.
+Although planner code operates on continuous world points, discrete graph search can still be performed using `neighbors4(point)`, `neighbors8(point)`, or `neighbors_forward(point)`.
 
 Each neighbor expansion:
 1. Projects the input world point into a grid cell
@@ -175,9 +162,6 @@ for candidate in grid.neighbors8(current):
         continue
 ```
 ### Hashing
-To support discrete search bookkeeping (e.g. visited sets), `WorldOccupancyGrid` provides `hash_key(point)`, which 
-returns a stable integer identifier corresponding to the grid cell that the point belongs to.
+To support discrete search bookkeeping (e.g. visited sets), `WorldOccupancyGrid` provides `hash_key(point)`, which returns a stable integer identifier corresponding to the grid cell that the point belongs to.
 
-The hash is derived from the projected grid indices, ensuring that all world points falling within the same grid cell 
-map to the same key. This allows planners to treat grid cells as discrete states without storing raw grid indices or 
-floating-point coordinates.
+The hash is derived from the projected grid indices, ensuring that all world points falling within the same grid cell map to the same key. This allows planners to treat grid cells as discrete states without storing raw grid indices or floating-point coordinates.

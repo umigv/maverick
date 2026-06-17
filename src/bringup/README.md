@@ -4,8 +4,7 @@ Launch files and configuration for the navigation stack.
 ## Configurations
 
 ### Mode
-There are three modes: `autonav`, `self_drive` and `nav_test`. They should be passed in with the `mode` flag. See the
-documentation of each launch file to see what different modes do.
+There are three modes: `autonav`, `self_drive` and `nav_test`. They should be passed in with the `mode` flag. See the documentation of each launch file to see what different modes do.
 
 ### Simulation
 Pass `simulation:=true` to use simulated sensors instead of hardware
@@ -15,15 +14,11 @@ To configure a new course, add a subfolder under `bringup/courses/` containing:
 - `gps.json` — GPS datum and waypoints
 - `map.json` — simulation obstacle map
 
-Courses can be generated using the [course creation tool](https://github.com/umigv/course_creation_tool). The `default`
-course is used when no `course` argument is provided. See `bringup/courses/default/` for the expected schema. Pass the
-subfolder name into launch files to select a course
+Courses can be generated using the [course creation tool](https://github.com/umigv/course_creation_tool). The `default`course is used when no `course` argument is provided. See `bringup/courses/default/` for the expected schema. Pass the subfolder name into launch files to select a course
 
 
 ## gps_origin_calculator.launch.py
-Computes and records the GPS datum for a course. Run this once with the robot stationary at the start position before
-an autonomous run. Collects GPS samples, writes the median lat/lon/alt into the course's `gps.json`, then shuts down
-automatically.
+Computes and records the GPS datum for a course. Run this once with the robot stationary at the start position before an autonomous run. Collects GPS samples, writes the median lat/lon/alt into the course's `gps.json`, then shuts down automatically.
 
 ```
 ros2 launch bringup gps_origin_calculator.launch.py [course:=<course>]
@@ -130,8 +125,7 @@ ros2 launch bringup simulation.launch.py [course:=<course>]
 - `enc_vel/raw` (`geometry_msgs/TwistWithCovarianceStamped`) - Simulated encoder velocity
 - `ins_vel/raw` (`geometry_msgs/TwistWithCovarianceStamped`) - Simulated INS body frame velocity
 - `odom/global` (`nav_msgs/Odometry`) - Simulated INS odometry in `map` frame
-- `odom/ground_truth` (`nav_msgs/Odometry`) - Noiseless true pose in `map` frame
-(`child_frame_id = base_link_ground_truth`)
+- `odom/ground_truth` (`nav_msgs/Odometry`) - Noiseless true pose in `map` frame (`child_frame_id = base_link_ground_truth`)
 - `occupancy_grid/raw` (`nav_msgs/OccupancyGrid`) - Robot-centric occupancy grid from static obstacle map
 - `occupancy_grid/ground_truth` (`nav_msgs/OccupancyGrid`) - Full static obstacle map (latched)
 
@@ -192,8 +186,7 @@ ros2 launch bringup navigation.launch.py mode:=<mode> [course:=<course>]
 - `course`: Course profile in `courses/` to load waypoints from, default `default` (required for `autonav`)
 
 ### Modes
-All modes run occupancy grid transform + path planning + path smoothing + path tracking. `autonav` additionally runs
-mission control + goal selection + recovery.
+All modes run occupancy grid transform + path planning + path smoothing + path tracking. `autonav` additionally runs mission control + goal selection + recovery.
 
 ### Subscribed Topics
 - `goal` (`geometry_msgs/PointStamped`) - Goal for path planning (`self_drive`, `nav_test` only)
@@ -247,8 +240,7 @@ ros2 launch bringup visualization.launch.py
 Starts Foxglove bridge on `ws://localhost:8765`.
 
 ### Occupancy Grid Voxel Visualization
-Subscribes to `occupancy_grid` and republishes it as a `foxglove_msgs/VoxelGrid` on `occupancy_grid/voxels` for 3D voxel
-visualization in Foxglove Studio.
+Subscribes to `occupancy_grid` and republishes it as a `foxglove_msgs/VoxelGrid` on `occupancy_grid/voxels` for 3D voxel visualization in Foxglove Studio.
 
 ### Subscribed Topics
 - `occupancy_grid` (`nav_msgs/OccupancyGrid`) - Occupancy grid input

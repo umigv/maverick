@@ -1,7 +1,5 @@
 # led_driver
-Drives the safety-light LED strip over serial based on the robot's current e-stop value, teleop activity, and mission
-state.
-Waits up to `ready_timeout_s` for the Arduino to send `READY` before starting.
+Drives the safety-light LED strip over serial based on the robot's current e-stop value, teleop activity, and mission state. Waits up to `ready_timeout_s` for the Arduino to send `READY` before starting.
 
 ## Read Files
 - `estop_file_path` - e-stop state written by `estop_driver`
