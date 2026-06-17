@@ -65,7 +65,7 @@ def convert(waypoints: list[DmsWaypoint]) -> list[DecimalWaypoint]:
 def write(waypoints: list[DecimalWaypoint], output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", newline="") as f:
-        writer = csv.writer(f)
+        writer = csv.writer(f, lineterminator="\n")
         writer.writerow(["name", "latitude", "longitude"])
         for name, latitude, longitude in waypoints:
             # 7dp for latitude / longitude. See waypoints/README.md for the rationale; keep these in sync.

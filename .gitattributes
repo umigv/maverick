@@ -1,0 +1,18 @@
+# Normalize all text files to LF in the repo, regardless of platform
+* text=auto eol=lf
+
+# Binary files: never apply EOL conversion or text diffs
+*.wav  binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.stl  binary
+*.dae  binary
+*.pcd  binary
+*.db3  binary
+*.pt   binary
+*.onnx binary
+
+# Generated artifacts: collapse in diffs and exclude from GitHub language stats
+waypoints/decimal/** linguist-generated=true
