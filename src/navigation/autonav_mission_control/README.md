@@ -70,14 +70,8 @@ unbalanced or out of order.
 [utils README](../../core/utils/README.md#utilsqos).
 
 ### MissionState fields
-| Field | Type | Description |
-|---|---|---|
-| `in_recovery` | `bool` | Robot is in a recovery maneuver |
-| `in_ramp_approach` | `bool` | Robot is within `ramp_approach_radius_m` of a ramp waypoint |
-| `in_no_mans_land` | `bool` | Robot is between a no man's land enter and exit waypoint |
-| `lane_detection_enabled` | `bool` | Lane detection should be active |
-| `mission_complete` | `bool` | Set `mission_complete_delay_s` seconds after the final waypoint is reached |
-| `current_waypoint` | `geometry_msgs/PointStamped` | Map-frame position of the current target waypoint; after the final waypoint, a far point projected along the robot's heading |
+See [`MissionState.msg`](../../core/maverick_msgs/msg/MissionState.msg) for the field definitions and what each one
+means for subscribers.
 
 ## Services
 | Service | Type | Description |
@@ -104,65 +98,8 @@ There are two kinds of state in this node, and which kind a new field is determi
 The `on_change` hook bridges the two: when a polled transition should kick off event-driven machinery, the hook is the 
 place to start it (e.g. reaching the final waypoint starts the mission-complete timer).
 
-State is driven by a compute-and-apply loop in `update_mission_state`. Each entry in the loop is a `StateUpdate`:
-
-```python
-class StateUpdate(NamedTuple):
-    attr: str  # name of the state attribute on AutonavMissionControl
-    compute: Callable[[], tuple[Any, str | None]]  # returns (new value, optional log message)
-    on_change: Callable[[Any, Any], None] | None = None  # called with (old value, new value)
-```
-
-To add a new state field:
-
-**1. Add the field to `__init__`:**
-```python
-self.my_flag: bool = False
-```
-
-**2. Write a compute function** that returns `(new_value, log_message | None)`. The function should read from `self` 
-freely but never write to it. All state writes happen in the loop after all values are computed:
-```python
-def compute_my_flag(self) -> tuple[bool, str | None]:
-    assert self.robot_pose is not None
-    new_val = ...  # derive from self.robot_pose, self.waypoints, self.config, etc.
-    return new_val, "My flag activated" if new_val else None
-```
-
-**3. Add it to the updates list** in `update_mission_state`:
-```python
-StateUpdate("my_flag", self.compute_my_flag),
-```
-
-**4. Add the field to the message definition** in `maverick_msgs/msg/MissionState.msg` (with a comment describing what 
-it means for subscribers), then rebuild `maverick_msgs` so the updated message is generated.
-
-**5. Publish it** by setting the new field on the `MissionState` message in `publish_state`.
-
-### On-change callbacks
-If you need a side effect when a field transitions (e.g. starting a timer, calling a service), pass an `on_change` 
-callback (defaults to `None`). The callback receives `(old_value, new_value)` and is called after logging but before 
-the new value is written:
-
-```python
-def _on_my_flag_change(self, old: bool, new: bool) -> None:
-    if not old and new:  # False → True transition
-        ...
-
-# in the updates list:
-StateUpdate("my_flag", self.compute_my_flag, on_change=self._on_my_flag_change),
-```
-
-For example, if you want to set a flag for 20 seconds after exiting no man's land (i.e. change goal selection behavior),
-you can add a change function to `compute_no_mans_land`, set the flag and create a ros timer for 20 seconds, then clear
-the flag within the timer. 
-
-## Config Parameters (`AutonavMissionControlConfig`)
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `waypoints_file_path` | `Path` | required | Path to the JSON waypoints file |
-| `waypoint_reached_threshold_m` | `float` | `0.5` | Distance (m) within which a waypoint is considered reached |
-| `ramp_approach_radius_m` | `float` | `12.0` | Distance (m) from a `ramp_approach` waypoint at which `in_ramp_approach` activates |
-| `lane_detection_enable_near_exit_radius_m` | `float` | `3.0` | Distance (m) from the next `no_mans_land_exit` waypoint within which lane detection is re-enabled |
-| `mission_complete_delay_s` | `float` | `10.0` | Time (s) after the final waypoint is reached before `mission_complete` is set |
-| `map_frame_id` | `str` | `"map"` | TF frame that odometry must be published in |
+To add a polled field: add the attribute in `__init__`, write a pure compute function returning 
+`(new_value, log_message | None)`, register it as a `StateUpdate` in the updates list in `update_mission_state`, add 
+the field to `MissionState.msg` (and rebuild `maverick_msgs`), and set it in `publish_state`. Follow the existing 
+fields in [`autonav_mission_control.py`](autonav_mission_control/autonav_mission_control.py): `in_ramp_approach` is the 
+simplest template, and `current_waypoint_index` shows an `on_change` side effect (starting the mission-complete timer).

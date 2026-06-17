@@ -14,15 +14,5 @@ EKF (`ekf_global`) can still fuse this with GPS and absolute IMU for a map-frame
 ## TF Broadcasts
 - `odom → base_link` - derived from `odom_frame_id` and `base_frame_id` config
 
-## Config Parameters
-| Parameter | Default | Description |
-|---|---|---|
-| `pose_x_variance_m2` | `0.01` | Pose covariance for x (m²) |
-| `pose_y_variance_m2` | `0.01` | Pose covariance for y (m²) |
-| `pose_yaw_variance_rad2` | `0.01` | Pose covariance for yaw (rad²) |
-| `max_dt_s` | `1.0` | Maximum allowed dt (s) between encoder messages; updates exceeding this are dropped |
-| `odom_frame_id` | `odom` | Parent frame for odometry and TF |
-| `base_frame_id` | `base_link` | Child frame for odometry and TF |
-
 Twist covariance is propagated directly from the encoder driver message. Pose covariance is fixed diagonal. Tune these
 based on your encoder's expected drift characteristics.

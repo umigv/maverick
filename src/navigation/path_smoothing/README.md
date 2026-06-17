@@ -10,8 +10,3 @@ details.
 
 ## Published Topics
 - `smoothed_path` (`nav_msgs/msg/Path`) — Smoothed path
-
-## Config Parameters
-| Parameter | Default | Description |
-|---|---|---|
-| `chaikin_iterations` | `3` | Number of Chaikin corner-cutting iterations. Each iteration halves corner sharpness. Set to `0` to disable smoothing |

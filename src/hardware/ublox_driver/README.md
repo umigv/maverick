@@ -17,14 +17,6 @@ Covariance is filled using u-blox accuracy fields:
 ## Published Topics
 - `ublox/gps` (`sensor_msgs/NavSatFix`) - processed GPS fix messages
 
-## Config Parameters
-| Parameter | Default | Description |
-|---|---|---|
-| `serial_port` | `/dev/ublox` | Serial port device path for the GPS receiver |
-| `baud_rate` | `460800` | Serial baud rate for communication |
-| `poll_period_s` | `0.1` | Period in seconds between GPS polls |
-| `ublox_frame_id` | `gps_link` | TF frame ID used in published GPS messages |
-
 ## GPS Configurations
 > Note: Message “rate” in `CFG-MSG` is **messages per navigation cycle**.  
 > With `CFG-RATE` set to **10 Hz**, a message rate of:
