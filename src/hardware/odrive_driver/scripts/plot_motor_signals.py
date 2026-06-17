@@ -76,10 +76,10 @@ class MotorSignalPlotter(Node):
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
-        "--window", type=int, default=500, metavar="N", help="number of samples to display (default: 500)"
+        "--window", type=int, default=500, metavar="N", help="Number of samples to display (default: 500)"
     )
     parser.add_argument(
-        "--frame-rate", type=float, default=10.0, metavar="HZ", help="plot redraw rate in Hz (default: 10)"
+        "--frame-rate", type=float, default=10.0, metavar="HZ", help="Plot redraw rate in Hz (default: 10)"
     )
     args = parser.parse_args()
 
