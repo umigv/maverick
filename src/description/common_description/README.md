@@ -22,8 +22,7 @@ All component macros follow a consistent pattern:
 - **`parent`** — parent link to attach to, defaults to `base_link`
 - **`*joint_origin`** — block parameter specifying the pose of the component's mount point relative to `parent`
 
-The mount point (`{name}_base_link`) is always at the physically meaningful reference location (e.g. bottom center of 
-housing, ARP for antennas). The primary measurement frame (`{name}_link`) is offset from there.
+The mount point (`{name}_base_link`) is always at the physically meaningful reference location (e.g. bottom center of housing, ARP for antennas). The primary measurement frame (`{name}_link`) is offset from there.
 
 
 ## Physics
