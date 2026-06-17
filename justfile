@@ -62,6 +62,12 @@ alias device name:
 unalias name:
     python3 scripts/remove_device_alias.py {{name}}
 
+# ── Waypoints ──────────────────────────────────────────────────────────────────
+
+# Convert all packed-DMS waypoints (waypoints/dms/) to decimal degrees (waypoints/decimal/)
+convert-waypoints:
+    python3 scripts/convert_waypoint.py
+
 # ── ROS 2 ──────────────────────────────────────────────────────────────────────
 
 # Capture a single message from a topic to a file
