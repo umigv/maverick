@@ -77,10 +77,18 @@ class AutonavMissionControl(Node):
             self.get_logger().fatal(f"{self.config.waypoints_file_path} has an empty waypoints list")
             raise SystemExit(1)
 
+        # Only the lat/lon waypoints need fromLL service conversion; waypoints given as x/y don't need it.
+        # Skip creating/waiting on the service entirely when no waypoint requires it.
         from_ll_client = self.create_client(FromLL, "fromLL")
-        self.get_logger().info("Waiting for fromLL service...")
-        from_ll_client.wait_for_service()
-        self.get_logger().info("fromLL service available, loading waypoints")
+        if any("latitude" in w for w in data["waypoints"]):
+            self.get_logger().info("Waiting for fromLL service...")
+            timeout = self.config.from_ll_service_timeout_s
+            if not from_ll_client.wait_for_service(timeout_sec=timeout):
+                self.get_logger().fatal(
+                    f"fromLL service not available after {timeout:g}s; cannot convert lat/lon waypoints"
+                )
+                raise SystemExit(1)
+            self.get_logger().info("fromLL service available, loading waypoints")
 
         waypoints = []
         for w in data["waypoints"]:
