@@ -90,7 +90,6 @@ class AutonavMissionControl(Node):
         waypoints = []
         for w in data["waypoints"]:
             if "latitude" in w:
-                assert from_ll_client is not None
                 request = FromLL.Request(ll_point=GeoPoint(latitude=w["latitude"], longitude=w["longitude"]))
                 future = from_ll_client.call_async(request)
                 rclpy.spin_until_future_complete(self, future)
