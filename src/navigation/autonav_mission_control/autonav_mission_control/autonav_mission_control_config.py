@@ -14,6 +14,8 @@ class AutonavMissionControlConfig:
             detection is re-enabled. Allows the robot to see lane markings as it approaches the zone exit.
         mission_complete_delay_s: Time (s) after the final waypoint is reached before mission_complete is set. Normal
             goal selection continues during this window.
+        from_ll_service_timeout_s: Time (s) to wait for the fromLL service before giving up on lat/lon waypoint
+            conversion.
         map_frame_id: TF frame ID for the map coordinate frame. Global odometry must publish in this frame.
     """
 
@@ -22,6 +24,7 @@ class AutonavMissionControlConfig:
     ramp_approach_radius_m: float = 12.0
     lane_detection_enable_near_exit_radius_m: float = 3.0
     mission_complete_delay_s: float = 10.0
+    from_ll_service_timeout_s: float = 10.0
     map_frame_id: str = "map"
 
     def __post_init__(self) -> None:
@@ -33,3 +36,5 @@ class AutonavMissionControlConfig:
             raise ValueError("AutonavMissionControlConfig: lane_detection_enable_near_exit_radius_m must be >= 0")
         if self.mission_complete_delay_s < 0:
             raise ValueError("AutonavMissionControlConfig: mission_complete_delay_s must be >= 0")
+        if self.from_ll_service_timeout_s <= 0:
+            raise ValueError("AutonavMissionControlConfig: from_ll_service_timeout_s must be > 0")

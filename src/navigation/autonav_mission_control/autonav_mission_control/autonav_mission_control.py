@@ -82,8 +82,11 @@ class AutonavMissionControl(Node):
         from_ll_client = self.create_client(FromLL, "fromLL")
         if any("latitude" in w for w in data["waypoints"]):
             self.get_logger().info("Waiting for fromLL service...")
-            if not from_ll_client.wait_for_service(timeout_sec=10.0):
-                self.get_logger().fatal("fromLL service not available after 10s; cannot convert lat/lon waypoints")
+            timeout = self.config.from_ll_service_timeout_s
+            if not from_ll_client.wait_for_service(timeout_sec=timeout):
+                self.get_logger().fatal(
+                    f"fromLL service not available after {timeout:g}s; cannot convert lat/lon waypoints"
+                )
                 raise SystemExit(1)
             self.get_logger().info("fromLL service available, loading waypoints")
 
