@@ -31,7 +31,6 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
             ("imu", "imu/raw"),
             ("ins_vel", "ins_vel/raw"),
             ("odom", "odom/global"),
-            ("odom/ground_truth", "odom/ground_truth"),
         ],
     )
 
@@ -49,7 +48,6 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         remappings=[
             ("odom", "odom/ground_truth"),
             ("occupancy_grid", "occupancy_grid/raw"),
-            ("occupancy_grid/ground_truth", "occupancy_grid/ground_truth"),
         ],
     )
 

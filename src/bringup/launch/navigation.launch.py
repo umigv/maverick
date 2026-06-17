@@ -37,10 +37,6 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         ],
         remappings=[
             ("odom", "odom/global"),
-            ("fromLL", "fromLL"),
-            ("mission_state", "mission_state"),
-            ("request_recovery", "request_recovery"),
-            ("recovery_complete", "recovery_complete"),
         ],
     )
 
@@ -54,10 +50,6 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         remappings=[
             ("occupancy_grid", "occupancy_grid/transformed"),
             ("odom", "odom/local"),
-            ("mission_state", "mission_state"),
-            ("request_recovery", "request_recovery"),
-            ("goal", "goal"),
-            ("goal_selection_debug", "goal_selection_debug"),
         ],
     )
 
@@ -71,8 +63,6 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         remappings=[
             ("occupancy_grid", "occupancy_grid/inflated"),
             ("odom", "odom/local"),
-            ("goal", "goal"),
-            ("path", "path"),
         ],
     )
 
@@ -80,10 +70,6 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         package="path_smoothing",
         executable="path_smoothing",
         name="path_smoothing",
-        remappings=[
-            ("path", "path"),
-            ("smoothed_path", "smoothed_path"),
-        ],
     )
 
     path_tracking_node = Node(
@@ -97,9 +83,6 @@ def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
         remappings=[
             ("odom", "odom/local"),
             ("path", "smoothed_path"),
-            ("nav_cmd_vel", "nav_cmd_vel"),
-            ("smoothed_path", "smoothed_path"),
-            ("mission_state", "mission_state"),
         ],
     )
 
