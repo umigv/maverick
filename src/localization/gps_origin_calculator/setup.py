@@ -16,7 +16,7 @@ setup(
     maintainer_email="ryanliao@umich.edu",
     description="GPS origin calculator node",
     license="Apache-2.0",
-    tests_require=["pytest"],
+    extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
             "gps_origin_calculator = gps_origin_calculator.gps_origin_calculator:main",

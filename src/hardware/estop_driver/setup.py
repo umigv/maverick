@@ -16,7 +16,7 @@ setup(
     maintainer_email="ericbi@umich.edu",
     description="Serial e-stop monitor driver",
     license="Apache-2.0",
-    tests_require=["pytest"],
+    extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
             "estop_driver = estop_driver.estop_driver:main",

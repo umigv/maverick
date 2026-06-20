@@ -16,7 +16,7 @@ setup(
     maintainer_email="ryanliao@umich.edu",
     description="Simulates an occupancy grid from a static obstacle map for use in simulation",
     license="Apache-2.0",
-    tests_require=["pytest"],
+    extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
             "occupancy_grid_simulator = occupancy_grid_simulator.occupancy_grid_simulator:main",

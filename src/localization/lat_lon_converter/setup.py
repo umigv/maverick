@@ -16,7 +16,7 @@ setup(
     maintainer_email="ryanliao@umich.edu",
     description="Converts GPS latitude/longitude to map-frame points via the fromLL service",
     license="Apache-2.0",
-    tests_require=["pytest"],
+    extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
             "lat_lon_converter = lat_lon_converter.lat_lon_converter:main",

@@ -16,7 +16,7 @@ setup(
     maintainer_email="hannerd@umich.edu",
     description="Recovery behavior node with ultrasonic obstacle avoidance",
     license="Apache-2.0",
-    tests_require=["pytest"],
+    extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
             "recovery_behavior = recovery_behavior.recovery_executable:main",
