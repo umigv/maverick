@@ -16,5 +16,5 @@ setup(
     maintainer_email="ryanliao@umich.edu",
     description="Utility helpers for nav stack",
     license="Apache-2.0",
-    tests_require=["pytest"],
+    extras_require={"test": ["pytest"]},
 )

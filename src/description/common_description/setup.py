@@ -20,7 +20,7 @@ setup(
     maintainer_email="ryanliao@umich.edu",
     description="Common xacro macros for sensors, wheels, and physics",
     license="Apache-2.0",
-    extras_require={},
+    extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [],
     },

@@ -16,7 +16,7 @@ setup(
     maintainer_email="ryanliao@umich.edu",
     description="Simulates enc_vel, imu, and gps sensor topics with Gaussian noise and drift",
     license="Apache-2.0",
-    tests_require=["pytest"],
+    extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
             "sensor_simulator = sensor_simulator.sensor_simulator:main",

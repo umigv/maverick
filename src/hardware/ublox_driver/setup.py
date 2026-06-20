@@ -16,7 +16,7 @@ setup(
     maintainer_email="ryanliao@umich.edu",
     description="U-Blox ZED-F9P GPS data publisher",
     license="Apache-2.0",
-    tests_require=["pytest"],
+    extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": ["ublox_driver = ublox_driver.ublox_driver:main"],
     },

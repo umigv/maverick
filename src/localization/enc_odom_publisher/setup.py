@@ -16,7 +16,7 @@ setup(
     maintainer_email="ryanliao@umich.edu",
     description="Encoder odometry publisher node",
     license="Apache-2.0",
-    tests_require=["pytest"],
+    extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
             "enc_odom_publisher = enc_odom_publisher.enc_odom_publisher:main",
