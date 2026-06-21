@@ -1,31 +1,31 @@
 {
     "datum": {
-        "latitude": 42.66808296,
-        "longitude": -83.21891701,
-        "altitude": 237.821
+        "latitude": 42.668083,
+        "longitude": -83.218917,
+        "altitude": 237.82
     },
     "waypoints": [
         {
-            "latitude": 42.667927706,
-            "longitude": -83.219327642,
+            "latitude": 42.6679277,
+            "longitude": -83.2193276,
             "no_mans_land_enter": true
         },
         {
-            "latitude": 42.668076633,
-            "longitude": -83.219359158
+            "latitude": 42.6680766,
+            "longitude": -83.2193592
         },
         {
-            "latitude": 42.668120644,
-            "longitude": -83.219360608
+            "latitude": 42.6681206,
+            "longitude": -83.2193606
         },
         {
-            "latitude": 42.668269722,
-            "longitude": -83.219340303,
+            "latitude": 42.6682697,
+            "longitude": -83.2193403,
             "no_mans_land_exit": true
         },
         {
-            "latitude": 42.66808296,
-            "longitude": -83.21891701,
+            "latitude": 42.668083,
+            "longitude": -83.218917,
             "ramp_approach": true
         }
     ]

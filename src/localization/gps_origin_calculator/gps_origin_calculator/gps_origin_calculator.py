@@ -79,10 +79,11 @@ class GpsOriginCalculator(Node):
 
     def compute_and_print_origin(self) -> None:
         self.get_logger().info(f"Collected {len(self.samples)} samples:")
-        latitude = median(sample.latitude for sample in self.samples)
-        longitude = median(sample.longitude for sample in self.samples)
-        altitude = median(sample.altitude for sample in self.samples)
-        self.get_logger().info(f"Origin is lat={latitude:.8f}, lon={longitude:.8f}, alt={altitude:.3f}m")
+        # 7dp for lat / lon, 2dp for alt. See waypoints/README.md for the rationale; keep these in sync.
+        latitude = round(median(sample.latitude for sample in self.samples), 7)
+        longitude = round(median(sample.longitude for sample in self.samples), 7)
+        altitude = round(median(sample.altitude for sample in self.samples), 2)
+        self.get_logger().info(f"Origin is lat={latitude}, lon={longitude}, alt={altitude}m")
 
         if self.config.output_file.name:
             self.write_origin_to_file(latitude, longitude, altitude)

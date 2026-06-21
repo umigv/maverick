@@ -4,12 +4,12 @@
 import subprocess
 import sys
 from pathlib import Path
-from typing import Literal, overload
+from typing import Literal, NoReturn, overload
 
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def die(msg: str) -> None:
+def die(msg: str) -> NoReturn:
     """Print an error message to stderr and exit with code 1."""
     print(f"ERROR: {msg}", file=sys.stderr)
     sys.exit(1)
