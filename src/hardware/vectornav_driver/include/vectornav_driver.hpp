@@ -18,27 +18,6 @@
 
 #include "transforms.hpp"
 
-#if __linux__
-#include <fcntl.h>
-#include <linux/serial.h>
-#include <sys/ioctl.h>
-
-inline bool optimize_serial_communication(const std::string& port) {
-    const int fd = ::open(port.c_str(), O_RDWR | O_NOCTTY);
-    if (fd == -1) {
-        return false;
-    }
-    struct serial_struct serial {};
-    ioctl(fd, TIOCGSERIAL, &serial);
-    serial.flags |= ASYNC_LOW_LATENCY;
-    ioctl(fd, TIOCSSERIAL, &serial);
-    ::close(fd);
-    return true;
-}
-#else
-inline bool optimize_serial_communication(const std::string&) { return false; }
-#endif
-
 inline std::optional<VN::Sensor::BaudRate> to_baud_rate(int baud) {
     static const std::unordered_map<int, VN::Sensor::BaudRate> map = {
         {9600, VN::Sensor::BaudRate::Baud9600},     {19200, VN::Sensor::BaudRate::Baud19200},
@@ -229,10 +208,6 @@ class VectornavDriver : public rclcpp::Node {
 
     [[nodiscard]] auto connect() -> bool {
         RCLCPP_INFO(get_logger(), "Starting Connection...");
-
-        if (!optimize_serial_communication(port_)) {
-            RCLCPP_WARN(get_logger(), "Failed to optimize serial communication for %s", port_.c_str());
-        }
 
         if (const VN::Error error = vs_.autoConnect(port_); error != VN::Error::None) {
             RCLCPP_ERROR(get_logger(), "Unable to connect to device %s", port_.c_str());
