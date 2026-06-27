@@ -1,6 +1,4 @@
-# EKF parameter reference:
-# https://github.com/cra-ros-pkg/robot_localization/tree/humble-devel/params
-
+# Reference: https://github.com/cra-ros-pkg/robot_localization/blob/humble-devel/params/ekf.yaml
 ekf_local:
   ros__parameters:
     frequency: 100.0
