@@ -52,13 +52,13 @@ class EstopDriver(Node):
     def write_estop_state(self, value: str) -> None:
         temp_file_path = self.config.estop_file_path.with_suffix(self.config.estop_file_path.suffix + ".tmp")
 
-        with open(temp_file_path, "w") as f:
+        with temp_file_path.open("w") as f:
             f.write(value)
             f.flush()
             os.fsync(f.fileno())
 
         # Atomic replace so readers never see a half-written file.
-        os.replace(temp_file_path, self.config.estop_file_path)
+        temp_file_path.replace(self.config.estop_file_path)
 
     def destroy_node(self) -> None:
         if self.serial is not None and self.serial.is_open:

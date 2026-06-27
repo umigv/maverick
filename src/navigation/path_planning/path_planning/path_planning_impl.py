@@ -23,6 +23,7 @@ def generate_path(
     config: PathPlanningConfig,
 ) -> list[Point2d] | None:
     """Generate a good path for the robot to follow towards the goal using the A* search algorithm.
+
     https://en.wikipedia.org/wiki/A*_search_algorithm.
 
     Unknown cells within the asymmetric forward/sideways bounds around the start are treated as traversable, allowing A*
@@ -103,6 +104,7 @@ def pull_string(
     config: PathPlanningConfig,
 ) -> list[Point2d]:
     """Remove unnecessary waypoints from a path using the string-pulling algorithm.
+
     https://digestingduck.blogspot.com/2010/03/simple-stupid-funnel-algorithm.html
 
     From each waypoint, finds the furthest subsequent waypoint reachable in a straight

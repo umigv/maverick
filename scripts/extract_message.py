@@ -18,6 +18,7 @@ Example:
 """
 
 import sys
+from pathlib import Path
 
 from common import run
 
@@ -32,7 +33,7 @@ def main() -> None:
     ros_type = run("ros2", "topic", "type", topic, capture_output=True)
     echo_output = run("ros2", "topic", "echo", "--once", "--full-length", topic, capture_output=True)
 
-    with open(output, "w") as f:
+    with Path(output).open("w") as f:
         f.write(f"# ros2_type: {ros_type.strip()}\n")
         f.write(echo_output)
 

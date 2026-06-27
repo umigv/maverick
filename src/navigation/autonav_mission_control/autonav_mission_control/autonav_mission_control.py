@@ -67,7 +67,7 @@ class AutonavMissionControl(Node):
         self.publish_state()
 
     def load_waypoints(self) -> list[Waypoint]:
-        with open(self.config.waypoints_file_path) as f:
+        with self.config.waypoints_file_path.open() as f:
             data = json.load(f)
 
         if "waypoints" not in data:
@@ -197,10 +197,10 @@ class AutonavMissionControl(Node):
 
         if waypoint.no_mans_land_enter:
             return True, "Entering no man's land"
-        elif waypoint.no_mans_land_exit:
+
+        if waypoint.no_mans_land_exit:
             return False, "Exiting no man's land"
-        else:
-            return self.in_no_mans_land, None
+        return self.in_no_mans_land, None
 
     def compute_waypoint_reached(self) -> tuple[int, str | None]:
         assert self.robot_pose is not None
@@ -212,14 +212,13 @@ class AutonavMissionControl(Node):
         new_index = self.current_waypoint_index + 1
         if new_index >= len(self.waypoints):
             return new_index, f"Waypoint {self.current_waypoint_index} reached, final waypoint"
-        else:
-            return new_index, f"Waypoint {self.current_waypoint_index} reached, advancing to {new_index}"
+        return new_index, f"Waypoint {self.current_waypoint_index} reached, advancing to {new_index}"
 
     def on_waypoint_index_change(self, _old: int, new: int) -> None:
         if new >= len(self.waypoints) and self.mission_complete_timer is None:
             assert self.robot_pose is not None
-            VERY_BIG_NUMBER = 10000.0  # ensure the goal is far enough that it won't be reached during normal operation
-            self.mission_complete_goal = self.robot_pose.local_to_world(Point2d(x=VERY_BIG_NUMBER, y=0.0))
+            # ensure the goal is far enough that it won't be reached during normal operation
+            self.mission_complete_goal = self.robot_pose.local_to_world(Point2d(x=10000.0, y=0.0))
             self.mission_complete_timer = self.create_timer(self.config.mission_complete_delay_s, self.complete_mission)
 
     def complete_mission(self) -> None:

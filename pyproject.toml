@@ -12,6 +12,8 @@ requires-python = ">=3.10"
 tooling = [
     "ruff>=0.6.0",
     "mypy>=1.8",
+    "types-PyYAML",
+    "types-pyserial",
 ]
 
 [tool.setuptools]
@@ -20,94 +22,103 @@ packages = []
 [tool.ruff]
 target-version = "py310"
 line-length = 120
-exclude = [
-    ".git",
+extend-exclude = [
     "build",
     "install",
     "log",
-    "**/__pycache__",
-    "**/*.egg-info",
-    "**/.pytest_cache",
-    "**/.mypy_cache",
-    "**/resource",
 ]
 
 [tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
+docstring-code-format = true
 
 [tool.ruff.lint]
 select = [
-    "E",   # pycodestyle errors
-    "F",   # pyflakes
-    "I",   # import sorting
-    "B",   # bugbear
-    "UP",  # pyupgrade
-    "SIM", # simplify
-    "RUF", # ruff rules
-    "A",   # builtins shadowing
-    "C4",  # comprehension optimizations
-    "PIE", # misc correctness
-    "ISC"  # string concat issues
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "I",    # import sorting
+    "B",    # bugbear
+    "UP",   # pyupgrade
+    "SIM",  # simplify
+    "RUF",  # ruff rules
+    "A",    # builtins shadowing
+    "C4",   # comprehension optimizations
+    "PIE",  # misc correctness
+    "ISC",  # string concat issues
+    "PTH",  # use pathlib instead of os.path
+    "RET",  # return-statement hygiene
+    "FURB", # refurb - modernizations
+    "DTZ",  # timezone-aware datetimes
+    "ICN",  # import conventions (numpy as np, etc.)
+    "LOG",  # logging-call correctness
+    "N",    # pep8 naming
+    "D",    # pydocstyle (replaces ament_pep257)
 ]
 ignore = [
-    "E501", # formatter handles line wrapping
+    "E501", # allow long lines that the formatter does not rewrite
+    "D1",   # don't require docstrings; only check formatting of the ones that exist
 ]
 
-[tool.ruff.lint.per-file-ignores]
-"**/test/**.py" = [
-    "B011", # asserts, tests use them
-]
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
 
 [tool.mypy]
 python_version = "3.10"
+
+# Output
 pretty = true
 show_error_codes = true
-warn_unused_ignores = true
-warn_redundant_casts = true
-warn_unreachable = true
+
+# Strictness
 check_untyped_defs = true
-exclude = [
-    "build/",
-    "install/",
-    "log/",
-    "(^|/)setup\\.py$",
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_ignores = true
+strict_equality = true
+extra_checks = true
+enable_error_code = [
+    "ignore-without-code", # require # type: ignore[code], not bare ignores
+    "redundant-expr",
+    "possibly-undefined",
+    "truthy-bool",
 ]
+
+# Module discovery and import resolution
 namespace_packages = true
 explicit_package_bases = true
 ignore_missing_imports = false
-disable_error_code = ["import-untyped"]
+exclude = [
+    "(^|/)(build|install|log)/",
+    "(^|/)setup\\.py$",
+]
 
 [[tool.mypy.overrides]]
+# Modules with no usable type information: ROS 2 generated interfaces/packages and third-party libraries that ship no
+# stubs or py.typed marker. Keep alphabetical.
 module = [
-    "rclpy.*",
+    "ament_index_python.*",
     "builtin_interfaces.*",
-    "std_msgs.*",
-    "geometry_msgs.*",
-    "geographic_msgs.*",
-    "nav_msgs.*",
-    "sensor_msgs.*",
-    "std_srvs.*",
     "foxglove_msgs.*",
-    "visualization_msgs.*",
-
-    "launch",
+    "geographic_msgs.*",
+    "geometry_msgs.*",
     "launch.*",
-    "launch_ros",
     "launch_ros.*",
-
-    "ament_copyright.*",
-    "ament_flake8.*",
-    "ament_pep257.*",
-
-    "tf2_ros.*",
-    "tf_transformations.*",
-    "tf2_geometry_msgs",
-
+    "matplotlib.*",
     "maverick_msgs.*",
+    "nav_msgs.*",
+    "odrive.*",
+    "playsound",
+    "pyubx2",
+    "rclpy.*",
     "robot_localization.*",
-    "pyproj",
-    "PyKDL",
+    "sensor_msgs.*",
+    "std_msgs.*",
+    "std_srvs.*",
+    "tf2_geometry_msgs.*",
+    "tf2_ros.*",
+    "visualization_msgs.*",
 ]
 ignore_missing_imports = true
 disable_error_code = ["attr-defined"]

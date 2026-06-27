@@ -36,8 +36,12 @@ class PathSmoother(Node):
         )
 
     def smooth_chaikin(self, path: list[Point2d]) -> list[Point2d]:
-        """Chaikin corner cutting: each iteration inserts points at 1/4 and 3/4 of every segment,
-        rounding sharp corners while keeping the start and end waypoints fixed.
+        """
+        Smooths path with Chaikin corner cutting.
+
+        Each iteration inserts points at 1/4 and 3/4 of every segment, rounding sharp corners while keeping the start
+        and end waypoints fixed.
+
         https://www.cs.unc.edu/~dm/UNC/COMP258/LECTURES/Chaikins-Algorithm.pdf
         """
         if len(path) < 2 or self.config.chaikin_iterations == 0:

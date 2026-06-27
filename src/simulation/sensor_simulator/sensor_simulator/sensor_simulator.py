@@ -122,18 +122,17 @@ class SensorSimulator(Node):
         self.vn_wz = self.cmd_vel.angular.z + self.vn_drift_wz + random.gauss(0.0, vn.wz_noise_std_radps)
         # fmt: on
 
-        stamp = now.to_msg()
-        self.publish_ground_truth(stamp)
-        self.publish_enc_vel(stamp)
-        self.publish_imu(stamp)
-        self.publish_ins_vel(stamp)
-        self.publish_ins_odom(stamp)
-        self.publish_gps(stamp)
+        self.publish_ground_truth(now)
+        self.publish_enc_vel(now)
+        self.publish_imu(now)
+        self.publish_ins_vel(now)
+        self.publish_ins_odom(now)
+        self.publish_gps(now)
 
-    def publish_ground_truth(self, stamp) -> None:
+    def publish_ground_truth(self, time: Time) -> None:
         self.tf_broadcaster.sendTransform(
             TransformStamped(
-                header=Header(stamp=stamp, frame_id=self.config.map_frame_id),
+                header=Header(stamp=time.to_msg(), frame_id=self.config.map_frame_id),
                 child_frame_id=self.config.ground_truth_base_frame_id,
                 transform=Transform(
                     translation=Vector3(x=self.position.x, y=self.position.y, z=0.0),
@@ -144,7 +143,7 @@ class SensorSimulator(Node):
 
         self.ground_truth_publisher.publish(
             Odometry(
-                header=Header(stamp=stamp, frame_id=self.config.map_frame_id),
+                header=Header(stamp=time.to_msg(), frame_id=self.config.map_frame_id),
                 child_frame_id=self.config.ground_truth_base_frame_id,
                 pose=PoseWithCovariance(
                     pose=Pose(
@@ -156,7 +155,7 @@ class SensorSimulator(Node):
             )
         )
 
-    def publish_enc_vel(self, stamp) -> None:
+    def publish_enc_vel(self, time: Time) -> None:
         enc = self.config.enc_vel
 
         enc_vel_cov = [0.0] * 36
@@ -166,7 +165,7 @@ class SensorSimulator(Node):
 
         self.enc_vel_publisher.publish(
             TwistWithCovarianceStamped(
-                header=Header(stamp=stamp, frame_id=self.config.base_frame_id),
+                header=Header(stamp=time.to_msg(), frame_id=self.config.base_frame_id),
                 twist=TwistWithCovariance(
                     twist=Twist(
                         linear=Vector3(x=self.enc_vx),
@@ -177,7 +176,7 @@ class SensorSimulator(Node):
             )
         )
 
-    def publish_imu(self, stamp) -> None:
+    def publish_imu(self, time: Time) -> None:
         vn = self.config.vn300
 
         self.get_imu_transform()
@@ -209,7 +208,7 @@ class SensorSimulator(Node):
 
         self.imu_publisher.publish(
             Imu(
-                header=Header(stamp=stamp, frame_id=vn.imu_frame_id),
+                header=Header(stamp=time.to_msg(), frame_id=vn.imu_frame_id),
                 orientation=Rotation2d(imu_yaw).to_ros(),
                 orientation_covariance=orientation_cov,
                 angular_velocity=Vector3(z=self.vn_wz),
@@ -218,7 +217,7 @@ class SensorSimulator(Node):
             )
         )
 
-    def publish_ins_vel(self, stamp) -> None:
+    def publish_ins_vel(self, time: Time) -> None:
         vn = self.config.vn300
 
         cov = [0.0] * 36
@@ -228,7 +227,7 @@ class SensorSimulator(Node):
 
         self.ins_vel_publisher.publish(
             TwistWithCovarianceStamped(
-                header=Header(stamp=stamp, frame_id=self.config.vn300.ins_frame_id),
+                header=Header(stamp=time.to_msg(), frame_id=self.config.vn300.ins_frame_id),
                 twist=TwistWithCovariance(
                     twist=Twist(
                         linear=Vector3(x=self.vn_vx),
@@ -239,7 +238,7 @@ class SensorSimulator(Node):
             )
         )
 
-    def publish_ins_odom(self, stamp) -> None:
+    def publish_ins_odom(self, time: Time) -> None:
         vn = self.config.vn300
 
         pose_cov = [0.0] * 36
@@ -257,7 +256,7 @@ class SensorSimulator(Node):
 
         self.ins_odom_publisher.publish(
             Odometry(
-                header=Header(stamp=stamp, frame_id=self.config.map_frame_id),
+                header=Header(stamp=time.to_msg(), frame_id=self.config.map_frame_id),
                 child_frame_id=self.config.vn300.ins_frame_id,
                 pose=PoseWithCovariance(
                     pose=Pose(
@@ -276,7 +275,7 @@ class SensorSimulator(Node):
             )
         )
 
-    def publish_gps(self, stamp) -> None:
+    def publish_gps(self, time: Time) -> None:
         vn = self.config.vn300
         lon, lat, alt = self.from_enu.transform(self.vn_x, self.vn_y, 0.0)
 
@@ -290,7 +289,7 @@ class SensorSimulator(Node):
 
         self.gps_publisher.publish(
             NavSatFix(
-                header=Header(stamp=stamp, frame_id=vn.ins_frame_id),
+                header=Header(stamp=time.to_msg(), frame_id=vn.ins_frame_id),
                 status=NavSatStatus(status=NavSatStatus.STATUS_SBAS_FIX, service=NavSatStatus.SERVICE_GPS),
                 latitude=lat,
                 longitude=lon,
@@ -300,7 +299,7 @@ class SensorSimulator(Node):
             )
         )
 
-    def get_imu_transform(self):
+    def get_imu_transform(self) -> None:
         if self.imu_rotation_offset is not None:
             return
 
@@ -317,7 +316,8 @@ class SensorSimulator(Node):
 
     @staticmethod
     def ou_update(value: float, sigma: float, tau: float, dt: float) -> float:
-        """Does one iteration of Ornstein-Uhlenbeck process.
+        """Run one iteration of Ornstein-Uhlenbeck process.
+
         https://en.wikipedia.org/wiki/Ornstein%E2%80%93Uhlenbeck_process
 
         Args:

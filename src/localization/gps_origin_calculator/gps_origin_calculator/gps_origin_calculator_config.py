@@ -19,7 +19,7 @@ class GpsOriginCalculatorConfig:
     min_sample_duration_s: float = 60.0
     max_sample_duration_s: float = 90.0
     max_horizontal_stdev_m: float = math.sqrt(2)
-    output_file: Path = Path("")
+    output_file: Path = Path()
 
     def __post_init__(self) -> None:
         if self.min_samples_required <= 0:

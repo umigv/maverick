@@ -1,3 +1,5 @@
+from typing import Any
+
 import tf2_geometry_msgs  # noqa: F401 — registers PointStamped transform
 import tf2_ros
 import utils.config
@@ -125,7 +127,7 @@ class AutonavGoalSelection(Node):
     def build_debug_markers(self, debug: GoalSelector.DebugInfo) -> MarkerArray:
         assert self.robot_pose is not None
 
-        def marker(marker_id: int, marker_type: int, **kw) -> Marker:
+        def marker(marker_id: int, marker_type: int, **kw: Any) -> Marker:
             # Stamp omitted intentionally to avoid TF extrapolation errors in rviz
             header = Header(frame_id=self.config.world_frame_id)
             return Marker(header=header, ns="goal_selection", id=marker_id, type=marker_type, action=Marker.ADD, **kw)

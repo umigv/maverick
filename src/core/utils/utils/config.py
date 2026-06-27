@@ -1,6 +1,4 @@
 """
-utils.config
-
 Dataclass-backed ROS 2 parameter loading.
 
 `load(node, cls)` constructs a dataclass instance by reading ROS 2 parameters from `node`.
@@ -28,15 +26,17 @@ from dataclasses import dataclass
 from rclpy.node import Node
 import utils.config
 
+
 @dataclass
 class Weights:
     clearance: float  # required
     heading: float = 1.0
 
+
 @dataclass
 class PlannerConfig:
     weights: Weights
-    timeout_s: float       # required
+    timeout_s: float  # required
     max_iters: int = 10_000
 ```
 
@@ -67,6 +67,7 @@ class Planner(Node):
 from collections.abc import Callable
 from dataclasses import MISSING, Field, dataclass, fields, is_dataclass
 from pathlib import Path
+from types import GenericAlias
 from typing import Any, Generic, Literal, TypeVar, cast, get_args, get_origin, get_type_hints
 
 from rclpy.node import Node
@@ -89,7 +90,7 @@ class _Entry(Generic[RawT, FieldT]):
     serialize: Callable[[FieldT], RawT]  # field -> raw (when declaring with a default)
 
 
-_ENTRIES: dict[type, _Entry[Any, Any]] = {
+_ENTRIES: dict[type | GenericAlias, _Entry[Any, Any]] = {
     bool: _Entry(bool, Parameter.Type.BOOL, _identity, _identity),
     int: _Entry(int, Parameter.Type.INTEGER, _identity, _identity),
     float: _Entry(float, Parameter.Type.DOUBLE, _identity, _identity),
@@ -125,7 +126,7 @@ def _literal_entry(field_type: Any, key: str) -> _Entry[Any, Any]:
 
 
 def _field_default(f: "Field[Any]") -> Any:
-    """The field's declared default, or MISSING if the field is required."""
+    """Return the field's declared default, or MISSING if the field is required."""
     if f.default is not MISSING:
         return f.default
     if f.default_factory is not MISSING:
@@ -136,6 +137,7 @@ def _field_default(f: "Field[Any]") -> Any:
 def load(node: Node, cls: type[T]) -> T:
     """
     Load ROS 2 parameters from `node` into a dataclass instance of type `cls`.
+
     Args:
         node: ROS 2 node providing parameters.
         cls: Dataclass type to construct.

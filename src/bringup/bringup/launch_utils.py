@@ -1,5 +1,6 @@
 import json
-from typing import Literal, get_args
+from pathlib import Path
+from typing import Literal, cast, get_args
 
 import yaml
 from ament_index_python.packages import get_package_share_directory
@@ -17,14 +18,14 @@ def format_mode_description(descriptions: dict[Mode, str]) -> str:
 
 
 def bringup_share() -> str:
-    return get_package_share_directory("bringup")
+    return str(get_package_share_directory("bringup"))
 
 
 def load_frames() -> dict:
-    with open(f"{bringup_share()}/config/frames.yaml") as f:
-        return yaml.safe_load(f)
+    with Path(f"{bringup_share()}/config/frames.yaml").open() as f:
+        return cast(dict, yaml.safe_load(f))
 
 
 def load_gps_file(course: str) -> dict:
-    with open(f"{bringup_share()}/courses/{course}/gps.json") as f:
-        return json.load(f)
+    with Path(f"{bringup_share()}/courses/{course}/gps.json").open() as f:
+        return cast(dict, json.load(f))

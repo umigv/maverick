@@ -6,7 +6,7 @@ from occupancy_grid_transform.occupancy_grid_transform_impl import (
 )
 
 
-def test_add_border():
+def test_add_border() -> None:
     grid = np.zeros((5, 4), dtype=np.int8)
 
     add_border(grid)
@@ -21,7 +21,7 @@ def test_add_border():
     assert (grid[1:-1, 1:-1] == 0).all()
 
 
-def test_inflate_grid():
+def test_inflate_grid() -> None:
     params = InflationParams(
         inflation_radius_cells=1,
         inflation_falloff_extent_cells=1,

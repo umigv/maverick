@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 import odrive
 import odrive.utils
@@ -16,7 +17,7 @@ from .odrive_driver_config import OdriveDriverConfig
 
 
 class OdriveDriver(Node):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("odrive_driver")
 
         self.config = utils.config.load(self, OdriveDriverConfig)
@@ -89,7 +90,7 @@ class OdriveDriver(Node):
             )
         )
 
-    def initialize_odrive(self, odrv) -> None:
+    def initialize_odrive(self, odrv: Any) -> None:
         odrv.clear_errors()
         try:
             odrive.utils.request_state(odrv.axis0, AxisState.CLOSED_LOOP_CONTROL)
@@ -116,7 +117,7 @@ class OdriveDriver(Node):
 
     def is_robot_enabled(self) -> bool:
         try:
-            with open(self.config.estop_file_path) as f:
+            with self.config.estop_file_path.open() as f:
                 return f.read().strip() != "1"  # only "1" stops the robot, everything else is enabled
         except Exception:
             self.get_logger().error("EStop file not found", throttle_duration_sec=30.0)

@@ -1,5 +1,7 @@
+from typing import Any
+
 from bringup.launch_utils import MODES, Mode, bringup_share, format_mode_description, load_frames
-from launch import LaunchDescription, LaunchDescriptionEntity
+from launch import LaunchContext, LaunchDescription, LaunchDescriptionEntity
 from launch.actions import DeclareLaunchArgument, EmitEvent, OpaqueFunction, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch.events import Shutdown
@@ -8,7 +10,7 @@ from launch_ros.actions import Node
 from typing_extensions import assert_never
 
 
-def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
+def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[LaunchDescriptionEntity]:
     frames = load_frames()
     mode: Mode = LaunchConfiguration("mode").perform(context)
     course = LaunchConfiguration("course").perform(context)

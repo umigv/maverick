@@ -33,7 +33,8 @@ class StanleyController:
         if new_projection_index is None:
             self.logger.warn("Stanley: no valid projection segment - stopping")
             return Twist()
-        elif new_projection_index >= len(self.path) - 1:
+
+        if new_projection_index >= len(self.path) - 1:
             self.logger.info("Reached end of path - stopping")
             self.path = None
             return Twist()
@@ -65,8 +66,10 @@ class StanleyController:
         return Twist(linear=Vector3(x=linear_velocity), angular=Vector3(z=angular_velocity))
 
     def compute_speed_limit(self, index: float) -> float:
-        """Cap speed by the lateral-accel budget: v^2 / r <= a_lat, with r = arclength / heading_change over the
-        lookahead horizon. Slows the robot *before* it reaches an upcoming corner.
+        """Cap speed by the lateral-accel budget.
+
+        Use v^2 / r <= a_lat, with r = arclength / heading_change over the lookahead horizon. Slows the robot *before*
+        it reaches an upcoming corner.
         """
         total_heading_change, arclength = self.compute_heading_change(index)
         if total_heading_change <= 1e-3:

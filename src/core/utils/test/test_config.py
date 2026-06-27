@@ -8,7 +8,7 @@ from utils.config import load
 
 
 class Param:
-    def __init__(self, value):
+    def __init__(self, value: object):
         self.value = value
 
 
@@ -20,14 +20,14 @@ class MockNode:
     get_parameter raises ParameterUninitializedException when a parameter is required and not set.
     """
 
-    def __init__(self, initial: dict[str, object] | None = None):
+    def __init__(self, initial: dict[str, object] | None = None) -> None:
         self._store: dict[str, object] = dict(initial or {})
         self.declared: list[tuple[str, object | None]] = []
 
     def get_name(self) -> str:
         return "MockNode"
 
-    def declare_parameter(self, key: str, value=None):
+    def declare_parameter(self, key: str, value: object = None) -> None:
         self.declared.append((key, value))
         if key not in self._store and not isinstance(value, Parameter.Type):
             self._store[key] = value
@@ -38,7 +38,7 @@ class MockNode:
         return Param(self._store[key])
 
 
-def test_load_required_param_success():
+def test_load_required_param_success() -> None:
     @dataclass(frozen=True)
     class Config:
         rate: int
@@ -50,7 +50,7 @@ def test_load_required_param_success():
     assert config.rate == 10
 
 
-def test_load_required_param_missing_raises():
+def test_load_required_param_missing_raises() -> None:
     @dataclass(frozen=True)
     class Config:
         rate: int
@@ -60,7 +60,7 @@ def test_load_required_param_missing_raises():
         load(node, Config)
 
 
-def test_load_default_is_used_if_missing():
+def test_load_default_is_used_if_missing() -> None:
     @dataclass(frozen=True)
     class Config:
         rate: int = 20
@@ -71,7 +71,7 @@ def test_load_default_is_used_if_missing():
     assert config.rate == 20
 
 
-def test_load_default_overridden_if_present():
+def test_load_default_overridden_if_present() -> None:
     @dataclass(frozen=True)
     class Config:
         rate: int = 20
@@ -82,7 +82,7 @@ def test_load_default_overridden_if_present():
     assert config.rate == 7
 
 
-def test_load_default_factory():
+def test_load_default_factory() -> None:
     @dataclass(frozen=True)
     class Config:
         ids: list[int] = field(default_factory=lambda: [1, 2, 3])
@@ -93,7 +93,7 @@ def test_load_default_factory():
     assert config.ids == [1, 2, 3]
 
 
-def test_load_nested_dataclass():
+def test_load_nested_dataclass() -> None:
     @dataclass(frozen=True)
     class Inner:
         gain: float = 0.5
@@ -118,7 +118,7 @@ def test_load_nested_dataclass():
     assert config.inner.name == "abc"
 
 
-def test_load_nested_default_instance():
+def test_load_nested_default_instance() -> None:
 
     @dataclass(frozen=True)
     class Inner:
@@ -136,7 +136,7 @@ def test_load_nested_default_instance():
     assert config.inner.name == "abc"
 
 
-def test_load_nested_default_instance_overridden_by_params():
+def test_load_nested_default_instance_overridden_by_params() -> None:
     @dataclass(frozen=True)
     class Inner:
         gain: float = 0.5
@@ -153,7 +153,7 @@ def test_load_nested_default_instance_overridden_by_params():
     assert config.inner.name == "abc"
 
 
-def test_load_nested_default_factory_makes_required_leaf_optional():
+def test_load_nested_default_factory_makes_required_leaf_optional() -> None:
     @dataclass(frozen=True)
     class InnerWithRequired:
         gain: float
@@ -170,7 +170,7 @@ def test_load_nested_default_factory_makes_required_leaf_optional():
     assert config.inner.name == "abc"
 
 
-def test_load_nested_without_default_instance_keeps_leaf_required():
+def test_load_nested_without_default_instance_keeps_leaf_required() -> None:
     @dataclass(frozen=True)
     class InnerWithRequired:
         gain: float
@@ -185,7 +185,7 @@ def test_load_nested_without_default_instance_keeps_leaf_required():
         load(node, Config)
 
 
-def test_load_nested_default_instance_recurses():
+def test_load_nested_default_instance_recurses() -> None:
     @dataclass(frozen=True)
     class Inner:
         gain: float = 0.5
@@ -208,7 +208,7 @@ def test_load_nested_default_instance_recurses():
     assert config.middle.inner.name == "xyz"
 
 
-def test_load_bytes():
+def test_load_bytes() -> None:
     @dataclass(frozen=True)
     class Config:
         data: bytes
@@ -219,7 +219,7 @@ def test_load_bytes():
     assert config.data == b"\x01\x02\x03"
 
 
-def test_load_list():
+def test_load_list() -> None:
     @dataclass(frozen=True)
     class Config:
         ids: list[int]
@@ -230,7 +230,7 @@ def test_load_list():
     assert config.ids == [10, 20, 30]
 
 
-def test_load_path_required():
+def test_load_path_required() -> None:
     @dataclass(frozen=True)
     class Config:
         log_dir: Path
@@ -242,7 +242,7 @@ def test_load_path_required():
     assert isinstance(config.log_dir, Path)
 
 
-def test_load_path_default():
+def test_load_path_default() -> None:
     @dataclass(frozen=True)
     class Config:
         log_dir: Path = Path("/var/log")
@@ -254,7 +254,7 @@ def test_load_path_default():
     assert isinstance(config.log_dir, Path)
 
 
-def test_load_path_default_overridden():
+def test_load_path_default_overridden() -> None:
     @dataclass(frozen=True)
     class Config:
         log_dir: Path = Path("/var/log")
@@ -265,7 +265,7 @@ def test_load_path_default_overridden():
     assert config.log_dir == Path("/tmp/override")
 
 
-def test_load_unsupported_type_raises():
+def test_load_unsupported_type_raises() -> None:
     @dataclass(frozen=True)
     class Config:
         value: tuple
