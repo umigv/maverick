@@ -1,7 +1,7 @@
 import math
 
-import rclpy
 import utils.config
+import utils.lifecycle
 import utils.qos
 from geometry_msgs.msg import Twist
 from maverick_msgs.msg import MissionState
@@ -94,10 +94,4 @@ class PathTracking(Node):
 
 
 def main() -> None:
-    rclpy.init()
-    node = PathTracking()
-    try:
-        rclpy.spin(node)
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    utils.lifecycle.run_node(PathTracking)

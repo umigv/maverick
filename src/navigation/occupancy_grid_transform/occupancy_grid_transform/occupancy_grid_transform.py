@@ -1,7 +1,7 @@
 import numpy as np
-import rclpy
 import tf2_geometry_msgs  # noqa: F401 - registers PoseStamped transform handlers
 import utils.config
+import utils.lifecycle
 import utils.qos
 from geometry_msgs.msg import PoseStamped
 from maverick_msgs.msg import MissionState
@@ -79,10 +79,4 @@ class OccupancyGridTransform(Node):
 
 
 def main() -> None:
-    rclpy.init()
-    node = OccupancyGridTransform()
-    try:
-        rclpy.spin(node)
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    utils.lifecycle.run_node(OccupancyGridTransform)

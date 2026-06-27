@@ -2,8 +2,8 @@ import json
 import math
 from statistics import median
 
-import rclpy
 import utils.config
+import utils.lifecycle
 from rclpy.node import Node
 from sensor_msgs.msg import NavSatFix
 
@@ -73,8 +73,6 @@ class GpsOriginCalculator(Node):
         self.done = True
         self.compute_and_print_origin()
 
-        # TODO: We don't call rclpy.shutdown() here because it causes a deadlock in humble
-        # https://github.com/ros2/rclpy/issues/1646
         raise SystemExit(0)
 
     def compute_and_print_origin(self) -> None:
@@ -115,10 +113,4 @@ class GpsOriginCalculator(Node):
 
 
 def main() -> None:
-    rclpy.init()
-    node = GpsOriginCalculator()
-    try:
-        rclpy.spin(node)
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    utils.lifecycle.run_node(GpsOriginCalculator)

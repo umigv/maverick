@@ -2,7 +2,7 @@ import argparse
 from collections import deque
 
 import matplotlib.pyplot as plt
-import rclpy
+import utils.lifecycle
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
 
@@ -57,8 +57,6 @@ class MotorSignalPlotter(Node):
     def render(self) -> None:
         # Once the window is closed its canvas is freed, drawing on it would be a use after free in the GUI backend
         if not plt.fignum_exists(self.fig.number):
-            # TODO: We don't call rclpy.shutdown() here because it causes a deadlock in humble
-            # https://github.com/ros2/rclpy/issues/1646
             raise SystemExit(0)
 
         xs = range(len(self.data["l_iq_sp"]))
@@ -83,14 +81,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    rclpy.init()
-    node = MotorSignalPlotter(window=args.window, frame_rate=args.frame_rate)
-
-    try:
-        rclpy.spin(node)
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    utils.lifecycle.run_node(lambda: MotorSignalPlotter(window=args.window, frame_rate=args.frame_rate))
 
 
 if __name__ == "__main__":

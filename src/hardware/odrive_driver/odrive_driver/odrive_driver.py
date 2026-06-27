@@ -2,8 +2,8 @@ from pathlib import Path
 
 import odrive
 import odrive.utils
-import rclpy
 import utils.config
+import utils.lifecycle
 from ament_index_python.packages import get_package_share_directory
 from geometry_msgs.msg import Twist, TwistWithCovariance, TwistWithCovarianceStamped, Vector3
 from odrive.enums import AxisState, ControlMode, InputMode, ODriveError
@@ -34,7 +34,9 @@ class OdriveDriver(Node):
             self.debug_publisher = self.create_publisher(Float32MultiArray, "~/debug", 10)
             self.create_timer(self.config.publish_period_s, self.publish_debug_info)
 
-    def init(self) -> bool:
+        self.connect()
+
+    def connect(self) -> None:
         try:
             self.get_logger().info(f"Finding left ODrive (serial number {self.config.left_odrive.serial})...")
             self.odrive_left = odrive.find_any(serial_number=self.config.left_odrive.serial)
@@ -45,10 +47,9 @@ class OdriveDriver(Node):
             self.odrive_right = odrive.find_any(serial_number=self.config.right_odrive.serial)
             self.initialize_odrive(self.odrive_right)
             self.get_logger().info("Found right ODrive")
-            return True
         except Exception as e:
             self.get_logger().fatal(f"Failed to initialize ODrive: {e}")
-            return False
+            raise SystemExit(1) from None
 
     def cmd_vel_callback(self, msg: Twist) -> None:
         self.watchdog_timer.reset()
@@ -139,14 +140,4 @@ class OdriveDriver(Node):
 
 
 def main() -> None:
-    rclpy.init()
-    node = OdriveDriver()
-
-    if not node.init():
-        return
-
-    try:
-        rclpy.spin(node)
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    utils.lifecycle.run_node(OdriveDriver)

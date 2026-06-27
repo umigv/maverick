@@ -1,5 +1,5 @@
-import rclpy
 import utils.config
+import utils.lifecycle
 from geometry_msgs.msg import Point
 from pyproj import Transformer
 from rclpy.node import Node
@@ -29,10 +29,4 @@ class LatLonConverter(Node):
 
 
 def main() -> None:
-    rclpy.init()
-    node = LatLonConverter()
-    try:
-        rclpy.spin(node)
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    utils.lifecycle.run_node(LatLonConverter)

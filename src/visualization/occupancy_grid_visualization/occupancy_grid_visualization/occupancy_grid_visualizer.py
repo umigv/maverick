@@ -1,5 +1,5 @@
 import numpy as np
-import rclpy
+import utils.lifecycle
 from foxglove_msgs.msg import PackedElementField, VoxelGrid
 from geometry_msgs.msg import Vector3
 from nav_msgs.msg import OccupancyGrid
@@ -36,10 +36,4 @@ class FoxgloveOccupancyGrid(Node):
 
 
 def main() -> None:
-    rclpy.init()
-    node = FoxgloveOccupancyGrid()
-    try:
-        rclpy.spin(node)
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    utils.lifecycle.run_node(FoxgloveOccupancyGrid)

@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
 
-import rclpy
 import serial
 import utils.config
+import utils.lifecycle
 from builtin_interfaces.msg import Time
 from pyubx2 import UBX_PROTOCOL, UBXMessage, UBXReader
 from rclpy.node import Node
@@ -32,8 +32,6 @@ class UbloxDriver(Node):
             self.get_logger().info(f"Connected to {self.config.serial_port}")
         except serial.SerialException as e:
             self.get_logger().error(f"Failed to connect to {self.config.serial_port}: {e}")
-            # TODO: We don't call rclpy.shutdown() here because it causes a deadlock in humble
-            # https://github.com/ros2/rclpy/issues/1646
             raise SystemExit(1) from None
 
         self.ubx_reader = UBXReader(self.serial, protfilter=UBX_PROTOCOL)
@@ -115,10 +113,4 @@ class UbloxDriver(Node):
 
 
 def main() -> None:
-    rclpy.init()
-    node = UbloxDriver()
-    try:
-        rclpy.spin(node)
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    utils.lifecycle.run_node(UbloxDriver)

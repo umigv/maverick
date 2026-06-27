@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum, IntEnum
 
-import rclpy
+import utils.lifecycle
 from rclpy.node import Node
 from rclpy.time import Time
 from std_msgs.msg import Float32, Float32MultiArray, UInt16
@@ -479,14 +479,7 @@ class VectornavMonitor(Node):
 
 
 def main() -> None:
-    rclpy.init()
-    node = VectornavMonitor()
-
-    try:
-        rclpy.spin(node)
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    utils.lifecycle.run_node(VectornavMonitor)
 
 
 if __name__ == "__main__":

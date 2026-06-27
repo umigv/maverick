@@ -1,15 +1,13 @@
 from statistics import median
 
-import rclpy
 import serial
+import utils.lifecycle
 import utils.qos
 from geometry_msgs.msg import Twist
 from maverick_msgs.msg import MissionState
-from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 from std_srvs.srv import Trigger
 
-recovery_executable = None
 THRESHOLD_DISTANCE = 60  # centimeters, distance needed to start backing up
 BACKUP_ALLOWANCE = (
     30  # centimeters, if the ultrasound reader reads less than this, the robot stops backing up and ends recovery
@@ -213,16 +211,5 @@ class RecoveryExecutable(Node):
 
 
 # this actually runs the code
-def main(args=None):
-    try:
-        rclpy.init(args=args)
-        global recovery_executable
-        recovery_executable = RecoveryExecutable()
-
-        rclpy.spin(recovery_executable)
-    except (KeyboardInterrupt, ExternalShutdownException):
-        pass
-
-
-if __name__ == "__main__":
-    main()
+def main() -> None:
+    utils.lifecycle.run_node(RecoveryExecutable)
