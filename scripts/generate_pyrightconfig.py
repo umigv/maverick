@@ -14,6 +14,7 @@ def main():
     config = {
         "extraPaths": extra_paths,
         "pythonVersion": "3.10",
+        "typeCheckingMode": "standard",
     }
 
     out = ROOT / "pyrightconfig.json"
