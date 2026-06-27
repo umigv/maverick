@@ -1,4 +1,5 @@
 import os
+from typing import override
 
 import serial
 import utils.config
@@ -60,6 +61,7 @@ class EstopDriver(Node):
         # Atomic replace so readers never see a half-written file.
         temp_file_path.replace(self.config.estop_file_path)
 
+    @override
     def destroy_node(self) -> None:
         if self.serial is not None and self.serial.is_open:
             self.serial.close()

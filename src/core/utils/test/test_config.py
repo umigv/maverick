@@ -1,8 +1,10 @@
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import cast
 
 import pytest
 from rclpy.exceptions import ParameterUninitializedException
+from rclpy.node import Node
 from rclpy.parameter import Parameter
 from utils.config import load
 
@@ -44,7 +46,7 @@ def test_load_required_param_success() -> None:
         rate: int
 
     node = MockNode(initial={"rate": 10})
-    config = load(node, Config)
+    config = load(cast(Node, node), Config)
 
     assert ("rate", Parameter.Type.INTEGER) in node.declared
     assert config.rate == 10
@@ -57,7 +59,7 @@ def test_load_required_param_missing_raises() -> None:
 
     node = MockNode(initial={})
     with pytest.raises(ParameterUninitializedException):
-        load(node, Config)
+        load(cast(Node, node), Config)
 
 
 def test_load_default_is_used_if_missing() -> None:
@@ -66,7 +68,7 @@ def test_load_default_is_used_if_missing() -> None:
         rate: int = 20
 
     node = MockNode(initial={})
-    config = load(node, Config)
+    config = load(cast(Node, node), Config)
 
     assert config.rate == 20
 
@@ -77,7 +79,7 @@ def test_load_default_overridden_if_present() -> None:
         rate: int = 20
 
     node = MockNode(initial={"rate": 7})
-    config = load(node, Config)
+    config = load(cast(Node, node), Config)
 
     assert config.rate == 7
 
@@ -88,7 +90,7 @@ def test_load_default_factory() -> None:
         ids: list[int] = field(default_factory=lambda: [1, 2, 3])
 
     node = MockNode(initial={})
-    config = load(node, Config)
+    config = load(cast(Node, node), Config)
 
     assert config.ids == [1, 2, 3]
 
@@ -111,7 +113,7 @@ def test_load_nested_dataclass() -> None:
         }
     )
 
-    config = load(node, Config)
+    config = load(cast(Node, node), Config)
 
     assert config.rate == 42
     assert config.inner.gain == 1.25
@@ -130,7 +132,7 @@ def test_load_nested_default_instance() -> None:
         inner: Inner = Inner(gain=2.0)
 
     node = MockNode(initial={})
-    config = load(node, Config)
+    config = load(cast(Node, node), Config)
 
     assert config.inner.gain == 2.0
     assert config.inner.name == "abc"
@@ -147,7 +149,7 @@ def test_load_nested_default_instance_overridden_by_params() -> None:
         inner: Inner = Inner(gain=2.0)
 
     node = MockNode(initial={"inner.gain": 3.5})
-    config = load(node, Config)
+    config = load(cast(Node, node), Config)
 
     assert config.inner.gain == 3.5
     assert config.inner.name == "abc"
@@ -164,7 +166,7 @@ def test_load_nested_default_factory_makes_required_leaf_optional() -> None:
         inner: InnerWithRequired = field(default_factory=lambda: InnerWithRequired(gain=1.5))
 
     node = MockNode(initial={})
-    config = load(node, Config)
+    config = load(cast(Node, node), Config)
 
     assert config.inner.gain == 1.5
     assert config.inner.name == "abc"
@@ -182,7 +184,7 @@ def test_load_nested_without_default_instance_keeps_leaf_required() -> None:
 
     node = MockNode(initial={})
     with pytest.raises(ParameterUninitializedException):
-        load(node, Config)
+        load(cast(Node, node), Config)
 
 
 def test_load_nested_default_instance_recurses() -> None:
@@ -201,7 +203,7 @@ def test_load_nested_default_instance_recurses() -> None:
         middle: Middle = Middle(inner=Inner(gain=4.0), scale=2.0)
 
     node = MockNode(initial={"middle.inner.name": "xyz"})
-    config = load(node, Config)
+    config = load(cast(Node, node), Config)
 
     assert config.middle.scale == 2.0
     assert config.middle.inner.gain == 4.0
@@ -214,7 +216,7 @@ def test_load_bytes() -> None:
         data: bytes
 
     node = MockNode(initial={"data": b"\x01\x02\x03"})
-    config = load(node, Config)
+    config = load(cast(Node, node), Config)
 
     assert config.data == b"\x01\x02\x03"
 
@@ -225,7 +227,7 @@ def test_load_list() -> None:
         ids: list[int]
 
     node = MockNode(initial={"ids": [10, 20, 30]})
-    config = load(node, Config)
+    config = load(cast(Node, node), Config)
 
     assert config.ids == [10, 20, 30]
 
@@ -236,7 +238,7 @@ def test_load_path_required() -> None:
         log_dir: Path
 
     node = MockNode(initial={"log_dir": "/tmp/logs"})
-    config = load(node, Config)
+    config = load(cast(Node, node), Config)
 
     assert config.log_dir == Path("/tmp/logs")
     assert isinstance(config.log_dir, Path)
@@ -248,7 +250,7 @@ def test_load_path_default() -> None:
         log_dir: Path = Path("/var/log")
 
     node = MockNode(initial={})
-    config = load(node, Config)
+    config = load(cast(Node, node), Config)
 
     assert config.log_dir == Path("/var/log")
     assert isinstance(config.log_dir, Path)
@@ -260,7 +262,7 @@ def test_load_path_default_overridden() -> None:
         log_dir: Path = Path("/var/log")
 
     node = MockNode(initial={"log_dir": "/tmp/override"})
-    config = load(node, Config)
+    config = load(cast(Node, node), Config)
 
     assert config.log_dir == Path("/tmp/override")
 
@@ -272,4 +274,4 @@ def test_load_unsupported_type_raises() -> None:
 
     node = MockNode(initial={})
     with pytest.raises(TypeError, match=r"unsupported type"):
-        load(node, Config)
+        load(cast(Node, node), Config)
