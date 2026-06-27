@@ -69,7 +69,6 @@ from dataclasses import MISSING, Field, dataclass, fields, is_dataclass
 from pathlib import Path
 from typing import Any, Generic, Literal, TypeVar, cast, get_args, get_origin, get_type_hints
 
-from rcl_interfaces.msg import ParameterDescriptor
 from rclpy.node import Node
 from rclpy.parameter import Parameter
 
@@ -143,7 +142,7 @@ def load(node: Node, cls: type[T]) -> T:
     Returns:
         An instance of `cls` populated from ROS 2 parameters.
     Raises:
-        RuntimeError: If a required parameter (field without a default) is missing or unset.
+        ParameterUninitializedException: If a required parameter (field without a default) is missing or unset.
     """
     return _load(node, cls, prefix="", defaults=None)
 
@@ -177,13 +176,10 @@ def _load(node: Node, cls: type[T], prefix: str, defaults: Any) -> T:
             raise TypeError(f"Parameter '{key}' has unsupported type {field_type!r}. Supported types: {supported}")
 
         if default_value is MISSING:
-            node.declare_parameter(key, descriptor=ParameterDescriptor(type=entry.ros_type.value))
+            node.declare_parameter(key, entry.ros_type)
         else:
             node.declare_parameter(key, entry.serialize(default_value))
 
-        value = node.get_parameter(key).value
-        if value is None:
-            raise RuntimeError(f"Required parameter '{key}' not set for node '{node.get_name()}'")
-        kwargs[f.name] = entry.deserialize(value)
+        kwargs[f.name] = entry.deserialize(node.get_parameter(key).value)
 
     return cls(**kwargs)
