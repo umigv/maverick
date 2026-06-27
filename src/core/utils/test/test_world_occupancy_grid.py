@@ -1,13 +1,12 @@
 import math
 
-from geometry_msgs.msg import Point
 from nav_msgs.msg import MapMetaData, OccupancyGrid
 from utils.geometry import Point2d, Pose2d, Rotation2d
 from utils.world_occupancy_grid import WorldOccupancyGrid
 
 
-def point_is_close(a: Point, b: Point, tol: float = 0.001) -> bool:
-    return abs(a.x - b.x) < tol and abs(a.y - b.y) < tol and abs(a.z - b.z) < tol
+def point_is_close(a: Point2d, b: Point2d, tol: float = 0.001) -> bool:
+    return a.distance(b) < tol
 
 
 def make_occupancy_grid() -> OccupancyGrid:
@@ -25,15 +24,15 @@ def make_occupancy_grid() -> OccupancyGrid:
 def test_world_to_grid_index():
     grid = WorldOccupancyGrid(make_occupancy_grid())
 
-    assert grid._world_to_grid_index(Point(x=3.25, y=3.5, z=0.0)) == (4, 3)
-    assert grid._world_to_grid_index(Point(x=2.0, y=1.0, z=0.0)) == (-1, 0)
+    assert grid._world_to_grid_index(Point2d(x=3.25, y=3.5)) == (4, 3)
+    assert grid._world_to_grid_index(Point2d(x=2.0, y=1.0)) == (-1, 0)
 
 
 def test_grid_index_center_to_world():
     grid = WorldOccupancyGrid(make_occupancy_grid())
 
-    assert point_is_close(grid._grid_index_center_to_world(2, 0, Point), Point(x=3.2271, y=1.8425, z=0.0))
-    assert point_is_close(grid._grid_index_center_to_world(2, -1, Point), Point(x=3.4771, y=1.4095, z=0.0))
+    assert point_is_close(grid._grid_index_center_to_world(2, 0), Point2d(x=3.2271, y=1.8425))
+    assert point_is_close(grid._grid_index_center_to_world(2, -1), Point2d(x=3.4771, y=1.4095))
 
 
 def test_state():
@@ -42,15 +41,15 @@ def test_state():
 
     grid = WorldOccupancyGrid(occupancy_grid)
 
-    assert grid.state(Point(x=2.5, y=2.0, z=0.0)).is_drivable
-    assert not grid.state(Point(x=3.25, y=3.5, z=0.0)).is_drivable
-    assert grid.state(Point(x=2.0, y=1.0, z=0.0)).is_unknown
+    assert grid.state(Point2d(x=2.5, y=2.0)).is_drivable
+    assert not grid.state(Point2d(x=3.25, y=3.5)).is_drivable
+    assert grid.state(Point2d(x=2.0, y=1.0)).is_unknown
 
 
 def test_neighbors():
     grid = WorldOccupancyGrid(make_occupancy_grid())
 
-    point = Point(x=3.25, y=3.5, z=0.0)
+    point = Point2d(x=3.25, y=3.5)
     assert grid._world_to_grid_index(point) == (4, 3)
 
     neighbors4 = list(grid.neighbors4(point))
@@ -91,12 +90,12 @@ def test_all_in_bound():
         )
     )
 
-    points = list(grid.in_bound_points(Point))
+    points = list(grid.in_bound_points())
     expected = [
-        Point(x=1.0, y=1.0, z=0.0),
-        Point(x=3.0, y=1.0, z=0.0),
-        Point(x=1.0, y=3.0, z=0.0),
-        Point(x=3.0, y=3.0, z=0.0),
+        Point2d(x=1.0, y=1.0),
+        Point2d(x=3.0, y=1.0),
+        Point2d(x=1.0, y=3.0),
+        Point2d(x=3.0, y=3.0),
     ]
 
     assert len(points) == len(expected)
@@ -107,8 +106,8 @@ def test_all_in_bound():
 def test_hash_key_same_grid():
     grid = WorldOccupancyGrid(make_occupancy_grid())
 
-    point1 = Point(x=3.25, y=3.5, z=0.0)
-    point2 = Point(x=3.25, y=3.5, z=0.0)
+    point1 = Point2d(x=3.25, y=3.5)
+    point2 = Point2d(x=3.25, y=3.5)
     assert grid.hash_key(point1) == grid.hash_key(point2)
 
 
@@ -120,7 +119,7 @@ def test_hash_key_unique_indices():
 
     keys = []
     for ix, iy in indices:
-        world = grid._grid_index_center_to_world(ix, iy, Point)
+        world = grid._grid_index_center_to_world(ix, iy)
         assert grid._world_to_grid_index(world) == (ix, iy)
         keys.append(grid.hash_key(world))
 

@@ -3,14 +3,11 @@ from __future__ import annotations
 import math
 from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import ClassVar, TypeVar
+from typing import ClassVar
 
-from geometry_msgs.msg import Point
 from nav_msgs.msg import OccupancyGrid
 
 from utils.geometry import Point2d, Pose2d
-
-PointT = TypeVar("PointT", Point, Point2d)
 
 
 @dataclass(frozen=True)
@@ -82,7 +79,7 @@ class WorldOccupancyGrid:
         self._occupancy_grid = grid
         self._origin = Pose2d.from_ros(self._occupancy_grid.info.origin)
 
-    def state(self, point: Point | Point2d) -> CellState:
+    def state(self, point: Point2d) -> CellState:
         """
         Query the occupancy state at a world-coordinate point.
 
@@ -102,21 +99,18 @@ class WorldOccupancyGrid:
 
         return CellState(self._occupancy_grid.data[grid_y * self._occupancy_grid.info.width + grid_x])
 
-    def in_bound_points(self, point_type: type[PointT]) -> Iterator[PointT]:
+    def in_bound_points(self) -> Iterator[Point2d]:
         """
         Generate a point in all in bound grids
-
-        Args:
-            point_type: The point type to yield - either Point or Point2d.
 
         Yields:
             World-coordinate points at the centers of all in-bound grid cells.
         """
         for x in range(self._occupancy_grid.info.width):
             for y in range(self._occupancy_grid.info.height):
-                yield self._grid_index_center_to_world(x, y, point_type)
+                yield self._grid_index_center_to_world(x, y)
 
-    def neighbors4(self, point: PointT) -> Iterator[PointT]:
+    def neighbors4(self, point: Point2d) -> Iterator[Point2d]:
         """
         Generate 4-connected neighboring world points for discrete grid search.
 
@@ -127,14 +121,14 @@ class WorldOccupancyGrid:
             point: World-coordinate point whose grid cell is expanded.
 
         Yields:
-            World-coordinate points at the centers of neighboring grid cells, in the same type as `point`.
+            World-coordinate points at the centers of neighboring grid cells.
         """
         x, y = self._world_to_grid_index(point)
 
         for dx, dy in ((1, 0), (0, 1), (0, -1), (-1, 0)):
-            yield self._grid_index_center_to_world(x + dx, y + dy, type(point))
+            yield self._grid_index_center_to_world(x + dx, y + dy)
 
-    def neighbors8(self, point: PointT) -> Iterator[PointT]:
+    def neighbors8(self, point: Point2d) -> Iterator[Point2d]:
         """
         Generate 8-connected neighboring world points for discrete grid search.
 
@@ -145,7 +139,7 @@ class WorldOccupancyGrid:
             point: World-coordinate point whose grid cell is expanded.
 
         Yields:
-            World-coordinate points at the centers of neighboring grid cells, in the same type as `point`.
+            World-coordinate points at the centers of neighboring grid cells.
         """
         x, y = self._world_to_grid_index(point)
 
@@ -153,9 +147,9 @@ class WorldOccupancyGrid:
             for dx in (-1, 0, 1):
                 if dx == 0 and dy == 0:
                     continue
-                yield self._grid_index_center_to_world(x + dx, y + dy, type(point))
+                yield self._grid_index_center_to_world(x + dx, y + dy)
 
-    def neighbors_forward(self, point: PointT) -> Iterator[PointT]:
+    def neighbors_forward(self, point: Point2d) -> Iterator[Point2d]:
         """
         Generate a forward-biased set of neighboring world points.
 
@@ -166,7 +160,7 @@ class WorldOccupancyGrid:
             point: World-coordinate point whose grid cell is expanded.
 
         Yields:
-            World-coordinate points at the centers of selected neighboring cells, in the same type as `point`.
+            World-coordinate points at the centers of selected neighboring cells.
         """
         x, y = self._world_to_grid_index(point)
 
@@ -179,9 +173,9 @@ class WorldOccupancyGrid:
         ]
 
         for dx, dy in candidates:
-            yield self._grid_index_center_to_world(x + dx, y + dy, type(point))
+            yield self._grid_index_center_to_world(x + dx, y + dy)
 
-    def hash_key(self, point: Point | Point2d) -> int:
+    def hash_key(self, point: Point2d) -> int:
         """
         Compute a stable hash key for the grid cell containing a world point.
 
@@ -203,7 +197,7 @@ class WorldOccupancyGrid:
         # cantor pairing (https://en.wikipedia.org/wiki/Pairing_function)
         return (zx + zy) * (zx + zy + 1) // 2 + zy
 
-    def _world_to_grid_index(self, world: Point | Point2d) -> tuple[int, int]:
+    def _world_to_grid_index(self, world: Point2d) -> tuple[int, int]:
         """
         Project a world-coordinate point into discrete grid indices.
 
@@ -213,11 +207,10 @@ class WorldOccupancyGrid:
         Returns:
             (grid_x, grid_y) integer indices corresponding to the grid cell containing the point.
         """
-        p2d = Point2d.from_ros(world) if isinstance(world, Point) else world
-        grid = self._origin.world_to_local(p2d) / self._occupancy_grid.info.resolution
+        grid = self._origin.world_to_local(world) / self._occupancy_grid.info.resolution
         return math.floor(grid.x), math.floor(grid.y)
 
-    def _grid_index_center_to_world(self, grid_x: int, grid_y: int, point_type: type[PointT]) -> PointT:
+    def _grid_index_center_to_world(self, grid_x: int, grid_y: int) -> Point2d:
         """
         Convert a grid cell index to the world-coordinate position of its center.
 
@@ -227,11 +220,9 @@ class WorldOccupancyGrid:
         Args:
             grid_x: Grid index in the +X (forward) direction.
             grid_y: Grid index in the +Y (left) direction.
-            point_type: The point type to return - either Point or Point2d.
 
         Returns:
             World-coordinate point at the center of the specified grid cell.
         """
         grid = Point2d(x=grid_x + 0.5, y=grid_y + 0.5) * self._occupancy_grid.info.resolution
-        p2d = self._origin.local_to_world(grid)
-        return p2d.to_ros() if point_type is Point else p2d
+        return self._origin.local_to_world(grid)

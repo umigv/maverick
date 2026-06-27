@@ -177,9 +177,6 @@ locations - without directly interacting with grid indices. Conceptually, the oc
 world representation: world points are projected into grid cells on demand, and any point outside the underlying grid
 bounds is treated as unknown.
 
-All public methods accept either `geometry_msgs/Point` or `Point2d`. Methods that return points (`neighbors4`,
-`neighbors8`, `neighbors_forward`, `in_bound_points`) preserve the caller's point type.
-
 ### Conventions / Transformations
 The supplied occupancy grid is assumed to have the following conventions (matching ROS conventions):
 - +x points forward from the robot
@@ -199,12 +196,12 @@ outside `[0..width) × [0..height)` return an unknown cell.
 | `is_drivable` | True if occupancy probability is ≤ 30 |
 
 ### Full grid iteration in continuous space via in_bound_points
-To iterate through all in-bound cells, `WorldOccupancyGrid` provides `in_bound_points(point_type)`. Pass `Point` or
-`Point2d` to control the yielded type.
+To iterate through all in-bound cells, `WorldOccupancyGrid` provides `in_bound_points()`, which yields the `Point2d`
+center of every in-bound cell.
 
 Example pattern:
 ```py
-for candidate in grid.in_bound_points(Point2d):
+for candidate in grid.in_bound_points():
     if grid.state(candidate).is_drivable:
         # found drivable cell, do something special
 ```
@@ -218,11 +215,9 @@ Each neighbor expansion:
 2. Expands neighboring cells in grid index space
 3. Converts those neighboring cells back into world points by returning the center of each cell
 
-The returned points are the same type as the input (`Point` or `Point2d`), so no conversion is needed at the call site.
-
 Example pattern:
 ```py
-for candidate in grid.neighbors8(current):  # candidate matches type of current
+for candidate in grid.neighbors8(current):
     if not grid.state(candidate).is_drivable:
         continue
 ```
