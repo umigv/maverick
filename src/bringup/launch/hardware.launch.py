@@ -1,11 +1,10 @@
-from typing import Any
+from typing import Any, assert_never
 
 from bringup.launch_utils import ESTOP_FILE_PATH, MODES, Mode, bringup_share, load_frames, load_gps_file
 from launch import LaunchContext, LaunchDescription, LaunchDescriptionEntity
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-from typing_extensions import assert_never
 
 
 def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[LaunchDescriptionEntity]:

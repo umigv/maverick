@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import serial
 import utils.config
@@ -98,7 +98,7 @@ class UbloxDriver(Node):
             hour=data.hour,
             minute=data.min,
             second=data.second,
-            tzinfo=timezone.utc,
+            tzinfo=UTC,
         ).timestamp()
 
         if data.nano < 0:
