@@ -13,6 +13,13 @@ class Param:
 
 
 class MockNode:
+    """Minimal mock for rclpy.Node, mimicking its parameter behavior.
+
+    declare_parameter accepts either a default value or a Parameter.Type. A value is stored as default while a type
+        leaves the parameter as required with the given static type
+    get_parameter raises ParameterUninitializedException when a parameter is required and not set.
+    """
+
     def __init__(self, initial: dict[str, object] | None = None):
         self._store: dict[str, object] = dict(initial or {})
         self.declared: list[tuple[str, object | None]] = []
