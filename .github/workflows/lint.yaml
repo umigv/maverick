@@ -2,7 +2,6 @@ name: Lint
 
 permissions:
   contents: read
-  packages: read
 
 on:
   push:
@@ -16,27 +15,22 @@ concurrency:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/${{ github.repository }}:latest
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-22.04-arm, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install any new deps (top-up)
-        run: rosdep install --from-paths . --ignore-src -r -y
+      - name: Set up Pixi
+        uses: prefix-dev/setup-pixi@v0.9.6
+        with:
+          environments: default
+          cache: true
 
-      - name: Install tooling deps
-        run: |
-          python3 -m pip install -U pip
-          pip install ".[tooling]"
+      - name: Set up just
+        uses: extractions/setup-just@v2
 
       - name: Lint
-        shell: bash
-        run: |
-          source /opt/ros/$ROS_DISTRO/setup.bash
-          just lint
+        run: just lint
