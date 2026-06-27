@@ -5,14 +5,12 @@ import os
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import Enum, IntEnum
-from typing import Any, Generic, TypeVar
+from typing import Any
 
 import utils.lifecycle
 from rclpy.node import Node
 from rclpy.time import Time
 from std_msgs.msg import Float32, Float32MultiArray, UInt16
-
-T = TypeVar("T")
 
 
 def green(s: str) -> str:
@@ -155,7 +153,7 @@ class SignalHealth:
 
 
 @dataclass
-class TopicState(Generic[T]):
+class TopicState[T]:
     last_time: Time | None = None
     last_timestamp_str: str = "Never"
     _value: T | None = None

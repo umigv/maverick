@@ -1,4 +1,5 @@
 import time
+from typing import override
 
 import serial
 import utils.config
@@ -120,6 +121,7 @@ class LedDriver(Node):
         except serial.SerialException as e:
             self.get_logger().error(f"Serial communication error: {e}")
 
+    @override
     def destroy_node(self) -> None:
         if self.serial is not None and self.serial.is_open:
             self.serial.close()

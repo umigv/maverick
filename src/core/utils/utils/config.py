@@ -68,22 +68,18 @@ from collections.abc import Callable
 from dataclasses import MISSING, Field, dataclass, fields, is_dataclass
 from pathlib import Path
 from types import GenericAlias
-from typing import Any, Generic, Literal, TypeVar, cast, get_args, get_origin, get_type_hints
+from typing import Any, Literal, cast, get_args, get_origin, get_type_hints
 
 from rclpy.node import Node
 from rclpy.parameter import Parameter
 
-T = TypeVar("T")
-RawT = TypeVar("RawT")
-FieldT = TypeVar("FieldT")
 
-
-def _identity(x: T) -> T:
+def _identity[T](x: T) -> T:
     return x
 
 
 @dataclass
-class _Entry(Generic[RawT, FieldT]):
+class _Entry[RawT, FieldT]:
     raw_type: type[RawT]
     ros_type: Parameter.Type
     deserialize: Callable[[RawT], FieldT]  # raw -> field (after reading from ROS)
@@ -134,7 +130,7 @@ def _field_default(f: Field[Any]) -> Any:
     return MISSING
 
 
-def load(node: Node, cls: type[T]) -> T:
+def load[T](node: Node, cls: type[T]) -> T:
     """
     Load ROS 2 parameters from `node` into a dataclass instance of type `cls`.
 
@@ -149,7 +145,7 @@ def load(node: Node, cls: type[T]) -> T:
     return _load(node, cls, prefix="", defaults=None)
 
 
-def _load(node: Node, cls: type[T], prefix: str, defaults: Any) -> T:
+def _load[T](node: Node, cls: type[T], prefix: str, defaults: Any) -> T:
     if not is_dataclass(cls):
         raise TypeError(f"{cls!r} is not a dataclass type")
 
