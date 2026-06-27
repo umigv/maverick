@@ -105,6 +105,7 @@ module = [
     "geometry_msgs.*",
     "launch.*",
     "launch_ros.*",
+    "matplotlib.*",
     "maverick_msgs.*",
     "nav_msgs.*",
     "odrive.*",
