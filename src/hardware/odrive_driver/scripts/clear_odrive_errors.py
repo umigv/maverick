@@ -1,13 +1,15 @@
+from typing import Any
+
 import odrive
 
 
-def clear_odrive_errors(odrv) -> None:
+def clear_odrive_errors(odrv: Any) -> None:
     print(f"Clearing errors from ODrive {odrv.serial_number}...")
     odrv.clear_errors()
     print(f"Errors cleared from ODrive {odrv.serial_number}!")
 
 
-def main():
+def main() -> None:
     print("Finding 2 ODrives...")
     odrv0, odrv1 = odrive.find_any(count=2)
     clear_odrive_errors(odrv0)

@@ -21,21 +21,21 @@ def make_occupancy_grid() -> OccupancyGrid:
     )
 
 
-def test_world_to_grid_index():
+def test_world_to_grid_index() -> None:
     grid = WorldOccupancyGrid(make_occupancy_grid())
 
     assert grid._world_to_grid_index(Point2d(x=3.25, y=3.5)) == (4, 3)
     assert grid._world_to_grid_index(Point2d(x=2.0, y=1.0)) == (-1, 0)
 
 
-def test_grid_index_center_to_world():
+def test_grid_index_center_to_world() -> None:
     grid = WorldOccupancyGrid(make_occupancy_grid())
 
     assert point_is_close(grid._grid_index_center_to_world(2, 0), Point2d(x=3.2271, y=1.8425))
     assert point_is_close(grid._grid_index_center_to_world(2, -1), Point2d(x=3.4771, y=1.4095))
 
 
-def test_state():
+def test_state() -> None:
     occupancy_grid = make_occupancy_grid()
     occupancy_grid.data[22] = 100
 
@@ -46,7 +46,7 @@ def test_state():
     assert grid.state(Point2d(x=2.0, y=1.0)).is_unknown
 
 
-def test_neighbors():
+def test_neighbors() -> None:
     grid = WorldOccupancyGrid(make_occupancy_grid())
 
     point = Point2d(x=3.25, y=3.5)
@@ -80,7 +80,7 @@ def test_neighbors():
     ]
 
 
-def test_all_in_bound():
+def test_all_in_bound() -> None:
     grid = WorldOccupancyGrid(
         OccupancyGrid(
             info=MapMetaData(
@@ -103,7 +103,7 @@ def test_all_in_bound():
         assert any(point_is_close(p, e) for p in points)
 
 
-def test_hash_key_same_grid():
+def test_hash_key_same_grid() -> None:
     grid = WorldOccupancyGrid(make_occupancy_grid())
 
     point1 = Point2d(x=3.25, y=3.5)
@@ -111,7 +111,7 @@ def test_hash_key_same_grid():
     assert grid.hash_key(point1) == grid.hash_key(point2)
 
 
-def test_hash_key_unique_indices():
+def test_hash_key_unique_indices() -> None:
     grid = WorldOccupancyGrid(make_occupancy_grid())
 
     # Arbitrary selection of indices to check for hash collision

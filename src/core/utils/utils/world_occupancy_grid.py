@@ -12,9 +12,7 @@ from utils.geometry import Point2d, Pose2d
 
 @dataclass(frozen=True)
 class CellState:
-    """
-    Discrete occupancy state of a grid cell.
-    """
+    """Discrete occupancy state of a grid cell."""
 
     value: int  # -1 (unknown) or 0-100 (probability occupied)
 
@@ -31,16 +29,12 @@ class CellState:
 
     @property
     def is_drivable(self) -> bool:
-        """
-        True if the cell can be traversed by the robot
-        """
+        """True if the cell can be traversed by the robot."""
         return 0 <= self.value <= CellState.DRIVABLE_THRESHOLD
 
     @property
     def is_unknown(self) -> bool:
-        """
-        True if the cell value is unknown
-        """
+        """True if the cell value is unknown."""
         return self.value == CellState.UNKNOWN_VALUE
 
 
@@ -101,7 +95,7 @@ class WorldOccupancyGrid:
 
     def in_bound_points(self) -> Iterator[Point2d]:
         """
-        Generate a point in all in bound grids
+        Generate a point in all in bound grids.
 
         Yields:
             World-coordinate points at the centers of all in-bound grid cells.

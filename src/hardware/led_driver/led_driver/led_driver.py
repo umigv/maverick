@@ -59,18 +59,18 @@ class LedDriver(Node):
 
         raise RuntimeError(f"Did not receive READY within {self.config.ready_timeout_s}s")
 
-    def teleop_callback(self, msg):
+    def teleop_callback(self, msg: Twist) -> None:
         self.last_teleop_time = self.get_clock().now()
 
-    def nav_callback(self, msg):
+    def nav_callback(self, msg: Twist) -> None:
         self.last_nav_time = self.get_clock().now()
 
-    def mission_state_callback(self, msg):
+    def mission_state_callback(self, msg: MissionState) -> None:
         self.mission_state = msg
 
     def is_robot_enabled(self) -> bool:
         try:
-            with open(self.config.estop_file_path) as f:
+            with self.config.estop_file_path.open() as f:
                 return f.read().strip() != "1"  # only "1" stops the robot, everything else is enabled
         except Exception:
             return True  # if the e-stop file doesn't exist / is corrupted we assume e-stop is off
@@ -79,7 +79,7 @@ class LedDriver(Node):
         if last_time is None:
             return False
 
-        elapsed = (self.get_clock().now() - last_time).nanoseconds / 1e9
+        elapsed: float = (self.get_clock().now() - last_time).nanoseconds / 1e9
         return elapsed <= self.config.cmd_vel_timeout_s
 
     def mission_led_value(self) -> int:
@@ -106,7 +106,7 @@ class LedDriver(Node):
 
         self.send_led_value(value)
 
-    def send_led_value(self, value: int):
+    def send_led_value(self, value: int) -> None:
         assert self.serial is not None
 
         if not self.serial.is_open:
@@ -120,7 +120,7 @@ class LedDriver(Node):
         except serial.SerialException as e:
             self.get_logger().error(f"Serial communication error: {e}")
 
-    def destroy_node(self):
+    def destroy_node(self) -> None:
         if self.serial is not None and self.serial.is_open:
             self.serial.close()
         super().destroy_node()

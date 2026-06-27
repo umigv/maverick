@@ -107,8 +107,8 @@ class GpsOriginCalculator(Node):
         if not self.samples:
             return 0.0
 
-        seconds_diff = self.samples[-1].header.stamp.sec - self.samples[0].header.stamp.sec
-        nanoseconds_diff = self.samples[-1].header.stamp.nanosec - self.samples[0].header.stamp.nanosec
+        seconds_diff = float(self.samples[-1].header.stamp.sec - self.samples[0].header.stamp.sec)
+        nanoseconds_diff = float(self.samples[-1].header.stamp.nanosec - self.samples[0].header.stamp.nanosec)
         return seconds_diff + nanoseconds_diff / 1e9
 
 

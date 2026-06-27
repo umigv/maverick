@@ -1,5 +1,7 @@
+from typing import Any
+
 from bringup.launch_utils import bringup_share
-from launch import LaunchDescription, LaunchDescriptionEntity
+from launch import LaunchContext, LaunchDescription, LaunchDescriptionEntity
 from launch.actions import DeclareLaunchArgument, EmitEvent, OpaqueFunction, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch.events import Shutdown
@@ -7,7 +9,7 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
-def launch_setup(context, *args, **kwargs) -> list[LaunchDescriptionEntity]:
+def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[LaunchDescriptionEntity]:
     course = LaunchConfiguration("course").perform(context)
 
     gps_origin_node = Node(

@@ -54,7 +54,7 @@ class OccupancyGridSimulator(Node):
 
     def load_obstacles_and_configure_grid(self) -> None:
         try:
-            with open(self.config.map_file_path) as file:
+            with self.config.map_file_path.open() as file:
                 data = json.load(file)
         except FileNotFoundError:
             self.get_logger().fatal(f"Map file not found: '{self.config.map_file_path}'")
@@ -128,12 +128,12 @@ class OccupancyGridSimulator(Node):
 
     @staticmethod
     def hash_cells(x: int | np.ndarray, y: int | np.ndarray) -> np.int64 | np.ndarray:
-        """Encodes (x, y) as a single int64 for use with np.isin."""
+        """Encode (x, y) as a single int64 for use with np.isin."""
         # Collisions require two y-values to differ by 2^32 (~4B cells), which is impossible in practice.
         return x * np.int64(1 << 32) + y
 
     def build_cell_maps(self, robot_pose: Pose2d) -> tuple[np.ndarray, np.ndarray]:
-        """Returns (obstacle_grid, lane_line_mask) by mapping local cells to world coordinates."""
+        """Return (obstacle_grid, lane_line_mask) by mapping local cells to world coordinates."""
         local_x, local_y = np.meshgrid(
             self.config.offset_x_m + (np.arange(self.width_cells) + 0.5) * self.resolution_m,
             self.config.offset_y_m + (np.arange(self.height_cells) + 0.5) * self.resolution_m,
@@ -180,9 +180,10 @@ class OccupancyGridSimulator(Node):
         obstacle_coord: np.ndarray,
     ) -> tuple[np.ndarray, np.ndarray]:
         """
-        Slab method: returns (t_enter, t_exit) - the parametric interval on the ray robot + t*delta that passes through
-        the 1-D slab [obstacle, obstacle+1). Handles parallel rays (|delta| ≈ 0): open interval if robot is inside the
-        slab, empty interval otherwise.
+        Return the parametric interval `(t_enter, t_exit)` on the ray `robot + t * delta` that passes through the 1-D slab `[obstacle, obstacle + 1)`.
+
+        Handle parallel rays (`|delta| ≈ 0`) by returning an open interval if the robot is inside the slab, or an empty
+        interval otherwise.
         """
         parallel = np.abs(delta) <= OccupancyGridSimulator.EPSILON
         inside = (robot_coord >= obstacle_coord) & (robot_coord < obstacle_coord + 1.0)

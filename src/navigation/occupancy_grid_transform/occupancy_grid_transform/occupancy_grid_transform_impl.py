@@ -31,12 +31,11 @@ def _make_inflation_kernel(r_hard: int, extent_soft: int, decay: float) -> np.nd
     r_total = r_hard + extent_soft
     ys, xs = np.mgrid[-r_total : r_total + 1, -r_total : r_total + 1]
     dists = np.hypot(xs, ys)
-    kernel = np.where(
+    return np.where(
         dists <= r_hard,
         100,
         np.where(dists <= r_total, np.round(100.0 * decay ** (dists - r_hard)), 0),
     ).astype(np.int8)
-    return kernel
 
 
 def inflate_grid(grid: np.ndarray, params: InflationParams) -> np.ndarray:

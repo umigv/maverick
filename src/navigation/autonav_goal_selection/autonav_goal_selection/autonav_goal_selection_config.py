@@ -45,13 +45,10 @@ class MomentumParams:
             raise ValueError("MomentumParams: ema_alpha must be in (0, 1]")
 
     def factor(self, angle_diff: Rotation2d, momentum_ray_length: float) -> float:
-        """
-        Alignment factor for a ray at angle deviation `d` from momentum:
-            `alignment_floor + (1 - alignment_floor) * ((1 + cos(d)) / 2) ** alignment_gain`
-        """
+        """Alignment factor for a ray at angle deviation `d` from momentum."""
         clearance = min(1.0, momentum_ray_length / self.obstacle_threshold_m)
-        obstacle_scale = clearance**self.obstacle_gain
-        raw_alignment = ((1.0 + angle_diff.cos) / 2.0) ** self.alignment_gain
+        obstacle_scale: float = clearance**self.obstacle_gain
+        raw_alignment: float = ((1.0 + angle_diff.cos) / 2.0) ** self.alignment_gain
         alignment = self.alignment_floor + (1.0 - self.alignment_floor) * raw_alignment
         return 1.0 - obstacle_scale + obstacle_scale * alignment
 
