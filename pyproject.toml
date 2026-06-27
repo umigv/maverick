@@ -1,6 +1,6 @@
 [tool.pixi.workspace]
 name = "maverick"
-channels = ["https://prefix.dev/robostack-jazzy", "https://prefix.dev/conda-forge"]
+channels = ["https://prefix.dev/robostack-lyrical", "https://prefix.dev/conda-forge"]
 platforms = ["linux-64", "linux-aarch64", "osx-arm64"]
 
 [tool.pixi.feature.ros.dependencies]
@@ -10,7 +10,7 @@ colcon-common-extensions = "*"
 pkg-config = "*"
 compilers = "*"
 ninja = "*"
-python = "3.12*"
+python = "3.14*"
 
 # Workspace dependencies
 geographiclib-cpp = "*"
@@ -24,19 +24,19 @@ pytest = "<8"
 pyubx2 = "*"
 # setuptools 80 removed the `develop` command that colcon's ament_python editable installs rely on
 setuptools = "<80"
-ros-jazzy-foxglove-bridge = "*"
-ros-jazzy-foxglove-msgs = "*"
-ros-jazzy-geographic-msgs = "*"
-ros-jazzy-joint-state-publisher = "*"
-ros-jazzy-joy = "*"
-ros-jazzy-robot-localization = "*"
-ros-jazzy-robot-state-publisher = "*"
-ros-jazzy-ros-base = "*"
-ros-jazzy-rviz2 = "*"
-ros-jazzy-teleop-twist-joy = "*"
-ros-jazzy-twist-mux = "*"
-ros-jazzy-urdf-launch = "*"
-ros-jazzy-xacro = "*"
+ros-lyrical-foxglove-bridge = "*"
+ros-lyrical-foxglove-msgs = "*"
+ros-lyrical-geographic-msgs = "*"
+ros-lyrical-joint-state-publisher = "*"
+ros-lyrical-joy = "*"
+ros-lyrical-robot-localization = "*"
+ros-lyrical-robot-state-publisher = "*"
+ros-lyrical-ros-base = "*"
+ros-lyrical-rviz2 = "*"
+ros-lyrical-teleop-twist-joy = "*"
+ros-lyrical-twist-mux = "*"
+ros-lyrical-urdf-launch = "*"
+ros-lyrical-xacro = "*"
 types-pyyaml = "*"
 
 [tool.pixi.feature.ros.pypi-dependencies]
@@ -54,13 +54,13 @@ RCUTILS_COLORIZED_OUTPUT = "1"
 ruff = "*"
 mypy = "*"
 # Pin to version matching what Ubuntu ships with the ROS distro we use
-clang-format = "18.*"
+clang-format = "22.*"
 
 [tool.pixi.environments]
 default = { features = ["ros", "tooling"], solve-group = "default" }
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py314"
 line-length = 120
 extend-exclude = [
     "build",
@@ -102,7 +102,7 @@ ignore = [
 convention = "pep257"
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.14"
 
 # Output
 pretty = true
