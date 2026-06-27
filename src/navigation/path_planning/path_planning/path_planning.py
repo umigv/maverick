@@ -1,6 +1,7 @@
 import rclpy
 import tf2_geometry_msgs  # noqa: F401 - registers PointStamped transform support
 import utils.config
+import utils.lifecycle
 from geometry_msgs.msg import PointStamped, Pose, PoseStamped, Quaternion
 from nav_msgs.msg import OccupancyGrid, Odometry, Path
 from rclpy.node import Node
@@ -101,10 +102,4 @@ class PathPlanner(Node):
 
 
 def main() -> None:
-    rclpy.init()
-    node = PathPlanner()
-    try:
-        rclpy.spin(node)
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    utils.lifecycle.run_node(PathPlanner)

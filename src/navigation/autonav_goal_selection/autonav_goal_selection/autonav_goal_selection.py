@@ -1,7 +1,7 @@
-import rclpy
 import tf2_geometry_msgs  # noqa: F401 — registers PointStamped transform
 import tf2_ros
 import utils.config
+import utils.lifecycle
 import utils.qos
 from geometry_msgs.msg import PointStamped, Vector3
 from maverick_msgs.msg import MissionState
@@ -155,10 +155,4 @@ class AutonavGoalSelection(Node):
 
 
 def main() -> None:
-    rclpy.init()
-    node = AutonavGoalSelection()
-    try:
-        rclpy.spin(node)
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    utils.lifecycle.run_node(AutonavGoalSelection)

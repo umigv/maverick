@@ -5,6 +5,7 @@ from typing import Any, NamedTuple
 
 import rclpy
 import utils.config
+import utils.lifecycle
 import utils.qos
 from geographic_msgs.msg import GeoPoint
 from geometry_msgs.msg import PointStamped
@@ -231,8 +232,6 @@ class AutonavMissionControl(Node):
             self.publish_state()
 
             # Exiting signals mission completion to the launch, which shuts down autonav
-            # TODO: We don't call rclpy.shutdown() here because it causes a deadlock in humble
-            # https://github.com/ros2/rclpy/issues/1646
             self.get_logger().info("Shutting down")
             raise SystemExit(0)
 
@@ -297,10 +296,4 @@ class AutonavMissionControl(Node):
 
 
 def main() -> None:
-    rclpy.init()
-    node = AutonavMissionControl()
-    try:
-        rclpy.spin(node)
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    utils.lifecycle.run_node(AutonavMissionControl)

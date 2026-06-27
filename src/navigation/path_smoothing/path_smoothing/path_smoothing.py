@@ -1,5 +1,5 @@
-import rclpy
 import utils.config
+import utils.lifecycle
 from geometry_msgs.msg import Pose, PoseStamped, Quaternion
 from nav_msgs.msg import Path
 from rclpy.node import Node
@@ -57,10 +57,4 @@ class PathSmoother(Node):
 
 
 def main() -> None:
-    rclpy.init()
-    node = PathSmoother()
-    try:
-        rclpy.spin(node)
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    utils.lifecycle.run_node(PathSmoother)

@@ -1,8 +1,8 @@
 import math
 import random
 
-import rclpy
 import utils.config
+import utils.lifecycle
 from geometry_msgs.msg import (
     Pose,
     PoseWithCovariance,
@@ -338,10 +338,4 @@ class SensorSimulator(Node):
 
 
 def main() -> None:
-    rclpy.init()
-    node = SensorSimulator()
-    try:
-        rclpy.spin(node)
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    utils.lifecycle.run_node(SensorSimulator)

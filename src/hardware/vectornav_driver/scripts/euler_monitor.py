@@ -1,7 +1,7 @@
 import argparse
 import math
 
-import rclpy
+import utils.lifecycle
 from rclpy.node import Node
 from sensor_msgs.msg import Imu
 
@@ -46,14 +46,7 @@ def main():
     parser.add_argument("topic", nargs="?", default="vectornav/imu", help="IMU topic name")
     args = parser.parse_args()
 
-    rclpy.init()
-    node = ImuEulerNode(args.topic)
-
-    try:
-        rclpy.spin(node)
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    utils.lifecycle.run_node(lambda: ImuEulerNode(args.topic))
 
 
 if __name__ == "__main__":

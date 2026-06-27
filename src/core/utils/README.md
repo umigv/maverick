@@ -86,6 +86,24 @@ self.create_subscription(MissionState, "mission_state", self.callback, utils.qos
 
 In RViz, set the topic's **Durability Policy** to `Transient Local` to receive latched messages.
 
+## utils.lifecycle
+Runs a node's init / spin / shutdown lifecycle so each node's `main` is a single line. All the rclpy / node lifetime is
+automatically managed and all shutdown exceptions are handled internally.
+```py
+utils.lifecycle.run_node(Planner)
+
+# For nodes with arguments, wrap it in a lambda
+utils.lifecycle.run_node(lambda: ImuMonitor(args.topic))
+
+# For nodes with non-default executors
+utils.lifecycle.run_node(Planner, executor=MultiThreadedExecutor())
+```
+
+### Stopping or failing from inside a node
+- `raise SystemExit(0)` to stop a one-shot node after it finishes its job (clean exit 0).
+- `raise SystemExit(1)` for a fatal condition (e.g. a device that won't connect).
+- Any other exception for an unexpected error (propagates with a traceback).
+
 ## utils.math
 Math utilities.
 

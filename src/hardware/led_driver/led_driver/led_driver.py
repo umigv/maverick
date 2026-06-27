@@ -1,8 +1,8 @@
 import time
 
-import rclpy
 import serial
 import utils.config
+import utils.lifecycle
 import utils.qos
 from geometry_msgs.msg import Twist
 from maverick_msgs.msg import MissionState
@@ -43,8 +43,6 @@ class LedDriver(Node):
             self.wait_for_ready()
         except (serial.SerialException, RuntimeError) as e:
             self.get_logger().error(f"Failed to connect to {self.config.serial_port}: {e}")
-            # TODO: We don't call rclpy.shutdown() here because it causes a deadlock in humble
-            # https://github.com/ros2/rclpy/issues/1646
             raise SystemExit(1) from None
 
         self.create_timer(self.config.update_period_s, self.update)
@@ -129,10 +127,4 @@ class LedDriver(Node):
 
 
 def main() -> None:
-    rclpy.init()
-    node = LedDriver()
-    try:
-        rclpy.spin(node)
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    utils.lifecycle.run_node(LedDriver)

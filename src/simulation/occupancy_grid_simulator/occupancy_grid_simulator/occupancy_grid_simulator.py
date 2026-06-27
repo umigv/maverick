@@ -4,8 +4,8 @@ import json
 import math
 
 import numpy as np
-import rclpy
 import utils.config
+import utils.lifecycle
 import utils.qos
 from nav_msgs.msg import MapMetaData, OccupancyGrid, Odometry
 from rclpy.node import Node
@@ -222,10 +222,4 @@ class OccupancyGridSimulator(Node):
 
 
 def main() -> None:
-    rclpy.init()
-    node = OccupancyGridSimulator()
-    try:
-        rclpy.spin(node)
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+    utils.lifecycle.run_node(OccupancyGridSimulator)
