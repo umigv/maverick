@@ -1,99 +1,104 @@
 #!/usr/bin/env python3
 import os
 import shutil
-import subprocess
 import sys
 from pathlib import Path
 
 from common import ROOT, die, run
 
-ROS_DISTRO = os.environ.get("ROS_DISTRO")
+BASH_BODY = """\
+# Managed by the maverick environment bootstrap.
+_pixi_ros2_completion() {
+    [ -n "$CONDA_PREFIX" ] || return
+    [ "$_ROS2_COMPL" = "$CONDA_PREFIX" ] && return
+
+    local f="$CONDA_PREFIX/share/ros2cli/environment/ros2-argcomplete.bash"
+    [ -f "$f" ] || return
+
+    . "$f"
+    export _ROS2_COMPL="$CONDA_PREFIX"
+}
+PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}_pixi_ros2_completion\""""
+
+ZSH_BODY = """\
+# Managed by the maverick environment bootstrap.
+_pixi_ros2_completion() {
+    [ -n "$CONDA_PREFIX" ] || return
+    [ "$_ROS2_COMPL" = "$CONDA_PREFIX" ] && return
+
+    local f="$CONDA_PREFIX/share/ros2cli/environment/ros2-argcomplete.zsh"
+    [ -f "$f" ] || return
+
+    source "$f"
+    export _ROS2_COMPL="$CONDA_PREFIX"
+}
+if [[ ! " ${precmd_functions[*]} " =~ " _pixi_ros2_completion " ]]; then
+    precmd_functions+=(_pixi_ros2_completion)
+fi"""
+
+MARK_START = "# >>> maverick environment >>>"
+MARK_END = "# <<< maverick environment <<<"
+
+GIT_HOOKS = {
+    "pre-commit": "pre_commit.py",
+    "post-checkout": "generate_pyrightconfig.py",
+    "post-merge": "generate_pyrightconfig.py",
+    "post-rewrite": "generate_pyrightconfig.py",
+}
 
 
 def log(msg: str) -> None:
-    print(f"\n\033[1m\033[0;36m==> {msg}\033[0m")
+    print(f"\033[1;34m===> {msg}\033[0m", flush=True)
 
 
-def note(msg: str) -> None:
-    print(f"    \033[0;33mNOTE: {msg}\033[0m")
+def update_or_append_block(rc_path: Path, body: str) -> None:
+    block = f"{MARK_START}\n{body}\n{MARK_END}"
+    text = rc_path.read_text() if rc_path.exists() else ""
+    if MARK_START in text:
+        log(f"Updating configuration in ~/{rc_path.name}")
+        before, _ = text.split(MARK_START, 1)
+        _, after = text.split(MARK_END, 1)
+        rc_path.write_text(before + block + after)
+    else:
+        log(f"Installing configuration in ~/{rc_path.name}")
+        with rc_path.open("a") as f:
+            f.write(f"\n{block}\n")
+
+
+def configure_shell() -> None:
+    if Path(os.environ.get("SHELL", "/bin/bash")).name == "zsh":
+        update_or_append_block(Path.home() / ".zshrc", ZSH_BODY)
+    else:
+        update_or_append_block(Path.home() / ".bashrc", BASH_BODY)
 
 
 def main() -> None:
-    if not ROS_DISTRO:
-        die("ROS_DISTRO is not set. Source /opt/ros/<distro>/setup.bash first.")
-
-    if not Path(f"/opt/ros/{ROS_DISTRO}").exists():
-        die(f"ROS not found at /opt/ros/{ROS_DISTRO}")
-
-    if not (ROOT / "src").is_dir():
-        die(f"Expected workspace src/ at: {ROOT}/src")
-
-    log(f"Repo root: {ROOT}")
+    missing = [tool for tool in ("just", "direnv") if shutil.which(tool) is None]
+    if missing:
+        die(f"Missing system tools: {', '.join(missing)}. Run the host bootstrap first.")
 
     log("Initializing git submodules")
-    result = subprocess.run(
-        ["git", "-C", str(ROOT), "submodule", "update", "--init", "--recursive"],
-        capture_output=True,
-        text=True,
-    )
-    if result.stdout.strip():
+    if run("git", "submodule", "update", "--init", "--recursive", capture_output=True).strip():
         log("Submodules changed — clearing build, install, and log directories")
-        for d in ("build", "install", "log"):
-            shutil.rmtree(ROOT / d, ignore_errors=True)
-
-    log("Installing apt tooling deps")
-    run("sudo", "apt", "update")
-    apt_packages = (ROOT / "tooling.apt").read_text().split()
-    run("sudo", "apt-get", "install", "-y", *apt_packages)
-
-    if not shutil.which("just"):
-        log("Installing just")
-        run(
-            "curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | sudo bash -s -- --to /usr/local/bin",
-            shell=True,
-        )
-
-    bashrc = Path.home() / ".bashrc"
-    content = bashrc.read_text() if bashrc.exists() else ""
-
-    if "just --completions bash" not in content:
-        log("Configuring just autocomplete")
-        with bashrc.open("a") as f:
-            f.write("source <(just --completions bash)\n")
-
-    if "direnv hook bash" not in content:
-        log("Configuring direnv shell hook")
-        with bashrc.open("a") as f:
-            f.write('export DIRENV_LOG_FORMAT=\neval "$(direnv hook bash)"\n')
-
-    log("Installing Python tooling deps")
-    run(sys.executable, "-m", "pip", "install", "-e", f"{ROOT}[tooling]")
-
-    log("Installing ROS deps via rosdep")
-    env = {**os.environ, "ROS_DISTRO": ROS_DISTRO, "ROS_VERSION": "2"}
-    run("rosdep", "update", env=env)
-    run("rosdep", "install", "--from-paths", str(ROOT), "--ignore-src", "-r", "-y", env=env)
+        for directory in ("build", "install", "log"):
+            shutil.rmtree(ROOT / directory, ignore_errors=True)
 
     log("Allowing direnv in repo")
     run("direnv", "allow", str(ROOT))
+
+    log("Configuring shell")
+    configure_shell()
 
     log("Generating pyrightconfig.json")
     run(sys.executable, str(ROOT / "scripts" / "generate_pyrightconfig.py"))
 
     log("Installing git hooks")
-    hooks = {
-        "pre-commit": ROOT / "scripts" / "pre_commit.py",
-        "post-checkout": ROOT / "scripts" / "generate_pyrightconfig.py",
-        "post-merge": ROOT / "scripts" / "generate_pyrightconfig.py",
-        "post-rewrite": ROOT / "scripts" / "generate_pyrightconfig.py",
-    }
-    for hook_name, hook_src in hooks.items():
-        hook_dst = ROOT / ".git" / "hooks" / hook_name
-        hook_dst.unlink(missing_ok=True)
-        hook_dst.symlink_to(hook_src)
+    for hook, script in GIT_HOOKS.items():
+        dest = ROOT / ".git" / "hooks" / hook
+        dest.unlink(missing_ok=True)
+        dest.symlink_to(ROOT / "scripts" / script)
 
-    log("Setup complete")
-    note("Run source ~/.bashrc for direnv hook to take effect")
+    log("Setup complete. Open a new terminal for the changes to take effect.")
 
 
 if __name__ == "__main__":

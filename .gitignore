@@ -35,3 +35,7 @@ log/
 /*.yaml
 /*.yml
 !colcon_defaults.yaml
+
+# pixi environments
+.pixi/*
+!.pixi/config.toml
