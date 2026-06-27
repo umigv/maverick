@@ -3,7 +3,7 @@ from __future__ import annotations
 import ctypes
 import os
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum, IntEnum
 from typing import Any, Generic, TypeVar
 
@@ -170,7 +170,7 @@ class TopicState(Generic[T]):
 
     def mark_received(self, ros_time: Time, value: T) -> None:
         self.last_time = ros_time
-        wall_time = datetime.fromtimestamp(ros_time.nanoseconds / 1e9, tz=timezone.utc).astimezone()
+        wall_time = datetime.fromtimestamp(ros_time.nanoseconds / 1e9, tz=UTC).astimezone()
         self.last_timestamp_str = wall_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         self._value = value
 
@@ -463,7 +463,7 @@ class VectornavMonitor(Node):
         # fmt: off
         print("\033[H\033[2J", end="")
         print("==========================================================================")
-        print(f"  Vectornav Monitor | Live Time: {cyan(datetime.now(timezone.utc).astimezone().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3])} | Uptime: {green(uptime_str)}")
+        print(f"  Vectornav Monitor | Live Time: {cyan(datetime.now(UTC).astimezone().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3])} | Uptime: {green(uptime_str)}")
         print("==========================================================================")
         print(f"  System Phase: {phase_display}")
         print(self.build_transition_checklist(now))
