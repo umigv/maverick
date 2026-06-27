@@ -2,7 +2,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import pytest
-from rcl_interfaces.msg import ParameterDescriptor
+from rclpy.exceptions import ParameterUninitializedException
+from rclpy.parameter import Parameter
 from utils.config import load
 
 
@@ -19,13 +20,15 @@ class MockNode:
     def get_name(self) -> str:
         return "MockNode"
 
-    def declare_parameter(self, key: str, default_value=None, descriptor: ParameterDescriptor | None = None):
-        self.declared.append((key, default_value))
-        if key not in self._store:
-            self._store[key] = default_value
+    def declare_parameter(self, key: str, value=None):
+        self.declared.append((key, value))
+        if key not in self._store and not isinstance(value, Parameter.Type):
+            self._store[key] = value
 
     def get_parameter(self, key: str) -> Param:
-        return Param(self._store.get(key, None))
+        if key not in self._store:
+            raise ParameterUninitializedException(key)
+        return Param(self._store[key])
 
 
 def test_load_required_param_success():
@@ -36,7 +39,7 @@ def test_load_required_param_success():
     node = MockNode(initial={"rate": 10})
     config = load(node, Config)
 
-    assert ("rate", None) in node.declared
+    assert ("rate", Parameter.Type.INTEGER) in node.declared
     assert config.rate == 10
 
 
@@ -46,7 +49,7 @@ def test_load_required_param_missing_raises():
         rate: int
 
     node = MockNode(initial={})
-    with pytest.raises(RuntimeError, match=r"Required parameter 'rate' not set"):
+    with pytest.raises(ParameterUninitializedException):
         load(node, Config)
 
 
@@ -171,7 +174,7 @@ def test_load_nested_without_default_instance_keeps_leaf_required():
         inner: InnerWithRequired
 
     node = MockNode(initial={})
-    with pytest.raises(RuntimeError, match=r"Required parameter 'inner.gain' not set"):
+    with pytest.raises(ParameterUninitializedException):
         load(node, Config)
 
 
