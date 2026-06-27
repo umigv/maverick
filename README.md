@@ -17,7 +17,7 @@
 ## Setup
 First run the [host bootstrap](https://github.com/umigv/nav-environment) if you haven't. Then:
 ```bash
-./scripts/setup_environment.py
+just setup
 ```
 
 VSCode: Install recommended extensions in this repo (it should automatically prompt you).
