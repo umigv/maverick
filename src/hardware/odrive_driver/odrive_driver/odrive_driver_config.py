@@ -137,11 +137,11 @@ class OdriveDriverConfig:
         geometry: Drivetrain geometry.
         controller: ODrive axis controller parameters.
         covariance: Dynamic covariance model for the published twist estimate.
+        estop_file_path: Path to the e-stop flag file. A value of "1" disables motor output.
         publish_period_s: Period of the encoder publish timer (s).
         timestamp_delay_s: Amount subtracted from the publish timestamp to compensate read and processing latency (s).
         cmd_vel_timeout_s: Maximum age of a cmd_vel command before motors are zeroed (s).
         frame_id: TF frame ID of the robot base, attached to the published twist header.
-        estop_file_path: Path to the e-stop flag file. A value of "1" disables motor output.
         debug: Whether to publish debug motor signals
     """
 
@@ -150,11 +150,11 @@ class OdriveDriverConfig:
     geometry: GeometryConfig
     controller: ControllerConfig
     covariance: CovarianceConfig
+    estop_file_path: Path
     publish_period_s: float = 0.01
     timestamp_delay_s: float = 0.0
     cmd_vel_timeout_s: float = 0.5
     frame_id: str = "base_link"
-    estop_file_path: Path = Path("/tmp/estop_value.txt")
     debug: bool = False
 
     def __post_init__(self) -> None:

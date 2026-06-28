@@ -37,6 +37,4 @@ odrive_driver:
     # Subtracted from publish timestamp to compensate for read/processing latency (s)
     timestamp_delay_s: 0.0
 
-    estop_file_path: "/tmp/estop_value.txt"
-
     debug: false

@@ -8,6 +8,9 @@ from ament_index_python.packages import get_package_share_directory
 Mode = Literal["autonav", "self_drive", "nav_test"]
 MODES: list[Mode] = list(get_args(Mode))
 
+# File the e-stop state is shared through: estop_driver writes it, led_driver and odrive_driver read it ("1" = stopped)
+ESTOP_FILE_PATH = "/tmp/estop_value.txt"
+
 
 def format_mode_description(descriptions: dict[Mode, str]) -> str:
     if missing := set(MODES) - descriptions.keys():

@@ -4,7 +4,7 @@ state.
 Waits up to `ready_timeout_s` for the Arduino to send `READY` before starting.
 
 ## Read Files
-- `/tmp/estop_value.txt` - e-stop state written by `estop_driver`
+- `estop_file_path` - e-stop state written by `estop_driver`
 
 ## Subscribed Topics
 - `teleop_cmd_vel` (`geometry_msgs/Twist`) - marks teleop as active for `cmd_vel_timeout_s` after the last message
@@ -14,7 +14,7 @@ Waits up to `ready_timeout_s` for the Arduino to send `READY` before starting.
 ## LED Priority
 | Priority | Condition | Code | Effect |
 |---|---|---|---|
-| 1 | `/tmp/estop_value.txt` is `"1"` | `6` | Flashing red |
+| 1 | e-stop file is `"1"` | `6` | Flashing red |
 | 2 | `teleop_cmd_vel` received within `cmd_vel_timeout_s` | `1` | Solid blue |
 | 3 | `mission_complete` | `7` | Solid green |
 | 4 | `in_recovery` | `4` | Flashing yellow |

@@ -1,6 +1,14 @@
 from typing import Any
 
-from bringup.launch_utils import MODES, Mode, bringup_share, format_mode_description, load_frames, load_gps_file
+from bringup.launch_utils import (
+    ESTOP_FILE_PATH,
+    MODES,
+    Mode,
+    bringup_share,
+    format_mode_description,
+    load_frames,
+    load_gps_file,
+)
 from launch import LaunchContext, LaunchDescription, LaunchDescriptionEntity
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
@@ -41,12 +49,14 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
             executable="estop_driver",
             name="estop_driver",
             output="screen",
+            parameters=[{"estop_file_path": ESTOP_FILE_PATH}],
         ),
         Node(
             package="led_driver",
             executable="led_driver",
             name="led_driver",
             output="screen",
+            parameters=[{"estop_file_path": ESTOP_FILE_PATH}],
         ),
         Node(
             package="odrive_driver",
@@ -56,6 +66,7 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
             parameters=[
                 f"{bringup_share()}/config/hardware/odrive_driver.yaml",
                 {"frame_id": frames["base_frame"]},
+                {"estop_file_path": ESTOP_FILE_PATH},
             ],
             remappings=[
                 ("enc_vel", "enc_vel/raw"),
