@@ -42,7 +42,7 @@ class LedDriver(Node):
             self.get_logger().info(f"Connected to {self.config.serial_port}")
             self.wait_for_ready()
         except (serial.SerialException, RuntimeError) as e:
-            self.get_logger().error(f"Failed to connect to {self.config.serial_port}: {e}")
+            self.get_logger().fatal(f"Failed to connect to {self.config.serial_port}: {e}")
             raise SystemExit(1) from None
 
         self.create_timer(self.config.update_period_s, self.update)

@@ -22,7 +22,7 @@ class EstopDriver(Node):
             self.serial = serial.Serial(str(self.config.serial_port), baudrate=self.config.baud_rate, timeout=0.0)
             self.get_logger().info(f"Connected to {self.config.serial_port}")
         except serial.SerialException as e:
-            self.get_logger().error(f"Failed to connect to {self.config.serial_port}: {e}")
+            self.get_logger().fatal(f"Failed to connect to {self.config.serial_port}: {e}")
             raise SystemExit(1) from None
 
         self.create_timer(self.config.poll_period_s, self.poll)
