@@ -1,4 +1,4 @@
-from typing import Any, assert_never
+from typing import Any, assert_never, cast
 
 from bringup.launch_utils import MODES, Mode, gps_file_path, load_frames
 from launch import LaunchContext, LaunchDescription, LaunchDescriptionEntity
@@ -11,7 +11,7 @@ from launch_ros.actions import Node
 
 def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[LaunchDescriptionEntity]:
     frames = load_frames()
-    mode: Mode = LaunchConfiguration("mode").perform(context)
+    mode: Mode = cast(Mode, LaunchConfiguration("mode").perform(context))
     course = LaunchConfiguration("course").perform(context)
 
     occupancy_grid_transform_node = Node(
@@ -127,7 +127,7 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
 def generate_launch_description() -> LaunchDescription:
     return LaunchDescription(
         [
-            DeclareLaunchArgument("mode", choices=MODES),
+            DeclareLaunchArgument("mode", choices=cast(list[str], MODES)),
             DeclareLaunchArgument("course", default_value="default"),
             OpaqueFunction(function=launch_setup),
         ]

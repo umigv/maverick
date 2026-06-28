@@ -5,7 +5,7 @@ from statistics import median
 import utils.config
 import utils.lifecycle
 from rclpy.node import Node
-from sensor_msgs.msg import NavSatFix
+from sensor_msgs.msg import NavSatFix, NavSatStatus
 
 from .gps_origin_calculator_config import GpsOriginCalculatorConfig
 
@@ -36,7 +36,7 @@ class GpsOriginCalculator(Node):
 
         self.get_logger().debug(f"Received data: lat={msg.latitude}, lon={msg.longitude}, alt={msg.altitude}")
 
-        if msg.status.status == msg.status.STATUS_NO_FIX:
+        if msg.status.status == NavSatStatus.STATUS_NO_FIX:
             self.get_logger().debug("Dropping GPS msg with no fix")
             return
 

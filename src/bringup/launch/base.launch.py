@@ -1,3 +1,5 @@
+from typing import cast
+
 from bringup.launch_utils import MODES
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
@@ -12,7 +14,7 @@ def generate_launch_description() -> LaunchDescription:
 
     return LaunchDescription(
         [
-            DeclareLaunchArgument("mode", choices=MODES),
+            DeclareLaunchArgument("mode", choices=cast(list[str], MODES)),
             DeclareLaunchArgument("simulation", default_value="false", choices=["true", "false"]),
             DeclareLaunchArgument("course", default_value="default"),
             IncludeLaunchDescription(

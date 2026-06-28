@@ -37,5 +37,5 @@ def run_node[NodeT: Node](factory: Callable[[], NodeT], *, executor: Executor | 
     try:
         with ros(), managed_node(factory) as node:
             rclpy.spin(node, executor)
-    except (KeyboardInterrupt, ExternalShutdownException):
+    except KeyboardInterrupt, ExternalShutdownException:
         pass
