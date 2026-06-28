@@ -263,8 +263,10 @@ class VectornavDriver : public rclcpp::Node {
     [[nodiscard]] auto configure_sensor_transforms() -> bool {
         RCLCPP_INFO(get_logger(), "Waiting for TF transforms...");
         const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+        rclcpp::executors::SingleThreadedExecutor executor;
+        executor.add_node(shared_from_this());
         while (rclcpp::ok()) {
-            rclcpp::spin_some(shared_from_this());
+            executor.spin_some();
             const bool ins_ready = tf_buffer_->canTransform(imu_frame_id_, ins_frame_id_, tf2::TimePointZero);
             const bool gnss_a_ready = tf_buffer_->canTransform(imu_frame_id_, gnss_a_frame_id_, tf2::TimePointZero);
             const bool gnss_b_ready = tf_buffer_->canTransform(imu_frame_id_, gnss_b_frame_id_, tf2::TimePointZero);
