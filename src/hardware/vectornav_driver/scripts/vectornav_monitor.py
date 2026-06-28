@@ -5,11 +5,14 @@ import os
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum, IntEnum
+from typing import Any, Generic, TypeVar
 
 import utils.lifecycle
 from rclpy.node import Node
 from rclpy.time import Time
 from std_msgs.msg import Float32, Float32MultiArray, UInt16
+
+T = TypeVar("T")
 
 
 def green(s: str) -> str:
@@ -136,10 +139,9 @@ class GnssStatusReg(ctypes.LittleEndianStructure):
         return cls.from_buffer_copy(value.to_bytes(2, "little"))
 
 
+# Field order matches the GnssCompassSignalHealthStatus array packed by the driver - VectorNav VN300 ICD section 4.8.1.
 @dataclass
 class SignalHealth:
-    # Field order matches the GnssCompassSignalHealthStatus array packed by the
-    # driver - VectorNav VN300 ICD section 4.8.1.
     pvt_a: float
     rtk_a: float
     cn0_a: float
@@ -150,23 +152,27 @@ class SignalHealth:
     com_rtk: float
 
     @classmethod
-    def from_array(cls, d) -> SignalHealth:
+    def from_array(cls, d: list[float]) -> SignalHealth:
         return cls(*d[:8])
 
 
 @dataclass
-class TopicState:
-    """Latest decoded value for a single topic, plus when it arrived."""
-
+class TopicState(Generic[T]):
     last_time: Time | None = None
     last_timestamp_str: str = "Never"
-    value: object = None
+    _value: T | None = None
 
-    def mark_received(self, ros_time: Time, value: object) -> None:
+    @property
+    def value(self) -> T:
+        # Callers guard with is_stale()/last_time before reading; this enforces that invariant.
+        assert self._value is not None, "TopicState.value read before any message arrived"
+        return self._value
+
+    def mark_received(self, ros_time: Time, value: T) -> None:
         self.last_time = ros_time
         wall_time = datetime.fromtimestamp(ros_time.nanoseconds / 1e9, tz=timezone.utc)
         self.last_timestamp_str = wall_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-        self.value = value
+        self._value = value
 
     def is_stale(self, now: Time, timeout_sec: float = STALE_TIMEOUT_SEC) -> bool:
         return self.last_time is None or (now - self.last_time).nanoseconds / 1e9 > timeout_sec
@@ -224,12 +230,8 @@ def _signal_health_hints(sh: SignalHealth) -> str:
     return ("\n" + "\n".join(hints)) if hints else ""
 
 
+# INS startup phase from VectorNav VN300 manual section 4.2.
 class Phase(Enum):
-    """INS startup phase (VectorNav VN300 manual section 4.2).
-
-    Each member's value is the colored label shown in the monitor.
-    """
-
     INIT = red("Event A: Sensor Initialization")
     GNSS_FIX = cyan("Event B: GNSS Fix Acquired")
     ALIGNING = yellow("Event C: Aligning (Valid Pos/Vel)")
@@ -267,19 +269,19 @@ class Phase(Enum):
 
 
 class VectornavMonitor(Node):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("vectornav_monitor")
 
         os.system("")  # enable ANSI escape processing on Windows terminals
 
         self.start_time = self.get_clock().now()
 
-        self.ins = TopicState()
-        self.gnss1 = TopicState()
-        self.gnss2 = TopicState()
-        self.signal_health = TopicState()
-        self.startup = TopicState()
-        self.yaw = TopicState()
+        self.ins: TopicState[InsStatusReg] = TopicState()
+        self.gnss1: TopicState[GnssStatusReg] = TopicState()
+        self.gnss2: TopicState[GnssStatusReg] = TopicState()
+        self.signal_health: TopicState[SignalHealth] = TopicState()
+        self.startup: TopicState[float] = TopicState()
+        self.yaw: TopicState[float] = TopicState()
 
         self.create_subscription(UInt16, "vectornav/ins_status", self.ins_callback, 10)
         self.create_subscription(UInt16, "vectornav/gnss_status", self.gnss1_callback, 10)
@@ -294,22 +296,22 @@ class VectornavMonitor(Node):
 
         self.create_timer(0.1, self.update_display)
 
-    def ins_callback(self, msg: UInt16):
+    def ins_callback(self, msg: UInt16) -> None:
         self.ins.mark_received(self.get_clock().now(), InsStatusReg.from_uint16(msg.data))
 
-    def gnss1_callback(self, msg: UInt16):
+    def gnss1_callback(self, msg: UInt16) -> None:
         self.gnss1.mark_received(self.get_clock().now(), GnssStatusReg.from_uint16(msg.data))
 
-    def gnss2_callback(self, msg: UInt16):
+    def gnss2_callback(self, msg: UInt16) -> None:
         self.gnss2.mark_received(self.get_clock().now(), GnssStatusReg.from_uint16(msg.data))
 
-    def signal_health_callback(self, msg: Float32MultiArray):
+    def signal_health_callback(self, msg: Float32MultiArray) -> None:
         self.signal_health.mark_received(self.get_clock().now(), SignalHealth.from_array(msg.data))
 
-    def startup_status_callback(self, msg: Float32MultiArray):
+    def startup_status_callback(self, msg: Float32MultiArray) -> None:
         self.startup.mark_received(self.get_clock().now(), msg.data[0])
 
-    def yaw_uncertainty_callback(self, msg: Float32):
+    def yaw_uncertainty_callback(self, msg: Float32) -> None:
         self.yaw.mark_received(self.get_clock().now(), msg.data)
 
     def build_transition_checklist(self, now: Time) -> str:
@@ -367,12 +369,7 @@ class VectornavMonitor(Node):
             case _:
                 return f"  {yellow('Unknown phase')}"
 
-    def block_frame(self, title: str, state: TopicState, now: Time, *, show_hex: bool = False) -> tuple[str, bool]:
-        """Render the '--- title ---' and 'Last received' lines. Returns (text, stale).
-
-        When stale, callers render blank rows in place of values so the block
-        keeps the same height (no value can be read from a stale topic).
-        """
+    def block_frame(self, title: str, state: TopicState[Any], now: Time, *, show_hex: bool = False) -> tuple[str, bool]:
         if state.last_time is None:
             return f"--- {title} {yellow('[STALE]')} ---\n  {'Last received:':<20}Never", True
 
@@ -408,7 +405,7 @@ class VectornavMonitor(Node):
 
         return f"{frame}\n{body}"
 
-    def build_gnss(self, title: str, state: TopicState, now: Time) -> str:
+    def build_gnss(self, title: str, state: TopicState[GnssStatusReg], now: Time) -> str:
         frame, stale = self.block_frame(title, state, now, show_hex=True)
         if stale:
             return f"{frame}\n" + "\n".join([""] * 9)
@@ -448,7 +445,7 @@ class VectornavMonitor(Node):
 
         return f"{frame}\n{body}{_signal_health_hints(sh)}"
 
-    def update_display(self):
+    def update_display(self) -> None:
         now = self.get_clock().now()
 
         if self.ins.last_time is None:
