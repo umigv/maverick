@@ -1,6 +1,6 @@
 from typing import Any
 
-from bringup.launch_utils import bringup_share
+from bringup.launch_utils import gps_file_path
 from launch import LaunchContext, LaunchDescription, LaunchDescriptionEntity
 from launch.actions import DeclareLaunchArgument, EmitEvent, OpaqueFunction, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
@@ -16,7 +16,7 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
         package="gps_origin_calculator",
         executable="gps_origin_calculator",
         output="screen",
-        parameters=[{"output_file": f"{bringup_share()}/courses/{course}/gps.json"}],
+        parameters=[{"output_file": gps_file_path(course)}],
         remappings=[("gps", "gps/raw")],
     )
 

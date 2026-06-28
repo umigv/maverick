@@ -29,6 +29,10 @@ def load_frames() -> dict:
         return cast(dict, yaml.safe_load(f))
 
 
+def gps_file_path(course: str) -> str:
+    return f"{bringup_share()}/courses/{course}/gps.json"
+
+
 def load_gps_file(course: str) -> dict:
-    with Path(f"{bringup_share()}/courses/{course}/gps.json").open() as f:
+    with Path(gps_file_path(course)).open() as f:
         return cast(dict, json.load(f))
