@@ -61,15 +61,21 @@ def run(
         sys.exit(e.returncode)
 
 
+# Flat directories that are lint/format targets but not ROS packages (no package.xml).
+EXTRA_DIRS = [Path("scripts")]
+
+
 def discover_packages() -> list[Path]:
-    """Return paths to all ROS 2 packages under src/, relative to ROOT."""
-    return sorted({p.parent.relative_to(ROOT) for p in (ROOT / "src").rglob("package.xml")})
+    """Return all lint/format targets relative to ROOT: ROS 2 packages (package.xml dirs under src/) plus EXTRA_DIRS."""
+    ros = sorted({p.parent.relative_to(ROOT) for p in (ROOT / "src").rglob("package.xml")})
+    packages = ros + EXTRA_DIRS
+    if not packages:
+        die("No packages found")
+    return packages
 
 
-def resolve_target(name: str, pkg_dirs: list[Path], extra_dirs: list[Path]) -> Path:
-    """Resolve a package name to its path, dying if not found."""
-    if Path(name) in extra_dirs:
-        return Path(name)
+def resolve_target(name: str, pkg_dirs: list[Path]) -> Path:
+    """Resolve a target name to its path, dying if not found."""
     matches = [d for d in pkg_dirs if d.name == name]
     if not matches:
         die(f"'{name}' is not a valid target")
@@ -77,23 +83,19 @@ def resolve_target(name: str, pkg_dirs: list[Path], extra_dirs: list[Path]) -> P
 
 
 def resolve_packages(only: list[str] | None, ignore: list[str] | None) -> tuple[list[Path], list[Path]]:
-    """Resolve the target package list from --only/--ignore filters.
+    """Resolve the target list from --only/--ignore filters.
 
     Returns (pkg_dirs, all_pkg_dirs) where pkg_dirs is the filtered set to operate on and all_pkg_dirs is the full
-    unfiltered set (used for cross-package type checking).
+    unfiltered set of targets (ROS packages plus EXTRA_DIRS), used as the MYPYPATH bases for type checking.
     """
-    print("==> Discovering ROS packages")
+    print("==> Discovering packages")
     all_pkg_dirs = discover_packages()
-    if not all_pkg_dirs:
-        die("No package.xml found under src/")
 
-    extra_dirs = [Path("scripts")]
-    pkg_dirs = list(all_pkg_dirs) + extra_dirs
-
+    pkg_dirs = all_pkg_dirs
     if only:
-        pkg_dirs = [resolve_target(name, all_pkg_dirs, extra_dirs) for name in only]
+        pkg_dirs = [resolve_target(name, all_pkg_dirs) for name in only]
     elif ignore:
-        ignored = {resolve_target(name, all_pkg_dirs, extra_dirs) for name in ignore}
+        ignored = {resolve_target(name, all_pkg_dirs) for name in ignore}
         pkg_dirs = [p for p in pkg_dirs if p not in ignored]
 
     if not pkg_dirs:
