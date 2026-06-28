@@ -10,7 +10,7 @@ Reads ultrasonic distance from `/dev/ultrasonic` at 9600 baud.
 - `mission_state` (`maverick_msgs/MissionState`) — triggers recovery when `in_recovery` transitions to true
 
 ## Published Topics
-- `recovery_cmd_vel` (`geometry_msgs/Twist`)
+- `recovery_cmd_vel` (`geometry_msgs/TwistStamped`)
 
 ## Service Clients
 - `recovery_complete` (`std_srvs/Trigger`) — signals recovery end back to mission control

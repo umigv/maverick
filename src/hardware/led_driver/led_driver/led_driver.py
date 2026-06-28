@@ -5,7 +5,7 @@ import serial
 import utils.config
 import utils.lifecycle
 import utils.qos
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import TwistStamped
 from maverick_msgs.msg import MissionState
 from rclpy.node import Node
 from rclpy.time import Time
@@ -28,8 +28,8 @@ class LedDriver(Node):
 
         self.config = utils.config.load(self, LedDriverConfig)
 
-        self.create_subscription(Twist, "teleop_cmd_vel", self.teleop_callback, 10)
-        self.create_subscription(Twist, "nav_cmd_vel", self.nav_callback, 10)
+        self.create_subscription(TwistStamped, "teleop_cmd_vel", self.teleop_callback, 10)
+        self.create_subscription(TwistStamped, "nav_cmd_vel", self.nav_callback, 10)
         self.create_subscription(MissionState, "mission_state", self.mission_state_callback, utils.qos.LATCHED)
 
         self.last_teleop_time: Time | None = None
@@ -60,10 +60,10 @@ class LedDriver(Node):
 
         raise RuntimeError(f"Did not receive READY within {self.config.ready_timeout_s}s")
 
-    def teleop_callback(self, msg: Twist) -> None:
+    def teleop_callback(self, msg: TwistStamped) -> None:
         self.last_teleop_time = self.get_clock().now()
 
-    def nav_callback(self, msg: Twist) -> None:
+    def nav_callback(self, msg: TwistStamped) -> None:
         self.last_nav_time = self.get_clock().now()
 
     def mission_state_callback(self, msg: MissionState) -> None:
