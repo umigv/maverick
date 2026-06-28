@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from dataclasses import dataclass
 
 from utils.geometry import Point2d, Pose2d, Rotation2d
