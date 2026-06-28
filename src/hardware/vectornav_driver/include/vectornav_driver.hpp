@@ -44,7 +44,7 @@ class VectornavDriver : public rclcpp::Node {
     [[nodiscard]] bool try_read(Register& reg, bool fatal = false) {
         if (const auto error = vs_.readRegister(&reg); error != VN::Error::None) {
             if (fatal) {
-                RCLCPP_ERROR(get_logger(), "Failed to read %s: %s", Register::name().data(),
+                RCLCPP_FATAL(get_logger(), "Failed to read %s: %s", Register::name().data(),
                              VN::errorCodeToString(error).data());
             } else {
                 RCLCPP_WARN(get_logger(), "Failed to read %s: %s", Register::name().data(),
@@ -58,7 +58,7 @@ class VectornavDriver : public rclcpp::Node {
     template <typename Register>
     [[nodiscard]] bool try_write(Register& reg) {
         if (const auto error = vs_.writeRegister(&reg); error != VN::Error::None) {
-            RCLCPP_ERROR(get_logger(), "Failed to write %s: %s", Register::name().data(),
+            RCLCPP_FATAL(get_logger(), "Failed to write %s: %s", Register::name().data(),
                          VN::errorCodeToString(error).data());
             return false;
         }
@@ -117,7 +117,7 @@ class VectornavDriver : public rclcpp::Node {
         port_ = declare_parameter<std::string>("port", "/dev/vn300");
 
         if (const auto baud_rate = to_baud_rate(declare_parameter<int>("baud_rate", 115200)); !baud_rate) {
-            RCLCPP_ERROR(get_logger(),
+            RCLCPP_FATAL(get_logger(),
                          "Invalid baud_rate. Valid values: 9600 19200 38400 57600 115200 128000 230400 460800 921600");
             return false;
         } else {
@@ -125,12 +125,12 @@ class VectornavDriver : public rclcpp::Node {
         }
 
         if (const auto period = declare_parameter<double>("measurement_publish_period_s", 0.01); period <= 0.0) {
-            RCLCPP_ERROR(get_logger(), "measurement_publish_period_s must be positive");
+            RCLCPP_FATAL(get_logger(), "measurement_publish_period_s must be positive");
             return false;
         } else {
             const auto divisor = static_cast<int>(std::round(SENSOR_SAMPLE_RATE * period));
             if (divisor < 1 || SENSOR_SAMPLE_RATE % divisor != 0) {
-                RCLCPP_ERROR(
+                RCLCPP_FATAL(
                     get_logger(),
                     "publish_period_s (%.4f) does not correspond to an integer divisor of the %d Hz sensor sample rate",
                     period, SENSOR_SAMPLE_RATE);
@@ -141,34 +141,34 @@ class VectornavDriver : public rclcpp::Node {
 
         if (status_register_poll_period_s_ = declare_parameter<double>("status_register_poll_period_s", 1.0);
             status_register_poll_period_s_ <= 0.0) {
-            RCLCPP_ERROR(get_logger(), "status_register_poll_period_s must be positive");
+            RCLCPP_FATAL(get_logger(), "status_register_poll_period_s must be positive");
             return false;
         }
 
         if (imu_frame_id_ = declare_parameter<std::string>("imu_frame_id", "vectornav"); imu_frame_id_.empty()) {
-            RCLCPP_ERROR(get_logger(), "imu_frame_id must be set");
+            RCLCPP_FATAL(get_logger(), "imu_frame_id must be set");
             return false;
         }
 
         if (ins_frame_id_ = declare_parameter<std::string>("ins_frame_id", "vectornav"); ins_frame_id_.empty()) {
-            RCLCPP_ERROR(get_logger(), "ins_frame_id must be set");
+            RCLCPP_FATAL(get_logger(), "ins_frame_id must be set");
             return false;
         }
 
         if (gnss_a_frame_id_ = declare_parameter<std::string>("gnss_a_frame_id", ""); gnss_a_frame_id_.empty()) {
-            RCLCPP_ERROR(get_logger(), "gnss_a_frame_id must be set");
+            RCLCPP_FATAL(get_logger(), "gnss_a_frame_id must be set");
             return false;
         }
 
         if (gnss_b_frame_id_ = declare_parameter<std::string>("gnss_b_frame_id", ""); gnss_b_frame_id_.empty()) {
-            RCLCPP_ERROR(get_logger(), "gnss_b_frame_id must be set");
+            RCLCPP_FATAL(get_logger(), "gnss_b_frame_id must be set");
             return false;
         }
 
         if (const auto cov =
                 declare_parameter<std::vector<double>>("linear_accel_covariance", std::vector<double>(9, 0.0));
             cov.size() != 9) {
-            RCLCPP_ERROR(get_logger(), "linear_accel_covariance must have 9 elements");
+            RCLCPP_FATAL(get_logger(), "linear_accel_covariance must have 9 elements");
             return false;
         } else {
             linear_accel_covariance_ = to_covariance(cov);
@@ -177,7 +177,7 @@ class VectornavDriver : public rclcpp::Node {
         if (const auto cov =
                 declare_parameter<std::vector<double>>("angular_vel_covariance", std::vector<double>(9, 0.0));
             cov.size() != 9) {
-            RCLCPP_ERROR(get_logger(), "angular_vel_covariance must have 9 elements");
+            RCLCPP_FATAL(get_logger(), "angular_vel_covariance must have 9 elements");
             return false;
         } else {
             angular_vel_covariance_ = to_covariance(cov);
@@ -185,7 +185,7 @@ class VectornavDriver : public rclcpp::Node {
 
         if (const auto datum = declare_parameter<std::vector<double>>("datum", std::vector<double>{}); !datum.empty()) {
             if (datum.size() != 3) {
-                RCLCPP_ERROR(get_logger(), "datum must have 3 elements: [lat, lon, alt]");
+                RCLCPP_FATAL(get_logger(), "datum must have 3 elements: [lat, lon, alt]");
                 return false;
             }
 
@@ -194,7 +194,7 @@ class VectornavDriver : public rclcpp::Node {
 
             map_frame_id_ = declare_parameter<std::string>("map_frame_id", "map");
             if (map_frame_id_.empty()) {
-                RCLCPP_ERROR(get_logger(), "map_frame_id must be set when datum is provided");
+                RCLCPP_FATAL(get_logger(), "map_frame_id must be set when datum is provided");
                 return false;
             }
         } else {
@@ -210,15 +210,15 @@ class VectornavDriver : public rclcpp::Node {
         RCLCPP_INFO(get_logger(), "Starting Connection...");
 
         if (const VN::Error error = vs_.autoConnect(port_); error != VN::Error::None) {
-            RCLCPP_ERROR(get_logger(), "Unable to connect to device %s", port_.c_str());
-            RCLCPP_ERROR(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
+            RCLCPP_FATAL(get_logger(), "Unable to connect to device %s", port_.c_str());
+            RCLCPP_FATAL(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
             return false;
         }
 
         if (baud_rate_ != *vs_.connectedBaudRate()) {
             if (const auto error = vs_.changeBaudRate(baud_rate_); error != VN::Error::None) {
-                RCLCPP_ERROR(get_logger(), "Failed to change device to requested baud rate");
-                RCLCPP_ERROR(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
+                RCLCPP_FATAL(get_logger(), "Failed to change device to requested baud rate");
+                RCLCPP_FATAL(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
                 return false;
             }
         }
@@ -230,7 +230,7 @@ class VectornavDriver : public rclcpp::Node {
         if (!try_read(model_register, true)) {
             return false;
         } else if (model_register.model.find("300") == VN::String<24>::npos) {
-            RCLCPP_ERROR(get_logger(), "Unsupported sensor model: %s (only VN300 is supported)",
+            RCLCPP_FATAL(get_logger(), "Unsupported sensor model: %s (only VN300 is supported)",
                          model_register.model.c_str());
             return false;
         } else {
@@ -274,20 +274,20 @@ class VectornavDriver : public rclcpp::Node {
             }
 
             if (std::chrono::steady_clock::now() > deadline) {
-                RCLCPP_ERROR(get_logger(), "Timed out waiting for TF transforms");
+                RCLCPP_FATAL(get_logger(), "Timed out waiting for TF transforms");
 
                 if (!ins_ready) {
-                    RCLCPP_ERROR(get_logger(), "Missing transform: %s -> %s", imu_frame_id_.c_str(),
+                    RCLCPP_FATAL(get_logger(), "Missing transform: %s -> %s", imu_frame_id_.c_str(),
                                  ins_frame_id_.c_str());
                 }
 
                 if (!gnss_a_ready) {
-                    RCLCPP_ERROR(get_logger(), "Missing transform: %s -> %s", imu_frame_id_.c_str(),
+                    RCLCPP_FATAL(get_logger(), "Missing transform: %s -> %s", imu_frame_id_.c_str(),
                                  gnss_a_frame_id_.c_str());
                 }
 
                 if (!gnss_b_ready) {
-                    RCLCPP_ERROR(get_logger(), "Missing transform: %s -> %s", imu_frame_id_.c_str(),
+                    RCLCPP_FATAL(get_logger(), "Missing transform: %s -> %s", imu_frame_id_.c_str(),
                                  gnss_b_frame_id_.c_str());
                 }
 
@@ -305,7 +305,7 @@ class VectornavDriver : public rclcpp::Node {
             return configure_ins_ref_offset(ins_tf) && configure_gnss_a_offset(ins_tf, gnss_a_tf) &&
                    configure_gnss_compass_baseline(gnss_a_tf, gnss_b_tf);
         } catch (const tf2::TransformException& ex) {
-            RCLCPP_ERROR(get_logger(), "TF transform error: %s", ex.what());
+            RCLCPP_FATAL(get_logger(), "TF transform error: %s", ex.what());
             return false;
         }
     }
@@ -348,16 +348,16 @@ class VectornavDriver : public rclcpp::Node {
             }
 
             if (const auto error = vs_.writeSettings(); error != VN::Error::None) {
-                RCLCPP_ERROR(get_logger(), "Failed to save settings to NVRAM");
-                RCLCPP_ERROR(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
+                RCLCPP_FATAL(get_logger(), "Failed to save settings to NVRAM");
+                RCLCPP_FATAL(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
                 return false;
             }
 
             // InsRefOffset is a static register so we must reset the sensor for the change to take effect
             RCLCPP_INFO(get_logger(), "Resetting sensor for InsRefOffset to take effect...");
             if (const auto error = vs_.reset(); error != VN::Error::None) {
-                RCLCPP_ERROR(get_logger(), "Failed to reset sensor");
-                RCLCPP_ERROR(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
+                RCLCPP_FATAL(get_logger(), "Failed to reset sensor");
+                RCLCPP_FATAL(get_logger(), "Error: %s", VN::errorCodeToString(error).data());
                 return false;
             }
         }
