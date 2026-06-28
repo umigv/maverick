@@ -2,7 +2,6 @@
     "recommendations": [
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "ms-python.mypy-type-checker",
         "charliermarsh.ruff",
         "editorconfig.editorconfig",
         "tamasfe.even-better-toml",
@@ -10,6 +9,8 @@
         "redhat.vscode-yaml",
         "redhat.vscode-xml",
         "nefrob.vscode-just",
-        "smilerobotics.urdf"
+        "smilerobotics.urdf",
+        "github.vscode-github-actions",
+        "twxs.cmake"
     ]
 }
