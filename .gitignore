@@ -1,5 +1,5 @@
 # Vscode
-.vscode/
+.vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
 
