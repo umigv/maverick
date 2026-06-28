@@ -4,7 +4,7 @@ publishes encoder-derived velocity with propagated covariance. Motors are zeroed
 `cmd_vel_timeout_s` or if the e-stop is active.
 
 ## Read Files
-- `/tmp/estop_value.txt` - e-stop state written by `estop_driver`; commands zero velocity to both motors while estopped
+- `estop_file_path` - e-stop state written by `estop_driver`; commands zero velocity to both motors while estopped
 
 ## Subscribed Topics
 - `cmd_vel` (`geometry_msgs/Twist`)

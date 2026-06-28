@@ -1,6 +1,6 @@
 from typing import Any
 
-from bringup.launch_utils import MODES, Mode, bringup_share, format_mode_description, load_frames
+from bringup.launch_utils import MODES, Mode, format_mode_description, gps_file_path, load_frames
 from launch import LaunchContext, LaunchDescription, LaunchDescriptionEntity
 from launch.actions import DeclareLaunchArgument, EmitEvent, OpaqueFunction, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
@@ -34,7 +34,7 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
         executable="autonav_mission_control",
         name="autonav_mission_control",
         parameters=[
-            {"waypoints_file_path": f"{bringup_share()}/courses/{course}/gps.json"},
+            {"waypoints_file_path": gps_file_path(course)},
             {"map_frame_id": frames["map_frame"]},
         ],
         remappings=[
