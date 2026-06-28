@@ -59,11 +59,7 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
 def generate_launch_description() -> LaunchDescription:
     return LaunchDescription(
         [
-            DeclareLaunchArgument(
-                "course",
-                default_value="default",
-                description="Course profile in courses/ to load map and GPS datum from",
-            ),
+            DeclareLaunchArgument("course", default_value="default"),
             OpaqueFunction(function=launch_setup),
         ]
     )
