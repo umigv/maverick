@@ -4,7 +4,7 @@ import json
 from common import ROOT
 
 
-def main():
+def main() -> None:
     extra_paths = []
     for pkg_xml in sorted((ROOT / "src").rglob("package.xml")):
         pkg_dir = pkg_xml.parent

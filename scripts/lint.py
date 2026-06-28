@@ -16,7 +16,7 @@ def lint_python(pkg_dirs: list[Path], all_pkg_dirs: list[Path]) -> None:
     print("==> Ruff lint")
     run("ruff", "check", *pkg_strs)
 
-    mypy_dirs = [d for d in pkg_dirs if files_in([d], "__init__.py")]
+    mypy_dirs = [d for d in pkg_dirs if any(p.name != "setup.py" for p in files_in([d], "*.py"))]
     print(f"==> mypy ({len(mypy_dirs)} packages)")
     if mypy_dirs:
         mypypath = ":".join(str(ROOT / d) for d in all_pkg_dirs)

@@ -19,9 +19,6 @@ def get_staged_files() -> list[Path]:
 
 
 def file_to_package(filepath: Path, pkg_dirs: list[Path]) -> str | None:
-    if filepath.parts[0] == "scripts":
-        return "scripts"
-
     for pkg_dir in sorted(pkg_dirs, key=lambda p: len(p.parts), reverse=True):
         if filepath == pkg_dir or pkg_dir in filepath.parents:
             return pkg_dir.name

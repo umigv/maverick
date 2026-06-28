@@ -6,7 +6,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import Imu
 
 
-def euler_from_quaternion(x, y, z, w):
+def euler_from_quaternion(x: float, y: float, z: float, w: float) -> tuple[float, float, float]:
     # Roll (x-axis rotation)
     sinr_cosp = 2.0 * (w * x + y * z)
     cosr_cosp = 1.0 - 2.0 * (x * x + y * y)
@@ -25,12 +25,12 @@ def euler_from_quaternion(x, y, z, w):
 
 
 class ImuEulerNode(Node):
-    def __init__(self, topic):
+    def __init__(self, topic: str) -> None:
         super().__init__("imu_euler_node")
         self.get_logger().info(f"Reading IMU data from topic: {topic}")
         self.subscription = self.create_subscription(Imu, topic, self.imu_callback, 10)
 
-    def imu_callback(self, msg):
+    def imu_callback(self, msg: Imu) -> None:
         orientation = msg.orientation
         roll, pitch, yaw = euler_from_quaternion(orientation.x, orientation.y, orientation.z, orientation.w)
 
@@ -41,7 +41,7 @@ class ImuEulerNode(Node):
         self.get_logger().info(f"Roll: {roll_deg:7.2f}°  Pitch: {pitch_deg:7.2f}°  Yaw: {yaw_deg:7.2f}°")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Print IMU orientation as Euler angles")
     parser.add_argument("topic", nargs="?", default="vectornav/imu", help="IMU topic name")
     args = parser.parse_args()
