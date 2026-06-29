@@ -151,17 +151,16 @@ ros2 launch bringup localization.launch.py mode:=<mode> [course:=<course>]
 - `course`: Course profile in `courses/` to load GPS datum from, default `default` (required for `autonav`)
 
 ### Modes
-
-**`autonav`**: `ekf_local` + `map_odom_publisher` + `lat_lon_converter`
+`autonav`: `ekf_local` + `map_odom_publisher` + `lat_lon_converter`
 - `odom` → `base_link`: EKF fusing encoder vx and IMU yaw rate
 - `map` → `odom`: computed from VectorNav INS odometry (`odom/global`) and the local TF tree via `T_map_odom = T_map_base * T_odom_base⁻¹`
 - `fromLL` service: converts GPS coordinates to map-frame points using the course datum
 
-**`self_drive`**: `ekf_local` + identity `map` → `odom`
+`self_drive`: `ekf_local` + identity `map` → `odom`
 - `odom` → `base_link`: EKF fusing encoder vx and IMU yaw rate
 - `map` → `odom`: fixed identity transform (no global correction)
 
-**`nav_test`**: `enc_odom_publisher` + identity `map` → `odom`
+`nav_test`: `enc_odom_publisher` + identity `map` → `odom`
 - `odom` → `base_link`: direct encoder velocity integration, no IMU
 - `map` → `odom`: fixed identity transform (no global correction)
 
