@@ -49,6 +49,10 @@ scripts = ["install/setup.bash"]
 
 [tool.pixi.feature.ros.activation.env]
 RCUTILS_COLORIZED_OUTPUT = "1"
+# rviz2 moved to Qt6 in Lyrical, which enables high-DPI scaling by default. On HiDPI displays under (X)Wayland that
+# makes the OGRE render panel flicker/tear.
+# See https://github.com/ros2/rviz/issues/1079 and https://github.com/ros2/rviz/issues/1052.
+QT_ENABLE_HIGHDPI_SCALING = "0"
 
 [tool.pixi.feature.tooling.dependencies]
 ruff = "*"
@@ -138,24 +142,13 @@ exclude = [
 # Dependencies that ship no type information (no py.typed marker, no stubs). Without this, mypy raises import-untyped
 # and fails; instead we accept Any from these modules. Keep alphabetical.
 module = [
-    "ament_index_python.*",
-    "builtin_interfaces.*",
-    "foxglove_msgs.*",
-    "geographic_msgs.*",
-    "geometry_msgs.*",
-    "launch.*",
-    "launch_ros.*",
+    # Ships type information but requires the workspace to be built, and lint currently doesn't build the workspace
+    # If one day we build before linting (i.e. introducing clang-tidy), remove this
     "maverick_msgs.*",
-    "nav_msgs.*",
     "odrive.*",
     "pyubx2",
-    "robot_localization.*",
-    "sensor_msgs.*",
-    "std_msgs.*",
-    "std_srvs.*",
     "tf2_geometry_msgs.*",
     "tf2_ros.*",
-    "visualization_msgs.*",
 ]
 ignore_missing_imports = true
 disable_error_code = ["attr-defined"]
