@@ -32,15 +32,3 @@ Two parameter sets are configured: `inflation_params` is used normally, and `no_
 while the mission state has `in_no_mans_land` set. Since spaced out obstacles form the border of no man's land instead 
 of the usual lane lines, the no man's land set uses a larger inflation radius to keep the robot further from obstacles 
 and therefore within the border.
-
-## Config Parameters
-| Parameter | Default | Description |
-|---|---|---|
-| `frame_id` | `odom` | TF frame the transformed grids are published in |
-
-### Inflation Parameters (`inflation_params`)
-| Parameter | Default | Description |
-|---|---|---|
-| `inflation_radius_cells` | `12` | Radius (cells) of the fully inflated obstacle core |
-| `inflation_falloff_extent_cells` | `0` | Extent (cells) of the falloff region applied beyond the hard core |
-| `inflation_decay_factor` | `0.9` | Decay factor in the falloff region (0–1, higher = slower decay) |

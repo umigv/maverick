@@ -23,13 +23,3 @@ Waits up to `ready_timeout_s` for the Arduino to send `READY` before starting.
 | 7 | mission state received | `2` | Flashing blue |
 | 8 | no mission state, `nav_cmd_vel` received within `cmd_vel_timeout_s` | `2` | Flashing blue |
 | 9 | no mission state, nav stack inactive | `9` | Rainbow |
-
-## Config Parameters
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `serial_port` | `Path` | `/dev/led` | Path to the serial device |
-| `baud_rate` | `int` | `9600` | Serial baud rate |
-| `ready_timeout_s` | `float` | `5.0` | Seconds to wait for the Arduino `READY` message before giving up |
-| `cmd_vel_timeout_s` | `float` | `1.0` | Seconds after the last teleop/nav command before that source is considered inactive |
-| `update_period_s` | `float` | `0.1` | Period (s) at which the LED state is evaluated and sent |
-| `estop_file_path` | `Path` | `/tmp/estop_value.txt` | Path to the file containing the e-stop state |

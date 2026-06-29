@@ -107,67 +107,20 @@ utils.lifecycle.run_node(Planner, executor=MultiThreadedExecutor())
 ## utils.math
 Math utilities.
 
-| Function | Description |
-|---|---|
-| `clamp(value, *, min, max)` | Clamp `value` to `[min, max]`. `min` and `max` are keyword-only. |
-
 ## utils.geometry
 2D geometry types and helpers for ROS 2.
 
 ### `Rotation2d`
 Wraps a yaw angle in radians. Angle is automatically wrapped to `[-π, π]` and `cos`/`sin` are cached on construction.
 
-| Method | Description |
-|---|---|
-| `rotate_by(rotation)` on `Point2d` | Rotate a point forward by this rotation |
-| `__neg__` | Negate the rotation |
-| `__add__`, `__sub__` | Compose rotations by adding/subtracting angles |
-| `__mul__(scalar)`, `__rmul__(scalar)`, `__truediv__(scalar)` | Scale the angle by a scalar |
-| `cos`, `sin` | Cached cosine and sine of the angle |
-| `to_ros()` | Convert to `geometry_msgs/Quaternion` |
-| `from_ros(q)` | Construct from a `geometry_msgs/Quaternion` |
-| `from_vector(vector)` | Construct from a 2D direction vector via `atan2(y, x)` |
-
 ### `Point2d`
 2D point with arithmetic operators and ROS interop.
-
-| Method | Description |
-|---|---|
-| `__add__`, `__sub__` | Point addition and subtraction |
-| `__mul__`, `__rmul__`, `__truediv__` | Scalar multiplication and division |
-| `__neg__` | Negate both components |
-| `rotate_by(rotation)` | Rotate by a `Rotation2d` |
-| `mag()` | Euclidean magnitude |
-| `dot(other)` | Dot product |
-| `cross(other)` | 2D cross product (scalar): `x·other.y − y·other.x`. Positive when `other` is to the left of `self`. |
-| `lerp(other, t)` | Linearly interpolate toward `other`: `self + (other - self) * t`. `t=0` returns `self`, `t=1` returns `other`. Not clamped. |
-| `distance(other)` | Distance to another `Point2d` |
-| `to_ros()` | Convert to `geometry_msgs/Point` |
-| `from_ros(point)` | Construct from a `geometry_msgs/Point` |
-| `unit(vector)` | Construct a Point2d 1 unit away from the origin in the direction of rotation |
 
 ### `Pose2d`
 2D pose (position + rotation) with world/local frame transforms and ROS interop.
 
-| Method | Description |
-|---|---|
-| `world_to_local(world_point)` | Transform a world-frame `Point2d` into this pose's local frame |
-| `local_to_world(local_point)` | Transform a local-frame `Point2d` back into world frame |
-| `to_ros()` | Convert to `geometry_msgs/Pose` |
-| `from_ros(pose)` | Construct from a `geometry_msgs/Pose` |
-
 ### `Path2d`
 An ordered sequence of 2D waypoints. Requires at least 2 points with no consecutive duplicates (all segments must be non-zero length).
-
-| Method | Description |
-|---|---|
-| `__len__()` | Number of waypoints |
-| `__bool__()` | `True` if the path has any waypoints |
-| `__iter__()` | Iterate over waypoints in order |
-| `__getitem__(index)` | Waypoint at an integer index (supports negative indexing), or interpolated point for a float fractional index (integer part = segment, fractional part = interpolation parameter) |
-| `project(point, start_index)` | Returns the fractional path index of the closest point on the path to `point`, searching forward from `start_index`. Returns `None` if `start_index` is at or past the last waypoint. On ties, prefers the later segment to commit forward at vertices. |
-| `advance(start_index, distance)` | Walk forward `distance` meters along the path from a fractional index. Returns the last waypoint if the path ends before `distance` is consumed. |
-| `from_ros(path)` | Construct from a `nav_msgs/Path` message, discarding z and pose orientations |
 
 ## utils.world_occupancy_grid
 This class provides a world-coordinate view of a discrete, robot-centric occupancy grid.

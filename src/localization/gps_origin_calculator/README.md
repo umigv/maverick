@@ -10,12 +10,3 @@ If `output_file` is set, the computed datum is written directly into the specifi
 
 ## Subscribed Topics
 - `gps` (`sensor_msgs/NavSatFix`) - GPS fix
-
-## Config Parameters
-| Parameter | Default | Description |
-|---|---|---|
-| `min_samples_required` | `3000` | Minimum number of valid GPS samples before setting datum |
-| `min_sample_duration_s` | `60.0` | Minimum time (s) to collect samples |
-| `max_sample_duration_s` | `90.0` | Maximum time (s) before setting datum regardless of sample count |
-| `max_horizontal_stdev_m` | `1.0` | Maximum horizontal accuracy (m) for a sample to be accepted |
-| `output_file` | `""` | Path to `gps.json` to write the computed datum into. Empty string skips writing |

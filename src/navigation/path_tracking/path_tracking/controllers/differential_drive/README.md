@@ -18,14 +18,3 @@ over-correction. Forward speed is reduced proportionally to `cos(θ_err)` and fu
 `heading_lookahead_m` ahead on the path. This anticipates the turn and reduces heading error overshoot at the apex. The
 lookahead ramps in as the robot approaches a corner vertex and ramps back out after passing it; on straight segments it
 stays zero so the local tangent is used directly.
-
-## Config Parameters
-| Parameter | Default | Description |
-|---|---|---|
-| `target_speed_mps` | `1.35` | Maximum forward speed (m/s). Reduced by `cos(heading_error)` in practice |
-| `kp_heading` | `2.0` | Proportional gain on heading error (rad/s per rad) |
-| `kp_cross` | `1.5` | Proportional gain on cross-track error, scaled by `cos(heading_error)` (rad/s per m) |
-| `max_angular_speed_radps` | `1.5` | Hard cap on angular velocity command (rad/s) |
-| `max_lateral_speed_mps` | `0.2` | Maximum tolerated lateral drift speed (m/s). Caps forward speed to keep `v·sin(θ) ≤` this value |
-| `heading_lookahead_m` | `1.0` | Distance ahead used for the heading reference near corners (m). Set to `0` to always use the local tangent |
-| `goal_tolerance_m` | `0.3` | Stop when the robot center is within this distance of the final path point (m) |

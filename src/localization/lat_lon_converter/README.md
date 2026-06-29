@@ -7,8 +7,3 @@ Uses `pyproj` (topocentric pipeline) for WGS84 → ENU conversion relative to a 
 ## Services
 - `fromLL` (`robot_localization/srv/FromLL`) - converts a `geographic_msgs/GeoPoint` (lat, lon, alt) to a
   `geometry_msgs/Point` in the map frame
-
-## Config Parameters
-| Parameter | Default | Description |
-|---|---|---|
-| `datum` | required | ENU origin as `[latitude (deg), longitude (deg), altitude (m)]` |
