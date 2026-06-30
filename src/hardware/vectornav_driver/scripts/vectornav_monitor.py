@@ -170,7 +170,7 @@ class TopicState(Generic[T]):
 
     def mark_received(self, ros_time: Time, value: T) -> None:
         self.last_time = ros_time
-        wall_time = datetime.fromtimestamp(ros_time.nanoseconds / 1e9, tz=timezone.utc)
+        wall_time = datetime.fromtimestamp(ros_time.nanoseconds / 1e9, tz=timezone.utc).astimezone()
         self.last_timestamp_str = wall_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         self._value = value
 
