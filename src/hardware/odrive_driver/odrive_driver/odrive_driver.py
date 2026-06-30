@@ -8,7 +8,7 @@ import utils.lifecycle
 from ament_index_python.packages import get_package_share_directory
 from geometry_msgs.msg import Twist, TwistWithCovariance, TwistWithCovarianceStamped, Vector3
 from odrive.enums import AxisState, ControlMode, InputMode, ODriveError
-from playsound import playsound
+from playsound3 import playsound
 from rclpy.duration import Duration
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray, Header
