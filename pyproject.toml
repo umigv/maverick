@@ -41,8 +41,7 @@ types-pyyaml = "*"
 
 [tool.pixi.feature.ros.pypi-dependencies]
 odrive = "*"
-# playsound is broken above 1.2.2
-playsound = "==1.2.2"
+playsound3 = "*"
 types-pyserial = "*"
 
 [tool.pixi.feature.ros.activation]
@@ -149,7 +148,6 @@ module = [
     "maverick_msgs.*",
     "nav_msgs.*",
     "odrive.*",
-    "playsound",
     "pyubx2",
     "rclpy.*",
     "robot_localization.*",
