@@ -1,21 +1,19 @@
 #!/usr/bin/env python3
-import sys
+import argparse
 from pathlib import Path
 
-from common import run
+from common import die, run
 
 
 def main() -> None:
-    if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <alias> (e.g. {sys.argv[0]} imu)")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Remove a udev device alias.")
+    parser.add_argument("alias", help="alias name, e.g. imu")
+    args = parser.parse_args()
 
-    alias = sys.argv[1]
-    rules_file = Path(f"/etc/udev/rules.d/99-{alias}.rules")
+    rules_file = Path(f"/etc/udev/rules.d/99-{args.alias}.rules")
 
     if not rules_file.exists():
-        print(f"ERROR: No rule found for alias '{alias}' (expected {rules_file}).", file=sys.stderr)
-        sys.exit(1)
+        die(f"No rule found for alias '{args.alias}' (expected {rules_file}).")
 
     print(f"Removing rule at {rules_file}:")
     print(f"  {rules_file.read_text().strip()}")
@@ -24,7 +22,7 @@ def main() -> None:
     run("sudo", "udevadm", "control", "--reload-rules")
     run("sudo", "udevadm", "trigger")
 
-    print(f"Udev rule removed. /dev/{alias} will no longer be created.")
+    print(f"Udev rule removed. /dev/{args.alias} will no longer be created.")
 
 
 if __name__ == "__main__":

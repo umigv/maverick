@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from common import ROOT, run
+from common import ROOT, die, run
 
 ROS_DISTRO = os.environ.get("ROS_DISTRO")
 
@@ -20,16 +20,13 @@ def note(msg: str) -> None:
 
 def main() -> None:
     if not ROS_DISTRO:
-        print("ROS_DISTRO is not set. Source /opt/ros/<distro>/setup.bash first.", file=sys.stderr)
-        sys.exit(1)
+        die("ROS_DISTRO is not set. Source /opt/ros/<distro>/setup.bash first.")
 
     if not Path(f"/opt/ros/{ROS_DISTRO}").exists():
-        print(f"ROS not found at /opt/ros/{ROS_DISTRO}", file=sys.stderr)
-        sys.exit(1)
+        die(f"ROS not found at /opt/ros/{ROS_DISTRO}")
 
     if not (ROOT / "src").is_dir():
-        print(f"Expected workspace src/ at: {ROOT}/src", file=sys.stderr)
-        sys.exit(1)
+        die(f"Expected workspace src/ at: {ROOT}/src")
 
     log(f"Repo root: {ROOT}")
 

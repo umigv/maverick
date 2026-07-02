@@ -72,7 +72,7 @@ class MotorSignalPlotter(Node):
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(description="Live-plot ODrive motor setpoints and measurements.")
     parser.add_argument(
         "--window", type=int, default=500, metavar="N", help="Number of samples to display (default: 500)"
     )
