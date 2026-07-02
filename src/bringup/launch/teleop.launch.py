@@ -31,7 +31,7 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
             output="screen",
             parameters=[
                 teleop_params,
-                {"frame": frames["base_frame"]},
+                {"frame": frames["base_frame"], "publish_stamped_twist": True},
             ],
             remappings=[
                 ("cmd_vel", "teleop_cmd_vel"),

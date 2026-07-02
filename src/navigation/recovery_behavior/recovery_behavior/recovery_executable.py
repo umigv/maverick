@@ -3,10 +3,11 @@ from statistics import median
 import serial
 import utils.lifecycle
 import utils.qos
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, TwistStamped
 from maverick_msgs.msg import MissionState
 from rclpy.node import Node
 from rclpy.task import Future
+from std_msgs.msg import Header
 from std_srvs.srv import Trigger
 
 THRESHOLD_DISTANCE = 60  # centimeters, distance needed to start backing up
@@ -23,7 +24,7 @@ SWEEP_PAUSE_TIME = 1.0  # seconds, time to pause in between sweeps and at the en
 class RecoveryExecutable(Node):
     def __init__(self) -> None:
         super().__init__("recovery_executable")
-        self.publisher_Twist = self.create_publisher(Twist, "recovery_cmd_vel", 10)
+        self.publisher_Twist = self.create_publisher(TwistStamped, "recovery_cmd_vel", 10)
         self.timer_period = 0.2  # seconds
         self.velocity_publishing_timer = self.create_timer(self.timer_period, self.velocity_publishing)
         self.backup_timer = self.create_timer(self.timer_period, self.back_up)
@@ -115,7 +116,15 @@ class RecoveryExecutable(Node):
         msg.linear.x = -self.targetLinearVelocity
         msg.angular.z = self.targetAngularVelocity
         if self.state != "noPublishing":
-            self.publisher_Twist.publish(msg)
+            self.publish_cmd(msg)
+
+    def publish_cmd(self, twist: Twist) -> None:
+        self.publisher_Twist.publish(
+            TwistStamped(
+                header=Header(stamp=self.get_clock().now().to_msg(), frame_id="base_link"),
+                twist=twist,
+            )
+        )
 
     # this function sets the velocity to have the robot back up
     def back_up(self) -> None:
@@ -168,7 +177,7 @@ class RecoveryExecutable(Node):
         msg = Twist()
         msg.linear.x = 0.0
         msg.angular.z = 0.0
-        self.publisher_Twist.publish(msg)
+        self.publish_cmd(msg)
         self.state = "noPublishing"
         self.get_logger().info("recovery ended")
         self.send_request()

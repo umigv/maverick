@@ -47,6 +47,7 @@ def generate_launch_description() -> LaunchDescription:
                 output="screen",
                 parameters=[
                     twist_mux_params,
+                    {"use_stamped": True},
                 ],
                 remappings=[
                     ("cmd_vel_out", "cmd_vel"),

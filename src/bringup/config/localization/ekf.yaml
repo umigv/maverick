@@ -1,4 +1,4 @@
-# Reference: https://github.com/cra-ros-pkg/robot_localization/blob/humble-devel/params/ekf.yaml
+# Reference: https://github.com/cra-ros-pkg/robot_localization/blob/jazzy-devel/params/ekf.yaml
 ekf_local:
   ros__parameters:
     frequency: 100.0

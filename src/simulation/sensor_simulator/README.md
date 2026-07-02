@@ -50,7 +50,7 @@ mutually consistent.
 - Twist uses the shared VN-300 velocity drift states
 
 ## Subscribed Topics
-- `cmd_vel` (`geometry_msgs/Twist`) - Velocity commands
+- `cmd_vel` (`geometry_msgs/TwistStamped`) - Velocity commands
 
 ## Published Topics
 - `enc_vel` (`geometry_msgs/TwistWithCovarianceStamped`) - Simulated encoder velocity in `base_frame_id`

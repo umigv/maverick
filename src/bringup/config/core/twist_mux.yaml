@@ -1,4 +1,4 @@
-# Reference: https://github.com/ros-teleop/twist_mux/blob/humble/config/twist_mux_topics.yaml
+# Reference: https://github.com/ros-teleop/twist_mux/blob/rolling/config/twist_mux_topics.yaml
 twist_mux:
   ros__parameters:
     topics:

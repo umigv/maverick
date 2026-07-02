@@ -26,4 +26,4 @@ unmodified.
 - `mission_state` (`maverick_msgs/msg/MissionState`) - Mission state (latched); see Mission Control Integration
 
 ## Published Topics
-- `nav_cmd_vel` (`geometry_msgs/msg/Twist`) — Velocity command for the robot base
+- `nav_cmd_vel` (`geometry_msgs/msg/TwistStamped`) — Velocity command for the robot base
