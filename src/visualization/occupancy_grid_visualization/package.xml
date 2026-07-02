@@ -4,7 +4,7 @@
   <name>occupancy_grid_visualization</name>
   <version>0.1.0</version>
   <description>occupancy grid voxel visualizer</description>
-  <maintainer email="juliwhit@umichh.edu">Julian Whittaker</maintainer>
+  <maintainer email="juliwhit@umich.edu">Julian Whittaker</maintainer>
   <license>Apache-2.0</license>
 
   <exec_depend>foxglove_msgs</exec_depend>

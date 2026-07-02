@@ -16,11 +16,7 @@ setup(
     maintainer_email="annanova@umich.edu, erikachn@umich.edu",
     description="Path tracking for mobile robots using pure pursuit",
     license="Apache-2.0",
-    extras_require={
-        "test": [
-            "pytest",
-        ],
-    },
+    extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
             "path_tracking = path_tracking.path_tracking:main",

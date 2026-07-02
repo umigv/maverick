@@ -48,7 +48,7 @@ lint *args:
 # ── Packages ───────────────────────────────────────────────────────────────────
 
 # Create a new ROS 2 package (type: python|cpp)
-new dir pkg type='python':
+create-pkg dir pkg type='python':
     python3 scripts/create_package.py {{dir}} {{pkg}} --type {{type}}
     just generate-pyrightconfig
 

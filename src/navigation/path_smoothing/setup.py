@@ -16,11 +16,7 @@ setup(
     maintainer_email="ryanliao@umich.edu",
     description="Chaikin path smoothing node",
     license="Apache-2.0",
-    extras_require={
-        "test": [
-            "pytest",
-        ],
-    },
+    extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
             "path_smoothing = path_smoothing.path_smoothing:main",
