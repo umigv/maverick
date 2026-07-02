@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Shared utilities for scripts: ROOT path, subprocess helpers, and package discovery."""
-
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -58,6 +57,15 @@ def run(
         )
         return result.stdout if capture_output else None
     except subprocess.CalledProcessError as e:
+        # A non-captured command already streamed its own errors to the terminal, so just relay its exit code;
+        # logging here would only stack redundant messages up nested run() chains. For a captured command the
+        # output was swallowed, so surface it (plus a summary, since some tools exit nonzero with no stderr).
+        if capture_output:
+            if e.stdout:
+                print(e.stdout, file=sys.stderr, end="")
+            if e.stderr:
+                print(e.stderr, file=sys.stderr, end="")
+            die(f"command failed (exit {e.returncode}): {shlex.join(cmd)}")
         sys.exit(e.returncode)
 
 
@@ -68,10 +76,7 @@ EXTRA_DIRS = [Path("scripts")]
 def discover_packages() -> list[Path]:
     """Return all lint/format targets relative to ROOT: ROS 2 packages (package.xml dirs under src/) plus EXTRA_DIRS."""
     ros = sorted({p.parent.relative_to(ROOT) for p in (ROOT / "src").rglob("package.xml")})
-    packages = ros + EXTRA_DIRS
-    if not packages:
-        die("No packages found")
-    return packages
+    return ros + EXTRA_DIRS
 
 
 def resolve_target(name: str, pkg_dirs: list[Path]) -> Path:
@@ -80,6 +85,18 @@ def resolve_target(name: str, pkg_dirs: list[Path]) -> Path:
     if not matches:
         die(f"'{name}' is not a valid target")
     return matches[0]
+
+
+def file_to_package(filepath: Path, pkg_dirs: list[Path]) -> str | None:
+    """Return the name of the package a file belongs to, or None if it is outside all targets.
+
+    The inverse of resolve_target. Deepest match wins so nested packages resolve to the innermost one.
+    """
+    for pkg_dir in sorted(pkg_dirs, key=lambda p: len(p.parts), reverse=True):
+        if filepath == pkg_dir or pkg_dir in filepath.parents:
+            return pkg_dir.name
+
+    return None
 
 
 def resolve_packages(only: list[str] | None, ignore: list[str] | None) -> tuple[list[Path], list[Path]]:

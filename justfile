@@ -23,12 +23,12 @@ test *args:
     colcon test-result --verbose
 
 # Build a single package and its dependencies
-build-pkg pkg:
-    colcon build --packages-up-to {{pkg}}
+build-pkg pkg *args:
+    colcon build --packages-up-to {{pkg}} {{args}}
 
 # Run tests for a single package
-test-pkg pkg:
-    colcon test --packages-select {{pkg}}
+test-pkg pkg *args:
+    colcon test --packages-select {{pkg}} {{args}}
     colcon test-result --verbose
 
 # Delete build, install, and log directories
