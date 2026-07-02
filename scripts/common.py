@@ -37,7 +37,6 @@ def warning(msg: str) -> None:
 def run(
     *cmd: str,
     env: dict | None = None,
-    shell: bool = False,
     capture_output: Literal[True],
     cwd: Path = ROOT,
     stdin: str | None = None,
@@ -46,7 +45,6 @@ def run(
 def run(
     *cmd: str,
     env: dict | None = None,
-    shell: bool = False,
     capture_output: Literal[False] = False,
     cwd: Path = ROOT,
     stdin: str | None = None,
@@ -54,7 +52,6 @@ def run(
 def run(
     *cmd: str,
     env: dict | None = None,
-    shell: bool = False,
     capture_output: bool = False,
     cwd: Path = ROOT,
     stdin: str | None = None,
@@ -65,8 +62,7 @@ def run(
     """
     try:
         result = subprocess.run(
-            cmd[0] if shell else cmd,
-            shell=shell,
+            cmd,
             check=True,
             cwd=cwd,
             env=env,
