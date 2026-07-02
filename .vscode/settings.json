@@ -12,6 +12,10 @@
             "source.organizeImports.ruff": "always"
         }
     },
+    "[markdown]": {
+        "editor.wordWrap": "on",
+        "editor.rulers": []
+    },
     "search.exclude": {
         "**/build": true,
         "**/install": true,
