@@ -1,53 +1,22 @@
 #!/usr/bin/env python3
-"""Publish a message to a ROS 2 topic from a file.
-
-Input file format (as produced by extract_message.py):
-    # ros2_type: <message_type>
-    <YAML message content>
-
-The `# ros2_type:` header on the first line is required. `---` separators
-are stripped. Rate defaults to 'once'; pass a Hz value (e.g. 10) to publish
-continuously.
-"""
-
-import re
-import sys
+import argparse
 from pathlib import Path
 
 from common import run
 
 
 def main() -> None:
-    if len(sys.argv) not in (3, 4):
-        print(f"Usage: {sys.argv[0]} <topic> <input> [rate]")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Publish a message to a ROS 2 topic from a file.")
+    parser.add_argument("topic", help="topic to publish to")
+    parser.add_argument("input", help="file containing the YAML message content")
+    parser.add_argument("rate", nargs="?", default="once", help="publish rate in Hz, or 'once' (default)")
+    args = parser.parse_args()
 
-    topic = sys.argv[1]
-    input_file = sys.argv[2]
-    rate = sys.argv[3] if len(sys.argv) > 3 else "once"
-
-    lines = Path(input_file).read_text().splitlines(keepends=True)
-
-    ros_type = None
-    for line in lines:
-        m = re.match(r"^# ros2_type:\s*(.+)", line)
-        if m:
-            ros_type = m.group(1).strip()
-            break
-    if not ros_type:
-        print(f"Error: could not find '# ros2_type: ...' header in {input_file}", file=sys.stderr)
-        sys.exit(1)
-
-    payload = "".join(
-        line
-        for i, line in enumerate(lines)
-        if not (i == 0 and re.match(r"^# ros2_type:", line)) and line.rstrip("\n") != "---"
-    )
-
-    if rate == "once":
-        run("ros2", "topic", "pub", "--once", topic, ros_type, payload)
-    else:
-        run("ros2", "topic", "pub", "-r", rate, topic, ros_type, payload)
+    # run() exits with a logged error if the topic type can't be resolved (e.g. no node is using the topic).
+    ros_type = run("ros2", "topic", "type", args.topic, capture_output=True).strip()
+    payload = Path(args.input).read_text()
+    rate_args = ["--once"] if args.rate == "once" else ["-r", args.rate]
+    run("ros2", "topic", "pub", *rate_args, args.topic, ros_type, payload)
 
 
 if __name__ == "__main__":
