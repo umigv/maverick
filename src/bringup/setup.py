@@ -16,6 +16,7 @@ setup(
         *[(str(share / path.parent), [str(path)]) for path in Path("config").rglob("*") if path.is_file()],
         *[(str(share / path.parent), [str(path)]) for path in Path("courses").rglob("*") if path.is_file()],
     ],
+    package_data={"": ["py.typed"]},
     install_requires=["setuptools"],
     zip_safe=True,
     maintainer="Ethan Hardy",
