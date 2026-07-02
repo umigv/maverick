@@ -310,7 +310,7 @@ class SensorSimulator(Node):
                 self.tf_buffer.lookup_transform(self.config.base_frame_id, vn.imu_frame_id, Time()).transform.rotation
             )
         except TransformException as e:
-            self.get_logger().warn(
+            self.get_logger().warning(
                 f"TF {self.config.base_frame_id}->{vn.imu_frame_id} unavailable, skipping publishing IMU: {e}"
             )
 

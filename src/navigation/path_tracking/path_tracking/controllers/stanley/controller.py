@@ -31,7 +31,7 @@ class StanleyController:
 
         new_projection_index = self.path.project(front, self.projection_index)
         if new_projection_index is None:
-            self.logger.warn("Stanley: no valid projection segment - stopping")
+            self.logger.warning("Stanley: no valid projection segment - stopping")
             return Twist()
 
         if new_projection_index >= len(self.path) - 1:

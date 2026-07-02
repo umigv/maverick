@@ -34,7 +34,7 @@ class PurePursuitController:
                            self.find_projected_lookahead(pose, lookahead_distance))
         # fmt: on
         if lookahead_point is None:
-            self.logger.warn("No valid lookahead point found - stopping")
+            self.logger.warning("No valid lookahead point found - stopping")
             return Twist()
 
         local_lookahead = pose.world_to_local(lookahead_point)
@@ -85,5 +85,5 @@ class PurePursuitController:
             return None
 
         self.lookahead_fractional_index = projection_index
-        self.logger.warn(f"Lookahead miss, projection fallback aiming at {self.lookahead_fractional_index:.2f}")
+        self.logger.warning(f"Lookahead miss, projection fallback aiming at {self.lookahead_fractional_index:.2f}")
         return self.path.advance(projection_index, lookahead_distance)

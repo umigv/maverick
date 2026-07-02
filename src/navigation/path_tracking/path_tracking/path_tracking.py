@@ -47,11 +47,13 @@ class PathTracking(Node):
 
     def odom_callback(self, msg: Odometry) -> None:
         if msg.header.frame_id != self.config.odom_frame_id:
-            self.get_logger().warn(f"Dropping odometry: frame '{msg.header.frame_id}' != '{self.config.odom_frame_id}'")
+            self.get_logger().warning(
+                f"Dropping odometry: frame '{msg.header.frame_id}' != '{self.config.odom_frame_id}'"
+            )
             return
 
         if msg.child_frame_id != self.config.base_frame_id:
-            self.get_logger().warn(
+            self.get_logger().warning(
                 f"Dropping odometry: child_frame_id '{msg.child_frame_id}' != '{self.config.base_frame_id}'"
             )
             return
@@ -64,7 +66,7 @@ class PathTracking(Node):
 
     def path_callback(self, path_msg: Path) -> None:
         if path_msg.header.frame_id != self.config.odom_frame_id:
-            self.get_logger().warn(
+            self.get_logger().warning(
                 f"Dropping path: frame '{path_msg.header.frame_id}' != '{self.config.odom_frame_id}'"
             )
             return
@@ -72,7 +74,7 @@ class PathTracking(Node):
         try:
             path = Path2d.from_ros(path_msg)
         except ValueError as e:
-            self.get_logger().warn(f"Dropping path: {e}")
+            self.get_logger().warning(f"Dropping path: {e}")
             return
 
         self.get_logger().info("Received a new path from subscription.")
