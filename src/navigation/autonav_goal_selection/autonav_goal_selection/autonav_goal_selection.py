@@ -112,7 +112,7 @@ class AutonavGoalSelection(Node):
             goal = self.goal_selector.step(self.grid, self.robot_pose)
 
         if goal is None:
-            self.get_logger().warn("No drivable goal found in occupancy grid")
+            self.get_logger().warning("No drivable goal found in occupancy grid")
             self.goal_selector.reset()
             self.request_recovery_client.call_async(Trigger.Request())
             return
