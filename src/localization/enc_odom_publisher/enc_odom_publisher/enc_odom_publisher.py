@@ -46,7 +46,9 @@ class EncOdomPublisher(Node):
 
     def enc_vel_callback(self, msg: TwistWithCovarianceStamped) -> None:
         if msg.header.frame_id != self.config.base_frame_id:
-            self.get_logger().warn(f"Dropping enc_vel: frame '{msg.header.frame_id}' != '{self.config.base_frame_id}'")
+            self.get_logger().warning(
+                f"Dropping enc_vel: frame '{msg.header.frame_id}' != '{self.config.base_frame_id}'"
+            )
             return
 
         current_time = Time.from_msg(msg.header.stamp)
