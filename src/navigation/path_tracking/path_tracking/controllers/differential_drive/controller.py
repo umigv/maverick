@@ -30,7 +30,7 @@ class DifferentialDriveController:
 
         new_projection_index = self.path.project(pose.point, self.projection_index)
         if new_projection_index is None:
-            self.logger.warn("DifferentialDrive: no valid projection segment - stopping")
+            self.logger.warning("DifferentialDrive: no valid projection segment - stopping")
             return Twist()
 
         if new_projection_index >= len(self.path) - 1:

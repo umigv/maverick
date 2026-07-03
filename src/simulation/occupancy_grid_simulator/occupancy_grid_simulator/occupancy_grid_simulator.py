@@ -42,10 +42,12 @@ class OccupancyGridSimulator(Node):
 
     def odom_callback(self, msg: Odometry) -> None:
         if msg.header.frame_id != self.config.map_frame_id:
-            self.get_logger().warn(f"Dropping odometry: frame '{msg.header.frame_id}' != '{self.config.map_frame_id}'")
+            self.get_logger().warning(
+                f"Dropping odometry: frame '{msg.header.frame_id}' != '{self.config.map_frame_id}'"
+            )
             return
         if msg.child_frame_id != self.config.ground_truth_base_frame_id:
-            self.get_logger().warn(
+            self.get_logger().warning(
                 f"Dropping odometry: child_frame_id '{msg.child_frame_id}' != '{self.config.ground_truth_base_frame_id}'"
             )
             return

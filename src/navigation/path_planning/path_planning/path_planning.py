@@ -76,7 +76,7 @@ class PathPlanner(Node):
         )
 
         if path_points is None:
-            self.get_logger().warn("No path found to goal")
+            self.get_logger().warning("No path found to goal")
             return
 
         pulled = pull_string(

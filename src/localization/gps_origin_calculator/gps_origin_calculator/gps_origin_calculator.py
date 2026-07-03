@@ -91,7 +91,7 @@ class GpsOriginCalculator(Node):
             with self.config.output_file.open() as f:
                 data = json.load(f)
         except (json.JSONDecodeError, OSError) as e:
-            self.get_logger().warn(f"Could not read existing file {self.config.output_file}: {e}. Overwriting.")
+            self.get_logger().warning(f"Could not read existing file {self.config.output_file}: {e}. Overwriting.")
             data = {}
 
         data["datum"] = {"latitude": latitude, "longitude": longitude, "altitude": altitude}

@@ -256,7 +256,7 @@ class AutonavMissionControl(Node):
             self.get_logger().info("Recovery requested")
             self.publish_state()
         else:
-            self.get_logger().warn("Recovery already in progress")
+            self.get_logger().warning("Recovery already in progress")
 
         res.success = True
         return res
@@ -267,7 +267,7 @@ class AutonavMissionControl(Node):
             self.get_logger().info("Recovery complete")
             self.publish_state()
         else:
-            self.get_logger().warn("Recovery complete called but not in recovery")
+            self.get_logger().warning("Recovery complete called but not in recovery")
 
         res.success = True
         return res
