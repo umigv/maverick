@@ -21,9 +21,35 @@ class PathTrackingConfig:
         ramp_max_speed_mps: Maximum forward speed (m/s) while the mission state has in_ramp_approach set.
     """
 
-    pure_pursuit: PurePursuitConfig
-    stanley: StanleyConfig
-    differential_drive: DifferentialDriveConfig
+    # The controller configs are frozen dataclasses, so sharing one default instance is safe. RUF009 flags them only
+    # because it cannot verify immutability across modules.
+    pure_pursuit: PurePursuitConfig = PurePursuitConfig(  # noqa: RUF009
+        max_angular_speed_radps=0.6,
+        base_lookahead_distance_m=0.8,
+        min_lookahead_distance_m=0.8,
+        max_lookahead_distance_m=1.5,
+        lookahead_speed_gain=0.0,
+        linear_speed_gain=0.5,
+    )
+    stanley: StanleyConfig = StanleyConfig(  # noqa: RUF009
+        target_speed_mps=1.35,
+        cross_track_gain=0.6,
+        front_offset_m=0.85,
+        max_steer_rad=1.2,
+        max_angular_speed_radps=1.0,
+        goal_tolerance_m=0.3,
+        max_lateral_accel_mps2=1.0,
+        curvature_lookahead_m=1.5,
+    )
+    differential_drive: DifferentialDriveConfig = DifferentialDriveConfig(  # noqa: RUF009
+        target_speed_mps=1.35,
+        kp_heading=0.8,
+        kp_cross=1.0,
+        max_angular_speed_radps=1.5,
+        max_lateral_speed_mps=0.4,
+        heading_lookahead_m=1.0,
+        goal_tolerance_m=0.3,
+    )
     algorithm: Algorithm = "differential_drive"
     control_period_s: float = 0.01
     base_frame_id: str = "base_link"

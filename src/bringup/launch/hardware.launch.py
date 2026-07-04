@@ -56,7 +56,6 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
             name="odrive_driver",
             output="screen",
             parameters=[
-                f"{bringup_share()}/config/hardware/odrive_driver.yaml",
                 {"frame_id": frames["base_frame"]},
                 {"estop_file_path": ESTOP_FILE_PATH},
             ],

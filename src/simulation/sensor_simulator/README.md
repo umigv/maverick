@@ -18,36 +18,31 @@ mean-reverting, so errors stay bounded over time rather than growing without bou
 
 ### Encoder Velocity
 - Publishes `TwistWithCovarianceStamped` in the `base_frame_id` frame
-- Applies OU multiplicative scale-factor drift to both linear and angular velocity proportional to speed so a
-stationary robot always reads near zero and odom drift only accumulates while moving
-- Applies per-sample Gaussian white noise on top of the drifting measurement
+- Applies OU multiplicative scale-factor drift and per-sample Gaussian white noise (measurement model documented in
+`EncVelConfig`)
 - Reported covariance is state-dependent: `var = noise_std² + (measurement × drift_std)²`
 
 ### VN-300 INS (IMU, GPS, INS velocity, INS odometry)
-The VN-300 is modeled as a single sensor with one shared Kalman filter state per quantity, matching how the real
-hardware works — all four outputs share the same OU drift states, so `gps`, `imu`, `ins_vel`, and `odom` stay
-mutually consistent.
+The VN-300 is modeled as a single sensor: all four outputs draw from shared error states (per-quantity mapping
+documented in `Vn300Config`), so `gps`, `imu`, `ins_vel`, and `odom` stay mutually consistent like the real
+hardware's Kalman filter output.
 
 #### IMU
 - Publishes `Imu` in the `imu_frame_id` frame
 - Reports absolute orientation (yaw in ENU, relative to true north) and body-frame angular velocity z
-- Applies shared OU yaw drift and shared OU velocity drift, plus per-sample Gaussian noise on each
 - Looks up `base_frame_id` → `imu_frame_id` to apply the mounting offset to the robot's true yaw
 
 #### GPS
 - Publishes `NavSatFix` in the `ins_frame_id` frame (not the physical antenna)
-- This is the Kalman Filter fused GPS output rather than tha raw antenna output
-- Applies shared OU position drift and per-sample Gaussian noise in ENU
+- This is the Kalman filter fused GPS output rather than the raw antenna output
 - ENU position is converted to WGS84 lat/lon/alt using a local topocentric projection anchored at `datum`
 
 #### INS Velocity
 - Publishes `TwistWithCovarianceStamped` in the `ins_frame_id` frame
-- Reports body-frame linear.x and angular.z; shares OU velocity drift with `odom` twist and IMU angular velocity
+- Reports body-frame linear.x and angular.z
 
 #### INS Odometry
 - Publishes `Odometry` in the `map` frame with `child_frame_id = ins_frame_id`
-- Pose (position + orientation) uses the shared VN-300 position and yaw drift states
-- Twist uses the shared VN-300 velocity drift states
 
 ## Subscribed Topics
 - `cmd_vel` (`geometry_msgs/Twist`) - Velocity commands

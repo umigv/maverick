@@ -26,11 +26,11 @@ class MomentumParams:
             Typical range: 0.05-0.3.
     """
 
-    alignment_gain: float = 2
-    alignment_floor: float = 0.1
-    obstacle_threshold_m: float = 4.0
-    obstacle_gain: float = 2.0
-    ema_alpha: float = 0.1
+    alignment_gain: float
+    alignment_floor: float
+    obstacle_threshold_m: float
+    obstacle_gain: float
+    ema_alpha: float
 
     def __post_init__(self) -> None:
         if self.alignment_gain < 0:
@@ -79,7 +79,13 @@ class GoalSelectionParams:
             walking a ray.
     """
 
-    momentum: MomentumParams
+    momentum: MomentumParams = MomentumParams(
+        alignment_gain=2.0,
+        alignment_floor=0.1,
+        obstacle_threshold_m=4.0,
+        obstacle_gain=2.0,
+        ema_alpha=0.1,
+    )
     arc_angle_rad: float = math.pi
     ray_interval_rad: float = math.radians(1.25)
     step_size_m: float = 0.05

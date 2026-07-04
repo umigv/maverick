@@ -73,12 +73,12 @@ class ControllerConfig:
         inertia: Feed-forward inertia compensation (Nm / (m/s²)).
     """
 
-    vel_gain: float = 0.08
-    vel_integrator_gain: float = 0.0
-    vel_integrator_limit: float = 0.0
-    vel_limit_mps: float = 3.0
-    accel_limit_mps2: float = 3.0
-    inertia: float = 0.0
+    vel_gain: float
+    vel_integrator_gain: float
+    vel_integrator_limit: float
+    vel_limit_mps: float
+    accel_limit_mps2: float
+    inertia: float
 
     def __post_init__(self) -> None:
         if self.vel_gain < 0:
@@ -111,10 +111,10 @@ class CovarianceConfig:
         angular_variance_gain: Speed-dependent gain on angular velocity variance (rad²/s² per (m/s)²).
     """
 
-    linear_variance_static: float = 1e-6
-    linear_variance_gain: float = 0.0004
-    angular_variance_static: float = 1e-6
-    angular_variance_gain: float = 0.0004
+    linear_variance_static: float
+    linear_variance_gain: float
+    angular_variance_static: float
+    angular_variance_gain: float
 
     def __post_init__(self) -> None:
         if self.linear_variance_static <= 0:
@@ -132,12 +132,12 @@ class OdriveDriverConfig:
     """Configuration for the ODrive motor driver node.
 
     Attributes:
+        estop_file_path: Path to the e-stop flag file. A value of "1" disables motor output.
         left_odrive: Hardware identification and polarity for the left ODrive unit.
         right_odrive: Hardware identification and polarity for the right ODrive unit.
         geometry: Drivetrain geometry.
         controller: ODrive axis controller parameters.
         covariance: Dynamic covariance model for the published twist estimate.
-        estop_file_path: Path to the e-stop flag file. A value of "1" disables motor output.
         publish_period_s: Period of the encoder publish timer (s).
         timestamp_delay_s: Amount subtracted from the publish timestamp to compensate read and processing latency (s).
         cmd_vel_timeout_s: Maximum age of a cmd_vel command before motors are zeroed (s).
@@ -145,12 +145,28 @@ class OdriveDriverConfig:
         debug: Whether to publish debug motor signals
     """
 
-    left_odrive: OdriveConfig
-    right_odrive: OdriveConfig
-    geometry: GeometryConfig
-    controller: ControllerConfig
-    covariance: CovarianceConfig
     estop_file_path: Path
+    left_odrive: OdriveConfig = OdriveConfig(serial="002190760F3E", polarity=1)
+    right_odrive: OdriveConfig = OdriveConfig(serial="384934743539", polarity=1)
+    geometry: GeometryConfig = GeometryConfig(
+        track_width_m=0.764,
+        wheel_diameter_m=0.18423,
+        gear_ratio=170 / 9,
+    )
+    controller: ControllerConfig = ControllerConfig(
+        vel_gain=0.06,
+        vel_integrator_gain=0.0,
+        vel_integrator_limit=0.0,
+        vel_limit_mps=2.2,
+        accel_limit_mps2=3.0,
+        inertia=0.0,
+    )
+    covariance: CovarianceConfig = CovarianceConfig(
+        linear_variance_static=1e-6,
+        linear_variance_gain=0.0004,
+        angular_variance_static=1e-6,
+        angular_variance_gain=0.0004,
+    )
     publish_period_s: float = 0.01
     timestamp_delay_s: float = 0.0
     cmd_vel_timeout_s: float = 0.5
