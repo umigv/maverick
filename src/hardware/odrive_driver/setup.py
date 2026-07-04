@@ -14,6 +14,7 @@ setup(
         ("share/" + package_name, ["package.xml"]),
         *[(str(share / path.parent), [str(path)]) for path in Path("sounds").rglob("*") if path.is_file()],
     ],
+    package_data={"": ["py.typed"]},
     install_requires=["setuptools"],
     zip_safe=True,
     maintainer="ericb",
