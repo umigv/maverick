@@ -40,8 +40,11 @@ def set_maintainer(pkg_dir: Path) -> None:
     for filename in ("package.xml", "setup.py"):
         path = pkg_dir / filename
         if path.exists():
-            text = path.read_text().replace("Hardworking ARV Member", name)
-            path.write_text(text.replace("hardworking_arv_member@umich.edu", email))
+            path.write_text(
+                path.read_text()
+                .replace("Hardworking ARV Member", name)
+                .replace("hardworking_arv_member@umich.edu", email)
+            )
 
 
 def main() -> None:
