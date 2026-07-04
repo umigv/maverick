@@ -16,11 +16,7 @@ setup(
     maintainer_email="juliwhit@umich.edu",
     description="occupancy grid voxel visualizer",
     license="Apache-2.0",
-    extras_require={
-        "test": [
-            "pytest",
-        ],
-    },
+    extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
             "foxglove_voxel = occupancy_grid_visualization.occupancy_grid_visualizer:main",

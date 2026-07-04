@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 project(vectornav_driver)
 
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
+endif()
+
 find_package(ament_cmake REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
@@ -10,22 +14,20 @@ find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
-# Non-ROS system library; no CMake config provided by the installation, so found manually via find_library/find_path and 
+# Non-ROS system library; no CMake config provided by the installation, so found manually via find_library/find_path and
 # linked directly via target_link_libraries rather than ament_target_dependencies
 find_library(GeographicLib_LIBRARIES NAMES Geographic REQUIRED)
 find_path(GeographicLib_INCLUDE_DIRS NAMES GeographicLib/LocalCartesian.hpp REQUIRED)
 
 add_subdirectory(third_party/vectornav_sdk/src vectornav_sdk)
-# Enable all GNSS fields in CompositeData; the default bitmask omits GNSS_GNSS1SATINFO_BIT which is needed to populate 
+# Enable all GNSS fields in CompositeData; the default bitmask omits GNSS_GNSS1SATINFO_BIT which is needed to populate
 # NavSatFix service flags
 target_compile_definitions(oVnSensor PUBLIC
   GNSS_GROUP_ENABLE=0xFFFFFFFF
   GNSS2_GROUP_ENABLE=0xFFFFFFFF
 )
 
-add_executable(${PROJECT_NAME}
-  src/vectornav_driver.cpp
-)
+add_executable(${PROJECT_NAME} src/vectornav_driver.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
   include

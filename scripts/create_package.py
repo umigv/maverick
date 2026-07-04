@@ -1,42 +1,54 @@
 #!/usr/bin/env python3
 import argparse
 import re
-import shutil
 from pathlib import Path
 
 from common import ROOT, die, run
 
-BUILD_TYPES = {"python": "ament_python", "cpp": "ament_cmake"}
-
-# ros2 pkg create bakes these linters into the template package.xml, but we lint with ruff + mypy + clang-format
-# (see pyproject.toml) and ship no ament lint stubs, so strip them from every new package. The ament_python template
-# emits the first three; the ament_cmake template emits the last two (plus a CMake block, see strip_lint_cmake_block).
-LINT_TEST_DEPENDS = ("ament_copyright", "ament_flake8", "ament_pep257", "ament_lint_auto", "ament_lint_common")
+TEMPLATES = {"python": ROOT / "src/template/template_python", "cpp": ROOT / "src/template/template_cpp"}
 
 
-def strip_lint_test_depends(package_xml: Path) -> None:
-    lines = package_xml.read_text().splitlines(keepends=True)
-    kept = [line for line in lines if not any(f"<test_depend>{dep}</test_depend>" in line for dep in LINT_TEST_DEPENDS)]
-    package_xml.write_text(re.sub(r"\n{3,}", "\n\n", "".join(kept)))
+def pascal_case(name: str) -> str:
+    return "".join(part.capitalize() for part in name.split("_"))
 
 
-def strip_lint_cmake_block(cmakelists: Path) -> None:
-    # ament_cmake's template adds an `if(BUILD_TESTING) ... endif()` block that runs ament_lint_auto; drop it
-    # so the package builds without the linter deps we just removed from package.xml.
-    out: list[str] = []
-    skipping = False
-    for line in cmakelists.read_text().splitlines():
-        if line.strip() == "if(BUILD_TESTING)":
-            skipping = True
-        elif skipping:
-            skipping = line.strip() != "endif()"
+def substitute(text: str, template_name: str, pkg_name: str) -> str:
+    return text.replace(template_name, pkg_name).replace(pascal_case(template_name), pascal_case(pkg_name))
+
+
+def copy_template(template: Path, pkg_dir: Path, pkg_name: str) -> None:
+    for src_path in sorted(template.rglob("*")):
+        rel = src_path.relative_to(template)
+        if "__pycache__" in rel.parts:
+            continue
+        out_path = pkg_dir / Path(*(substitute(part, template.name, pkg_name) for part in rel.parts))
+        if src_path.is_dir():
+            out_path.mkdir(parents=True, exist_ok=True)
         else:
-            out.append(line)
-    cmakelists.write_text(re.sub(r"\n{3,}", "\n\n", "\n".join(out) + "\n"))
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_text(substitute(src_path.read_text(), template.name, pkg_name))
+
+
+def git_config(key: str, default: str) -> str:
+    return run("git", "config", "--default", default, "--get", key, capture_output=True).strip()
+
+
+def set_maintainer(pkg_dir: Path) -> None:
+    name = git_config("user.name", "TODO")
+    email = git_config("user.email", "todo@todo.todo")
+
+    for filename in ("package.xml", "setup.py"):
+        path = pkg_dir / filename
+        if path.exists():
+            path.write_text(
+                path.read_text()
+                .replace("Hardworking ARV Member", name)
+                .replace("hardworking_arv_member@umich.edu", email)
+            )
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Create a ROS 2 package")
+    parser = argparse.ArgumentParser(description="Create a ROS 2 package from the template packages in src/template")
     parser.add_argument("dir", help="Destination directory for the package (e.g. src/hardware)")
     parser.add_argument("package_name")
     parser.add_argument("--type", choices=["python", "cpp"], default="python")
@@ -54,6 +66,10 @@ def main() -> None:
     if not str(dest).startswith(str(ROOT / "src")):
         die(f"Destination must be under src/, got: {args.dir}")
 
+    pkg_dir = dest / pkg_name
+    if pkg_dir.exists():
+        die(f"Package directory already exists: {args.dir}/{pkg_name}")
+
     if not dest.exists():
         response = input(f"Directory {args.dir} does not exist. Create it? [y/N]: ").strip().lower()
         if response != "y":
@@ -62,14 +78,8 @@ def main() -> None:
         dest.mkdir(parents=True)
 
     print(f"==> Creating ROS 2 {args.type} package: {pkg_name}")
-    run("ros2", "pkg", "create", "--build-type", BUILD_TYPES[args.type], "--license", "Apache-2.0", pkg_name, cwd=dest)
-
-    pkg_dir = dest / pkg_name
-    (pkg_dir / "LICENSE").unlink(missing_ok=True)
-    shutil.rmtree(pkg_dir / "test", ignore_errors=True)
-    strip_lint_test_depends(pkg_dir / "package.xml")
-    if args.type == "cpp":
-        strip_lint_cmake_block(pkg_dir / "CMakeLists.txt")
+    copy_template(TEMPLATES[args.type], pkg_dir, pkg_name)
+    set_maintainer(pkg_dir)
 
     print(f"==> Package '{pkg_name}' created successfully at {args.dir}/{pkg_name}")
 

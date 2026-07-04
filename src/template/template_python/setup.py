@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = "gps_origin_calculator"
+package_name = "template_python"
 
 setup(
     name=package_name,
@@ -12,14 +12,14 @@ setup(
     ],
     install_requires=["setuptools"],
     zip_safe=True,
-    maintainer="Ryan Liao",
-    maintainer_email="ryanliao@umich.edu",
-    description="GPS origin calculator node",
+    maintainer="Hardworking ARV Member",
+    maintainer_email="hardworking_arv_member@umich.edu",
+    description="TODO: Package description",
     license="Apache-2.0",
     extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
-            "gps_origin_calculator = gps_origin_calculator.gps_origin_calculator:main",
+            "template_python = template_python.template_python:main",
         ],
     },
 )
