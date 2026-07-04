@@ -2,7 +2,6 @@
 import argparse
 import re
 import shutil
-import sys
 from pathlib import Path
 
 from common import ROOT, die, run
@@ -59,7 +58,7 @@ def main() -> None:
         response = input(f"Directory {args.dir} does not exist. Create it? [y/N]: ").strip().lower()
         if response != "y":
             print("Aborted.")
-            sys.exit(0)
+            return
         dest.mkdir(parents=True)
 
     print(f"==> Creating ROS 2 {args.type} package: {pkg_name}")

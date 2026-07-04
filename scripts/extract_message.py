@@ -1,41 +1,21 @@
 #!/usr/bin/env python3
-"""Capture a single message from a ROS 2 topic to a file.
-
-Output file format:
-    # ros2_type: <message_type>
-    <YAML message content>
-
-Example:
-    # ros2_type: geometry_msgs/msg/Twist
-    linear:
-      x: 1.0
-      y: 0.0
-      z: 0.0
-    angular:
-      x: 0.0
-      y: 0.0
-      z: 0.0
-"""
-
-import sys
+import argparse
 from pathlib import Path
 
 from common import run
 
 
 def main() -> None:
-    if len(sys.argv) != 3:
-        print(f"Usage: {sys.argv[0]} <topic> <output>")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Capture a single message from a topic to a file.")
+    parser.add_argument("topic", help="topic to capture from")
+    parser.add_argument("output", help="file to write the YAML message to")
+    args = parser.parse_args()
 
-    topic, output = sys.argv[1], sys.argv[2]
+    echo_output = run("ros2", "topic", "echo", "--once", "--full-length", args.topic, capture_output=True)
 
-    ros_type = run("ros2", "topic", "type", topic, capture_output=True)
-    echo_output = run("ros2", "topic", "echo", "--once", "--full-length", topic, capture_output=True)
-
-    with Path(output).open("w") as f:
-        f.write(f"# ros2_type: {ros_type.strip()}\n")
-        f.write(echo_output)
+    # ros2 topic echo delimits messages with a trailing '---'; drop it so the file is a single clean YAML document.
+    payload = "".join(line for line in echo_output.splitlines(keepends=True) if line.rstrip("\n") != "---")
+    Path(args.output).write_text(payload)
 
 
 if __name__ == "__main__":
