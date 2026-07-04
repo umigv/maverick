@@ -37,19 +37,11 @@ def set_maintainer(pkg_dir: Path) -> None:
     name = git_config("user.name", "TODO")
     email = git_config("user.email", "todo@todo.todo")
 
-    package_xml = pkg_dir / "package.xml"
-    package_xml.write_text(
-        re.sub(
-            r'<maintainer email="[^"]*">[^<]*</maintainer>',
-            f'<maintainer email="{email}">{name}</maintainer>',
-            package_xml.read_text(),
-        )
-    )
-
-    setup_py = pkg_dir / "setup.py"
-    if setup_py.exists():
-        text = re.sub(r'maintainer="[^"]*"', f'maintainer="{name}"', setup_py.read_text())
-        setup_py.write_text(re.sub(r'maintainer_email="[^"]*"', f'maintainer_email="{email}"', text))
+    for filename in ("package.xml", "setup.py"):
+        path = pkg_dir / filename
+        if path.exists():
+            text = path.read_text().replace("Hardworking ARV Member", name)
+            path.write_text(text.replace("hardworking_arv_member@umich.edu", email))
 
 
 def main() -> None:

@@ -4,7 +4,7 @@
   <name>template_python</name>
   <version>0.1.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="ryanliao@umich.edu">Ryan Liao</maintainer>
+  <maintainer email="hardworking_arv_member@umich.edu">Hardworking ARV Member</maintainer>
   <license>Apache-2.0</license>
 
   <exec_depend>rclpy</exec_depend>
