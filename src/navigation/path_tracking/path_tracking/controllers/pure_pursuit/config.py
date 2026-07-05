@@ -15,12 +15,12 @@ class PurePursuitConfig:
         linear_speed_gain: Gain applied to lookahead distance to produce the linear velocity command.
     """
 
-    max_angular_speed_radps: float = 0.6
-    base_lookahead_distance_m: float = 0.8
-    min_lookahead_distance_m: float = 0.8
-    max_lookahead_distance_m: float = 1.5
-    lookahead_speed_gain: float = 0.0
-    linear_speed_gain: float = 0.5
+    max_angular_speed_radps: float
+    base_lookahead_distance_m: float
+    min_lookahead_distance_m: float
+    max_lookahead_distance_m: float
+    lookahead_speed_gain: float
+    linear_speed_gain: float
 
     def __post_init__(self) -> None:
         if self.max_angular_speed_radps <= 0:

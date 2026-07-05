@@ -19,7 +19,6 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
         name="sensor_simulator",
         output="screen",
         parameters=[
-            f"{share}/config/simulation/sensor_simulator.yaml",
             {"map_frame_id": frames["map_frame"]},
             {"base_frame_id": frames["base_frame"]},
             {"ground_truth_base_frame_id": frames["ground_truth_base_frame"]},

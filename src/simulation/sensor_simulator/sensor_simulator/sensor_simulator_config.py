@@ -1,3 +1,4 @@
+import math
 from dataclasses import dataclass
 
 
@@ -15,16 +16,16 @@ class EncVelConfig:
     Attributes:
         vx_noise_std_mps: Per-sample Gaussian noise on linear.x.
         wz_noise_std_radps: Per-sample Gaussian noise on angular.z.
-        vx_drift_std: OU scale-factor steady-state std on linear.x.
-        wz_drift_std: OU scale-factor steady-state std on angular.z).
-        drift_time_constant_s: OU mean-reversion time constant for both scale factors.
+        vx_drift_std: OU scale-factor steady-state std on linear.x (e.g. wheel radius calibration error).
+        wz_drift_std: OU scale-factor steady-state std on angular.z.
+        drift_time_constant_s: OU mean-reversion time constant for both scale factors (tire warmup, surface changes).
     """
 
-    vx_noise_std_mps: float = 0.0
-    wz_noise_std_radps: float = 0.0
-    vx_drift_std: float = 0.0
-    wz_drift_std: float = 0.0
-    drift_time_constant_s: float = 30.0
+    vx_noise_std_mps: float
+    wz_noise_std_radps: float
+    vx_drift_std: float
+    wz_drift_std: float
+    drift_time_constant_s: float
 
     def __post_init__(self) -> None:
         if self.drift_time_constant_s <= 0:
@@ -50,7 +51,8 @@ class Vn300Config:
         ins_frame_id: TF frame ID for the INS reference point.
 
         position_noise_std_m: Per-sample Gaussian noise on horizontal position (m).
-        position_drift_std_m: OU position-drift steady-state std (m). Set to 0 to disable drift.
+        position_drift_std_m: OU position-drift steady-state std (m), e.g. multipath and ionospheric error. Set to 0
+            to disable drift.
         position_drift_time_constant_s: OU mean-reversion time constant for position drift (s).
 
         vx_noise_std_mps: Per-sample Gaussian noise on body-frame linear velocity x (m/s).
@@ -59,27 +61,28 @@ class Vn300Config:
         wz_drift_std_radps: OU drift steady-state std on angular.z (rad/s).
         vel_drift_time_constant_s: OU mean-reversion time constant for velocity drift (s).
 
-        yaw_noise_std_rad: Per-sample Gaussian noise on absolute yaw (rad).
+        yaw_noise_std_rad: Per-sample Gaussian noise on absolute yaw (rad); set by the dual-antenna GNSS heading
+            accuracy.
         yaw_drift_std_rad: OU yaw-drift steady-state std (rad). Set to 0 to disable drift.
         yaw_drift_time_constant_s: OU mean-reversion time constant for yaw drift (s).
     """
 
-    imu_frame_id: str = "imu_link"
-    ins_frame_id: str = "base_link"
+    imu_frame_id: str
+    ins_frame_id: str
 
-    position_noise_std_m: float = 0.0
-    position_drift_std_m: float = 0.0
-    position_drift_time_constant_s: float = 120.0
+    position_noise_std_m: float
+    position_drift_std_m: float
+    position_drift_time_constant_s: float
 
-    vx_noise_std_mps: float = 0.0
-    wz_noise_std_radps: float = 0.0
-    vx_drift_std_mps: float = 0.0
-    wz_drift_std_radps: float = 0.0
-    vel_drift_time_constant_s: float = 120.0
+    vx_noise_std_mps: float
+    wz_noise_std_radps: float
+    vx_drift_std_mps: float
+    wz_drift_std_radps: float
+    vel_drift_time_constant_s: float
 
-    yaw_noise_std_rad: float = 0.0
-    yaw_drift_std_rad: float = 0.0
-    yaw_drift_time_constant_s: float = 300.0
+    yaw_noise_std_rad: float
+    yaw_drift_std_rad: float
+    yaw_drift_time_constant_s: float
 
     @property
     def position_sigma2(self) -> float:
@@ -111,10 +114,11 @@ class SensorSimulatorConfig:
     """Top-level configuration for the sensor simulator node.
 
     Attributes:
+        datum: ENU origin as [latitude (deg), longitude (deg), altitude (m)]. Map (0, 0, 0) maps to this point.
+
         enc_vel: Encoder velocity sensor noise and drift config.
         vn300: VN-300 INS config. Shared error state drives gps, imu, ins_vel, and odom.
 
-        datum: ENU origin as [latitude (deg), longitude (deg), altitude (m)]. Map (0, 0, 0) maps to this point.
         initial_yaw_rad: Initial heading of the robot in map frame in true north ENU (rad).
 
         map_frame_id: TF frame ID for the map frame.
@@ -126,10 +130,29 @@ class SensorSimulatorConfig:
         update_period_s: Publish period for all sensors.
     """
 
-    enc_vel: EncVelConfig
-    vn300: Vn300Config
-
     datum: list[float]
+    enc_vel: EncVelConfig = EncVelConfig(
+        vx_noise_std_mps=0.01,
+        wz_noise_std_radps=0.01,
+        vx_drift_std=0.02,
+        wz_drift_std=0.02,
+        drift_time_constant_s=60.0,
+    )
+    vn300: Vn300Config = Vn300Config(
+        imu_frame_id="imu_link",
+        ins_frame_id="base_link",
+        position_noise_std_m=0.05,
+        position_drift_std_m=0.5,
+        position_drift_time_constant_s=120.0,
+        vx_noise_std_mps=0.02,
+        wz_noise_std_radps=0.005,
+        vx_drift_std_mps=0.05,
+        wz_drift_std_radps=0.002,
+        vel_drift_time_constant_s=120.0,
+        yaw_noise_std_rad=math.radians(0.5),
+        yaw_drift_std_rad=math.radians(0.3),
+        yaw_drift_time_constant_s=300.0,
+    )
     initial_yaw_rad: float = 0.0
 
     map_frame_id: str = "map"
