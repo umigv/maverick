@@ -15,7 +15,7 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
     gps_file = load_gps_file(course)
 
     base_params = [
-        f"{bringup_share()}/config/hardware/vectornav.yaml",
+        f"{bringup_share()}/config/hardware/vectornav_driver.yaml",
         {"imu_frame_id": frames["imu_frame"]},
         {"ins_frame_id": frames["base_frame"]},
         {"gnss_a_frame_id": frames["gnss_a_frame"]},
