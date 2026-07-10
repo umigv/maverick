@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 
-from common import discover_packages, file_to_package, run
+from common import discover_packages, file_to_package, info, run
 
 
 def get_staged_files() -> list[Path]:
@@ -25,7 +25,7 @@ def main() -> None:
     if not affected:
         return
 
-    print(f"pre-commit: linting {', '.join(sorted(affected))}")
+    info(f"pre-commit: linting {', '.join(sorted(affected))}")
     run("just", "lint", "--only", *sorted(affected))
 
 

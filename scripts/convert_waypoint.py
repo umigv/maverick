@@ -2,7 +2,7 @@
 import csv
 from pathlib import Path
 
-from common import ROOT, die
+from common import ROOT, die, info
 
 DMS_DIR = ROOT / "waypoints" / "dms"
 DECIMAL_DIR = ROOT / "waypoints" / "decimal"
@@ -85,7 +85,7 @@ def convert_file(input_path: Path) -> None:
     dms_waypoints = extract(input_path)
     waypoints = convert(dms_waypoints)
     write(waypoints, output_path)
-    print(f"Converted {len(waypoints)} waypoint(s): {input_path.relative_to(ROOT)} -> {output_path.relative_to(ROOT)}")
+    info(f"Converted {len(waypoints)} waypoint(s): {input_path.relative_to(ROOT)} -> {output_path.relative_to(ROOT)}")
 
 
 def write_marker() -> None:

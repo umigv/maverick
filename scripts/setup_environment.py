@@ -5,13 +5,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-from common import ROOT, die, run
+from common import ROOT, die, info, run
 
 ROS_DISTRO = os.environ.get("ROS_DISTRO")
-
-
-def log(msg: str) -> None:
-    print(f"\n\033[1m\033[0;36m==> {msg}\033[0m")
 
 
 def note(msg: str) -> None:
@@ -28,26 +24,26 @@ def main() -> None:
     if not (ROOT / "src").is_dir():
         die(f"Expected workspace src/ at: {ROOT}/src")
 
-    log(f"Repo root: {ROOT}")
+    info(f"Repo root: {ROOT}")
 
-    log("Initializing git submodules")
+    info("Initializing git submodules")
     result = subprocess.run(
         ["git", "-C", str(ROOT), "submodule", "update", "--init", "--recursive"],
         capture_output=True,
         text=True,
     )
     if result.stdout.strip():
-        log("Submodules changed — clearing build, install, and log directories")
+        info("Submodules changed — clearing build, install, and log directories")
         for d in ("build", "install", "log"):
             shutil.rmtree(ROOT / d, ignore_errors=True)
 
-    log("Installing apt tooling deps")
+    info("Installing apt tooling deps")
     run("sudo", "apt", "update")
     apt_packages = (ROOT / "tooling.apt").read_text().split()
     run("sudo", "apt-get", "install", "-y", *apt_packages)
 
     if not shutil.which("just"):
-        log("Installing just")
+        info("Installing just")
         run(
             "curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | sudo bash -s -- --to /usr/local/bin",
             shell=True,
@@ -57,30 +53,30 @@ def main() -> None:
     content = bashrc.read_text() if bashrc.exists() else ""
 
     if "just --completions bash" not in content:
-        log("Configuring just autocomplete")
+        info("Configuring just autocomplete")
         with bashrc.open("a") as f:
             f.write("source <(just --completions bash)\n")
 
     if "direnv hook bash" not in content:
-        log("Configuring direnv shell hook")
+        info("Configuring direnv shell hook")
         with bashrc.open("a") as f:
             f.write('export DIRENV_LOG_FORMAT=\neval "$(direnv hook bash)"\n')
 
-    log("Installing Python tooling deps")
+    info("Installing Python tooling deps")
     run(sys.executable, "-m", "pip", "install", "-e", f"{ROOT}[tooling]")
 
-    log("Installing ROS deps via rosdep")
+    info("Installing ROS deps via rosdep")
     env = {**os.environ, "ROS_DISTRO": ROS_DISTRO, "ROS_VERSION": "2"}
     run("rosdep", "update", env=env)
     run("rosdep", "install", "--from-paths", str(ROOT), "--ignore-src", "-r", "-y", env=env)
 
-    log("Allowing direnv in repo")
+    info("Allowing direnv in repo")
     run("direnv", "allow", str(ROOT))
 
-    log("Generating pyrightconfig.json")
+    info("Generating pyrightconfig.json")
     run(sys.executable, str(ROOT / "scripts" / "generate_pyrightconfig.py"))
 
-    log("Installing git hooks")
+    info("Installing git hooks")
     hooks = {
         "pre-commit": ROOT / "scripts" / "pre_commit.py",
         "post-checkout": ROOT / "scripts" / "generate_pyrightconfig.py",
@@ -92,7 +88,7 @@ def main() -> None:
         hook_dst.unlink(missing_ok=True)
         hook_dst.symlink_to(hook_src)
 
-    log("Setup complete")
+    info("Setup complete")
     note("Run source ~/.bashrc for direnv hook to take effect")
 
 

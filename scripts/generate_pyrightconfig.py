@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import json
 
-from common import ROOT
+from common import ROOT, info
 
 
 def main() -> None:
@@ -19,7 +19,7 @@ def main() -> None:
 
     out = ROOT / "pyrightconfig.json"
     out.write_text(json.dumps(config, indent=4) + "\n")
-    print(f"Written {out.name} with {len(extra_paths)} package paths")
+    info(f"Written {out.name} with {len(extra_paths)} package paths")
 
 
 if __name__ == "__main__":
