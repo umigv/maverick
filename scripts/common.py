@@ -9,9 +9,28 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def die(msg: str) -> NoReturn:
-    """Print an error message to stderr and exit with code 1."""
-    print(f"ERROR: {msg}", file=sys.stderr)
+    """Print an error message to stderr in red and exit with code 1."""
+    first, *rest = msg.splitlines()
+    print(f"\033[1;31mERROR: {first}\033[0m", file=sys.stderr)
+    for line in rest:
+        print(f"\033[31m       {line}\033[0m", file=sys.stderr)
     sys.exit(1)
+
+
+def info(msg: str) -> None:
+    """Print a progress message in cyan."""
+    first, *rest = msg.splitlines()
+    print(f"\033[1;36m===> {first}\033[0m", flush=True)
+    for line in rest:
+        print(f"\033[36m     {line}\033[0m", flush=True)
+
+
+def warning(msg: str) -> None:
+    """Print a warning message to stderr in yellow."""
+    first, *rest = msg.splitlines()
+    print(f"\033[1;33mWARNING: {first}\033[0m", file=sys.stderr, flush=True)
+    for line in rest:
+        print(f"\033[33m         {line}\033[0m", file=sys.stderr, flush=True)
 
 
 @overload
@@ -105,7 +124,7 @@ def resolve_packages(only: list[str] | None, ignore: list[str] | None) -> tuple[
     Returns (pkg_dirs, all_pkg_dirs) where pkg_dirs is the filtered set to operate on and all_pkg_dirs is the full
     unfiltered set of targets (ROS packages plus EXTRA_DIRS), used as the MYPYPATH bases for type checking.
     """
-    print("==> Discovering packages")
+    info("Discovering packages")
     all_pkg_dirs = discover_packages()
 
     pkg_dirs = all_pkg_dirs

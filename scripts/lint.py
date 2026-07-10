@@ -4,20 +4,20 @@ import os
 import shutil
 from pathlib import Path
 
-from common import ROOT, die, files_in, resolve_packages, run
+from common import ROOT, die, files_in, info, resolve_packages, run
 
 
 def lint_python(pkg_dirs: list[Path], all_pkg_dirs: list[Path]) -> None:
     pkg_strs = [str(d) for d in pkg_dirs]
 
-    print("==> Ruff format (check)")
+    info("Ruff format (check)")
     run("ruff", "format", "--check", *pkg_strs)
 
-    print("==> Ruff lint")
+    info("Ruff lint")
     run("ruff", "check", *pkg_strs)
 
     mypy_dirs = [d for d in pkg_dirs if any(p.name != "setup.py" for p in files_in([d], "*.py"))]
-    print(f"==> mypy ({len(mypy_dirs)} packages)")
+    info(f"mypy ({len(mypy_dirs)} packages)")
     if mypy_dirs:
         mypypath = ":".join(str(ROOT / d) for d in all_pkg_dirs)
         run("mypy", *[str(d) for d in mypy_dirs], env={**os.environ, "MYPYPATH": mypypath})
@@ -25,7 +25,7 @@ def lint_python(pkg_dirs: list[Path], all_pkg_dirs: list[Path]) -> None:
 
 def lint_cpp(pkg_dirs: list[Path]) -> None:
     cpp = files_in(pkg_dirs, "*.cpp", "*.hpp", "*.h", "*.cc")
-    print("==> clang-format (check)")
+    info("clang-format (check)")
     run("clang-format", "--dry-run", "--Werror", *[str(f.relative_to(ROOT)) for f in cpp])
 
 
@@ -48,7 +48,7 @@ def main() -> None:
     if files_in(pkg_dirs, "*.cpp", "*.hpp", "*.h", "*.cc"):
         lint_cpp(pkg_dirs)
 
-    print("\n==> All checks passed!")
+    info("All checks passed!")
 
 
 if __name__ == "__main__":

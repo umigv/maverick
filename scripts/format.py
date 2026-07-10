@@ -3,22 +3,22 @@ import argparse
 import shutil
 from pathlib import Path
 
-from common import ROOT, die, files_in, resolve_packages, run
+from common import ROOT, die, files_in, info, resolve_packages, run
 
 
 def format_python(pkg_dirs: list[Path]) -> None:
     pkg_strs = [str(d) for d in pkg_dirs]
 
-    print("==> Ruff lint (fix)")
+    info("Ruff lint (fix)")
     run("ruff", "check", "--fix", "--exit-zero", *pkg_strs)
 
-    print("==> Ruff format")
+    info("Ruff format")
     run("ruff", "format", *pkg_strs)
 
 
 def format_cpp(pkg_dirs: list[Path]) -> None:
     cpp = files_in(pkg_dirs, "*.cpp", "*.hpp", "*.h", "*.cc")
-    print("==> clang-format")
+    info("clang-format")
     run("clang-format", "-i", *[str(f.relative_to(ROOT)) for f in cpp])
 
 

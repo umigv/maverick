@@ -12,7 +12,7 @@
 | `navigation` | Path planning, path tracking, mission control, and recovery behavior packages |
 | `simulation` | Simulated sensors and environment for testing without hardware |
 | `visualization` | Visualization packages |
-| `template` | Package skeletons copied by `just create-pkg` |
+| `template` | Package skeletons copied by `just create-package` |
 
 ## Setup
 First run the [host bootstrap](https://github.com/umigv/nav-environment) if you haven't. Then:
@@ -82,7 +82,7 @@ just format
 
 ## Adding a New Package
 ```bash
-just create-pkg <dir> <pkg> [--type python|cpp]
+just create-package <dir> <package> [--type python|cpp]
 ```
 Copies [`template_python`](src/template/template_python) or [`template_cpp`](src/template/template_cpp) into
-`<dir>/<pkg>`.
+`<dir>/<package>`.

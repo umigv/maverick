@@ -2,7 +2,7 @@
 import argparse
 from pathlib import Path
 
-from common import die, run
+from common import die, info, run
 
 
 def main() -> None:
@@ -15,14 +15,13 @@ def main() -> None:
     if not rules_file.exists():
         die(f"No rule found for alias '{args.alias}' (expected {rules_file}).")
 
-    print(f"Removing rule at {rules_file}:")
-    print(f"  {rules_file.read_text().strip()}")
+    info(f"Removing rule at {rules_file}:\n{rules_file.read_text().strip()}")
 
     run("sudo", "rm", str(rules_file))
     run("sudo", "udevadm", "control", "--reload-rules")
     run("sudo", "udevadm", "trigger")
 
-    print(f"Udev rule removed. /dev/{args.alias} will no longer be created.")
+    info(f"Udev rule removed. /dev/{args.alias} will no longer be created.")
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ import argparse
 import re
 from pathlib import Path
 
-from common import ROOT, die, run
+from common import ROOT, die, info, run
 
 TEMPLATES = {"python": ROOT / "src/template/template_python", "cpp": ROOT / "src/template/template_cpp"}
 
@@ -73,15 +73,15 @@ def main() -> None:
     if not dest.exists():
         response = input(f"Directory {args.dir} does not exist. Create it? [y/N]: ").strip().lower()
         if response != "y":
-            print("Aborted.")
+            info("Aborted.")
             return
         dest.mkdir(parents=True)
 
-    print(f"==> Creating ROS 2 {args.type} package: {pkg_name}")
+    info(f"Creating ROS 2 {args.type} package: {pkg_name}")
     copy_template(TEMPLATES[args.type], pkg_dir, pkg_name)
     set_maintainer(pkg_dir)
 
-    print(f"==> Package '{pkg_name}' created successfully at {args.dir}/{pkg_name}")
+    info(f"Package '{pkg_name}' created successfully at {args.dir}/{pkg_name}")
 
 
 if __name__ == "__main__":
