@@ -70,6 +70,10 @@ convert-waypoints:
 
 # ── ROS 2 ──────────────────────────────────────────────────────────────────────
 
+# Open RViz with the shared stack configuration
+rviz:
+    pixi run rviz2 -d src/bringup/config/visualization/maverick.rviz
+
 # Capture a single message from a topic to a file
 extract topic output:
     pixi run python3 scripts/extract_message.py {{topic}} {{output}}
