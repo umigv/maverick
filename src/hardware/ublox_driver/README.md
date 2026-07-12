@@ -1,24 +1,23 @@
 # ublox_driver
-This package reads GNSS data in UBX protocol from our **u-blox ZED-F9P** GPS over USB and publishes 
-`sensor_msgs/NavSatFix` messages for use with localization.
+This package reads GNSS data in UBX protocol from our **u-blox ZED-F9P** GPS over USB and publishes `sensor_msgs/NavSatFix` messages for use with localization.
 
 ## Behavior / Filtering
 We only publish message UBX `NAV-PVT`/`NAV2-PVT` that indicates a valid position solution:
-- `fixType` is not `NO_FIX (0)` and not `TIME_ONLY (5)`
+- `fixType` is neither `NO_FIX (0)` nor `TIME_ONLY (5)`
 - `gnssFixOk == 1`
 - `invalidLlh == 0`
 
-Timestamps are taken from GNSS time when valid (`validDate && validTime && fullyResolved`), otherwise we fall back to 
-ROS2 node time.
+Timestamps are taken from GNSS time when valid (`validDate && validTime && fullyResolved`), otherwise we fall back to ROS2 node time.
 
 Covariance is filled using u-blox accuracy fields:
-- `hAcc` / `vAcc` (mm → meters → meters²), published as diagonal covariance.
+- `hAcc` / `vAcc` (mm → meters → meters²), floored at 0.05 m / 0.08 m before squaring, published as diagonal covariance
+- `NavSatStatus` is `STATUS_GBAS_FIX` when the fix is differential-corrected (`diffSoln`), otherwise `STATUS_FIX`
 
 ## Published Topics
-- `ublox/gps` (`sensor_msgs/NavSatFix`) - processed GPS fix messages
+- `ublox/gps` (`sensor_msgs/NavSatFix`) - Processed GPS fix messages
 
 ## GPS Configurations
-> Note: Message “rate” in `CFG-MSG` is **messages per navigation cycle**.  
+> Note: Message “rate” in `CFG-MSG` is **messages per navigation cycle**.
 > With `CFG-RATE` set to **10 Hz**, a message rate of:
 > - `1` → 10 Hz
 > - `10` → 1 Hz

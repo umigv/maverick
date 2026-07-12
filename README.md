@@ -50,15 +50,14 @@ ros2 launch bringup navigation.launch.py mode:=<mode> [course:=<course>]
 ```
 
 ### Mode and Course Configuration
-See [bringup/README.md](bringup/README.md) for mode and course configuration details.
+See [bringup/README.md](src/bringup/README.md) for mode and course configuration details.
 
 ### Visualization
 Run in a separate terminal:
 ```bash
 ros2 launch bringup visualization.launch.py
 ```
-This sends robot data to Foxglove. Then open [Foxglove Studio](https://foxglove.dev/download) and connect to
-`ws://localhost:8765`.
+This sends robot data to Foxglove. Then open [Foxglove Studio](https://foxglove.dev/download) and connect to `ws://localhost:8765`.
 
 Alternatively, run `rviz2` in a new terminal and add the topics you want to visualize.
 
@@ -82,7 +81,6 @@ just format
 
 ## Adding a New Package
 ```bash
-just create-package <dir> <package> [--type python|cpp]
+just create-package <dir> <package> [python|cpp]
 ```
-Copies [`template_python`](src/template/template_python) or [`template_cpp`](src/template/template_cpp) into
-`<dir>/<package>`.
+Copies [`template_python`](src/template/template_python) or [`template_cpp`](src/template/template_cpp) into `<dir>/<package>`.

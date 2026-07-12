@@ -1,6 +1,7 @@
 {
     "C_Cpp.intelliSenseEngine": "disabled",
     "python.defaultInterpreterPath": "${workspaceFolder}/.pixi/envs/default/bin/python",
+    "editor.rulers": [120],
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.formatOnSave": true,
@@ -8,6 +9,10 @@
             "source.fixAll.ruff": "always",
             "source.organizeImports.ruff": "always"
         }
+    },
+    "[markdown]": {
+        "editor.wordWrap": "on",
+        "editor.rulers": []
     },
     "search.exclude": {
         "**/build": true,
