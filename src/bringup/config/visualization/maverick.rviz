@@ -1,0 +1,113 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+  - Class: rviz_common/Views
+    Name: Views
+  - Class: rviz_common/Time
+    Name: Time
+Visualization Manager:
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Name: Grid
+      Enabled: true
+      Plane Cell Count: 40
+    - Class: rviz_default_plugins/TF
+      Name: TF
+      Enabled: false
+    - Class: rviz_default_plugins/Map
+      Name: Ground Truth Map (sim)
+      Enabled: true
+      Draw Behind: true
+      Topic:
+        Durability Policy: Transient Local
+        Value: /occupancy_grid/ground_truth
+    - Class: rviz_default_plugins/Map
+      Name: Raw Occupancy Grid
+      Enabled: false
+      Topic:
+        Value: /occupancy_grid/raw
+    - Class: rviz_default_plugins/Map
+      Name: Transformed Occupancy Grid
+      Enabled: false
+      Topic:
+        Value: /occupancy_grid/transformed
+    - Class: rviz_default_plugins/Map
+      Name: Inflated Occupancy Grid
+      Enabled: true
+      Alpha: 0.3
+      Topic:
+        Value: /occupancy_grid/inflated
+    - Class: rviz_default_plugins/Odometry
+      Name: Local Odometry
+      Enabled: true
+      Keep: 1
+      Covariance:
+        Value: false
+      Topic:
+        Value: /odom/local
+    - Class: rviz_default_plugins/Odometry
+      Name: Global Odometry
+      Enabled: false
+      Keep: 1
+      Covariance:
+        Value: false
+      Shape:
+        Color: 255; 165; 0
+      Topic:
+        Value: /odom/global
+    - Class: rviz_default_plugins/Odometry
+      Name: Ground Truth Odometry (sim)
+      Enabled: false
+      Keep: 1
+      Covariance:
+        Value: false
+      Shape:
+        Color: 25; 255; 0
+      Topic:
+        Value: /odom/ground_truth
+    - Class: rviz_default_plugins/Path
+      Name: Planned Path
+      Enabled: true
+      Color: 152; 106; 68
+      Line Style: Billboards
+      Line Width: 0.15
+      Topic:
+        Value: /path
+    - Class: rviz_default_plugins/Path
+      Name: Smoothed Path
+      Enabled: true
+      Color: 25; 255; 255
+      Line Style: Billboards
+      Line Width: 0.15
+      Topic:
+        Value: /smoothed_path
+    - Class: rviz_default_plugins/PointStamped
+      Name: Goal
+      Enabled: true
+      Topic:
+        Value: /goal
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Goal Selection Debug
+      Enabled: true
+      Topic:
+        Value: /goal_selection_debug
+  Global Options:
+    Fixed Frame: map
+  Tools:
+    - Class: rviz_default_plugins/Interact
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Select
+    - Class: rviz_default_plugins/FocusCamera
+    - Class: rviz_default_plugins/Measure
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Name: Current View
+      Target Frame: <Fixed Frame>
+      Distance: 40
+      Pitch: 1.4
+      Yaw: 4.71239
+Window Geometry:
+  # Qt dock layout (Displays left, Views right, Time bottom). RViz can only place panels via this serialized QMainWindow
+  # state; there is no readable equivalent.
+  QMainWindow State: 000000ff00000000fd00000003000000000000015e00000328fc0200000001fb000000100044006900730070006c0061007900730100000000000003280000005600ffffff00000001000000fa00000328fc0200000001fb0000000a005600690065007700730100000000000003280000005600ffffff000000030000064000000056fc0100000001fb0000000800540069006d00650100000000000006400000004600ffffff000003dc0000032800000004000000040000000800000008fc00000000

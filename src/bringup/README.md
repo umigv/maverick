@@ -248,3 +248,6 @@ ros2 launch bringup visualization.launch.py
 ### Nodes
 - `foxglove_bridge` - Foxglove bridge on `ws://localhost:8765`
 - [occupancy_grid_visualization](../visualization/occupancy_grid_visualization/README.md)
+
+### RViz
+We maintain a shared RViz configuration in `config/visualization/maverick.rviz`. The ground truth map, inflated occupancy grid, local odometry, paths, and goal displays are enabled by default. The raw and transformed occupancy grids and the global and ground truth odometry are included but toggled off to avoid overdraw - enable them from the Displays panel as needed.
