@@ -29,6 +29,16 @@ def lint_cpp(pkg_dirs: list[Path]) -> None:
     run("clang-format", "--dry-run", "--Werror", *[str(f.relative_to(ROOT)) for f in cpp])
 
 
+def lint_rviz(pkg_dirs: list[Path]) -> None:
+    info("RViz configs (ARV Config marker)")
+    for f in files_in(pkg_dirs, "*.rviz"):
+        if "# ARV Config" not in f.read_text():
+            die(
+                f"{f.relative_to(ROOT)}: missing '# ARV Config' marker. Revert if config was accidentally saved in RViz"
+                ", or re-add the marker comment if the change was intentional"
+            )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run all linters")
     group = parser.add_mutually_exclusive_group()
@@ -47,6 +57,9 @@ def main() -> None:
 
     if files_in(pkg_dirs, "*.cpp", "*.hpp", "*.h", "*.cc"):
         lint_cpp(pkg_dirs)
+
+    if files_in(pkg_dirs, "*.rviz"):
+        lint_rviz(pkg_dirs)
 
     info("All checks passed!")
 
