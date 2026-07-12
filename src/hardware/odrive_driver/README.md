@@ -1,15 +1,17 @@
 # odrive_driver
 Controls two ODrives (left and right) over USB. Converts `cmd_vel` twist commands to per-motor velocity setpoints and publishes encoder-derived velocity with propagated covariance. Motors are zeroed if no `cmd_vel` is received within `cmd_vel_timeout_s` or if the e-stop is active.
 
+On startup the driver finds both ODrives by serial number, clears existing errors, and puts them in closed-loop velocity control with ramped input, writing the controller gains from config. If the DC bus is undervolted at startup (usually because the physical e-stop is engaged), it plays an audible "turn off the estop" warning and exits.
+
 ## Read Files
-- `estop_file_path` - e-stop state written by `estop_driver`; commands zero velocity to both motors while estopped
+- `estop_file_path` - E-stop state written by `estop_driver`; commands zero velocity to both motors while estopped
 
 ## Subscribed Topics
-- `cmd_vel` (`geometry_msgs/TwistStamped`)
+- `cmd_vel` (`geometry_msgs/TwistStamped`) - Target ODrive velocity
 
 ## Published Topics
-- `odrive_driver/debug` (`std_msgs/Float32MultiArray`) - per-motor Iq and velocity signals, only published when `debug` is true: `[l_iq_sp, l_iq_meas, l_vel_sp, l_vel_est, r_iq_sp, r_iq_meas, r_vel_sp, r_vel_est]`. Iq in A, velocity in rps
-- `enc_vel` (`geometry_msgs/TwistWithCovarianceStamped`) - encoder derived linear/angular velocity with dynamic covariance
+- `odrive_driver/debug` (`std_msgs/Float32MultiArray`) - Per-motor Iq and velocity signals, only published when `debug` is true: `[l_iq_sp, l_iq_meas, l_vel_sp, l_vel_est, r_iq_sp, r_iq_meas, r_vel_sp, r_vel_est]`. Iq in A, velocity in rps
+- `enc_vel` (`geometry_msgs/TwistWithCovarianceStamped`) - Encoder derived linear/angular velocity with dynamic covariance
 
 ## Scripts
 Before running any script, make sure `odrivetool` and this node is closed first as they hold the USB connection.
@@ -38,6 +40,6 @@ If errors persist or if the scripts can't detect an ODrive, troubleshoot in the 
 ### `scripts/plot_motor_signals.py`
 Live-plots left/right Iq setpoint vs measured (A) and velocity setpoint vs estimate (rps) from the `odrive_driver/debug`topic. Useful for tuning the velocity controller and diagnosing motor behavior. Requires `odrive_driver` to be running with `debug: true` in its config.
 ```bash
-just plot-odrive                              # 500-sample window, 10 Hz redraw
+just plot-odrive # 500-sample window, 10 Hz redraw
 just plot-odrive --window 1000 --frame-rate 15
 ```

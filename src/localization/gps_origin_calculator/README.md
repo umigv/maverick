@@ -1,5 +1,5 @@
 # gps_origin_calculator
-Collects GPS samples on startup, then computes and writes the median position (latitude, longitude, altitude) as the datum. See `bringup` for the launch file that runs this alongside the GPS driver.
+Collects GPS samples on startup, then computes and writes the median position (latitude, longitude, altitude) as the datum.
 
 Samples are filtered by horizontal accuracy (`max_horizontal_stdev_m`). The node waits until either `min_samples_required` samples have been collected for at least `min_sample_duration_s`, or `max_sample_duration_s` has elapsed.
 

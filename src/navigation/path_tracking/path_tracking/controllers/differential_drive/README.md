@@ -1,4 +1,4 @@
-# Differential Drive Controller
+# differential_drive
 Unicycle path tracking controller designed for differential-drive robots, combining heading and cross-track error feedback with an adaptive lookahead for corner handling.
 
 At each control step, the robot is projected onto the nearest path segment. Two error terms are computed: heading error (angle between the robot's heading and the path tangent) and cross-track error (signed lateral distance from the path). The angular velocity command is a weighted sum of both:

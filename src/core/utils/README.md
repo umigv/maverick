@@ -66,7 +66,7 @@ Shared QoS profiles for use across nodes.
 ### `LATCHED`
 `RELIABLE` + `TRANSIENT_LOCAL` + `KEEP_LAST` (depth 1). Use this for topics where late-joining subscribers must receive the last published message immediately on connect (e.g. ground truth map, mission state).
 
-Both the publisher **and** subscriber must use the same profile — a mismatch silently drops all messages. Always use `utils.qos.LATCHED` on both sides rather than constructing the profile inline.
+Both the publisher **and** subscriber must use the same profile - a mismatch silently drops all messages. Always use `utils.qos.LATCHED` on both sides rather than constructing the profile inline.
 
 ```py
 import utils.qos
@@ -161,6 +161,7 @@ for candidate in grid.neighbors8(current):
     if not grid.state(candidate).is_drivable:
         continue
 ```
+
 ### Hashing
 To support discrete search bookkeeping (e.g. visited sets), `WorldOccupancyGrid` provides `hash_key(point)`, which returns a stable integer identifier corresponding to the grid cell that the point belongs to.
 

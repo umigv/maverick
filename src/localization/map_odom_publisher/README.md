@@ -9,7 +9,7 @@ T_map_odom = T_map_base * T_odom_base^-1
 ## Subscribed Topics
 - `odom` (`nav_msgs/Odometry`) - Global odometry. `frame_id` must be `map_frame_id` and `child_frame_id` must be `base_frame_id`
 
-## Broadcasted TF Frames
+## TF Broadcasts
 - `map_frame_id` → `odom_frame_id`
 
 ## Config Parameters

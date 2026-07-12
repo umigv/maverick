@@ -28,7 +28,6 @@ In general, decimal latitude and longitude should be written to 7 decimal places
 
 This should be kept in sync across all producers / consumers of GPS coordinates across ARV (i.e. `gps_origin_calculator`, `bringup/courses` `gps.json` files, course creation tool).
 
-
 ## Packed DMS format
 The `latitude`/`longitude` numbers in `dms/` are **not** decimal degrees. They pack degrees, minutes, and seconds into a single float as `DD.MMSSsssss`.
 ```

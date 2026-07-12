@@ -1,4 +1,4 @@
-# Sensor Simulator
+# sensor_simulator
 Simulates encoder velocity, IMU, and INS sensors for testing the stack without real hardware. Subscribes to `cmd_vel`, integrates velocity into a ground-truth pose, and publishes noisy sensor measurements that mimic real hardware behavior.
 
 Sensor noise is modeled using two components: per-sample **Gaussian white noise** for instantaneous measurement error, and [**Ornstein-Uhlenbeck (OU) processes**](https://en.wikipedia.org/wiki/Ornstein%E2%80%93Uhlenbeck_process) for slow-drifting correlated errors (e.g. scale factor bias on encoders, multipath drift on GPS). OU processes are mean-reverting, so errors stay bounded over time rather than growing without bound like a random walk.
@@ -18,6 +18,8 @@ Sensor noise is modeled using two components: per-sample **Gaussian white noise*
 
 ### VN-300 INS (IMU, GPS, INS velocity, INS odometry)
 The VN-300 is modeled as a single sensor: all four outputs draw from shared error states (per-quantity mapping documented in `Vn300Config`), so `gps`, `imu`, `ins_vel`, and `odom` stay mutually consistent like the real hardware's Kalman filter output.
+- Applies additive OU drift and per-sample Gaussian white noise per quantity (measurement model documented in `Vn300Config`). Unlike the encoder's multiplicative drift, position and yaw drift accumulate even while stationary
+- Reported covariance is fixed rather than state-dependent: `var = noise_std² + drift_std²` per quantity; the IMU reports no linear-acceleration estimate (covariance `-1`)
 
 #### IMU
 - Publishes `Imu` in the `imu_frame_id` frame
@@ -47,8 +49,8 @@ The VN-300 is modeled as a single sensor: all four outputs draw from shared erro
 - `odom` (`nav_msgs/Odometry`) - Simulated VN-300 INS odometry in `map` frame
 - `odom/ground_truth` (`nav_msgs/Odometry`) - Noiseless true pose in `map` frame (`child_frame_id = base_link_ground_truth`)
 
-## Broadcasted TF
+## TF Broadcasts
 - `map` → `base_link_ground_truth` - Noiseless true robot pose, broadcast every update
 
-## Required TF
+## TF Requirements
 - `base_link` → `imu_link` - IMU mounting orientation (used to compute yaw offset for IMU topic)

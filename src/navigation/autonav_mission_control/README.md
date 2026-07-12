@@ -38,14 +38,14 @@ Each waypoint is either map-frame `x`/`y` (meters) or GPS `latitude`/`longitude`
 ## Subscribed Topics
 | Topic | Type | Description |
 |---|---|---|
-| `odom` | `nav_msgs/msg/Odometry` | Robot pose used to compute distance to waypoints |
+| `odom` | `nav_msgs/Odometry` | Robot pose used to compute distance to waypoints |
 
 ## Published Topics
 | Topic | Type | Description |
 |---|---|---|
-| `mission_state` | `maverick_msgs/msg/MissionState` | Latched mission state; published on every state transition |
+| `mission_state` | `maverick_msgs/MissionState` | Latched mission state; published on every state transition |
 
-`mission_state` is latched: publisher and subscribers must both use `utils.qos.LATCHED` — see the [utils README](../../core/utils/README.md#utilsqos).
+`mission_state` is latched: publisher and subscribers must both use `utils.qos.LATCHED` - see the [utils README](../../core/utils/README.md#utilsqos).
 
 ### MissionState fields
 See [`MissionState.msg`](../../core/maverick_msgs/msg/MissionState.msg) for the field definitions and what each one means for subscribers.
@@ -53,19 +53,19 @@ See [`MissionState.msg`](../../core/maverick_msgs/msg/MissionState.msg) for the 
 ## Services
 | Service | Type | Description |
 |---|---|---|
-| `request_recovery` | `std_srvs/srv/Trigger` | Sets `in_recovery = true` and publishes state |
-| `recovery_complete` | `std_srvs/srv/Trigger` | Clears `in_recovery` and publishes state |
+| `request_recovery` | `std_srvs/Trigger` | Sets `in_recovery = true` and publishes state |
+| `recovery_complete` | `std_srvs/Trigger` | Clears `in_recovery` and publishes state |
 
 ## Service Clients
 | Service | Type | Description |
 |---|---|---|
-| `fromLL` | `robot_localization/srv/FromLL` | Converts GPS waypoints to map-frame coordinates at startup |
+| `fromLL` | `robot_localization/FromLL` | Converts GPS waypoints to map-frame coordinates at startup |
 
 ## Adding new state fields
 There are two kinds of state in this node, and which kind a new field is determines where it belongs:
 
-- **Polled state** can be recomputed from scratch at any moment from current values (pose, waypoints, config, other state). It belongs in the compute-and-apply loop in `update_mission_state`, which samples it on every odometry message, diffs it against the stored value, and publishes on change. Compute functions must be pure reads — the loop owns the write.
-- **Event-driven state** changes at a moment in time — a service call arrives, a timer fires. There is nothing to poll; the event itself is the change. The event callback sets the attribute and calls `publish_state()` directly. `in_recovery` (service-driven) and `mission_complete` (timer-driven) work this way.
+- **Polled state** can be recomputed from scratch at any moment from current values (pose, waypoints, config, other state). It belongs in the compute-and-apply loop in `update_mission_state`, which samples it on every odometry message, diffs it against the stored value, and publishes on change. Compute functions must be pure reads - the loop owns the write.
+- **Event-driven state** changes at a moment in time - a service call arrives, a timer fires. There is nothing to poll; the event itself is the change. The event callback sets the attribute and calls `publish_state()` directly. `in_recovery` (service-driven) and `mission_complete` (timer-driven) work this way.
 
 The `on_change` hook bridges the two: when a polled transition should kick off event-driven machinery, the hook is the place to start it (e.g. reaching the final waypoint starts the mission-complete timer).
 

@@ -50,7 +50,7 @@ ros2 launch bringup navigation.launch.py mode:=<mode> [course:=<course>]
 ```
 
 ### Mode and Course Configuration
-See [bringup/README.md](bringup/README.md) for mode and course configuration details.
+See [bringup/README.md](src/bringup/README.md) for mode and course configuration details.
 
 ### Visualization
 Run in a separate terminal:
@@ -81,6 +81,6 @@ just format
 
 ## Adding a New Package
 ```bash
-just create-package <dir> <package> [--type python|cpp]
+just create-package <dir> <package> [python|cpp]
 ```
 Copies [`template_python`](src/template/template_python) or [`template_cpp`](src/template/template_cpp) into `<dir>/<package>`.
