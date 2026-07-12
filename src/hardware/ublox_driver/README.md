@@ -3,7 +3,7 @@ This package reads GNSS data in UBX protocol from our **u-blox ZED-F9P** GPS ove
 
 ## Behavior / Filtering
 We only publish message UBX `NAV-PVT`/`NAV2-PVT` that indicates a valid position solution:
-- `fixType` is not `NO_FIX (0)` and not `TIME_ONLY (5)`
+- `fixType` is neither `NO_FIX (0)` nor `TIME_ONLY (5)`
 - `gnssFixOk == 1`
 - `invalidLlh == 0`
 
