@@ -1,7 +1,19 @@
 #!/usr/bin/env python3
 import json
+import re
 
-from common import ROOT, info
+from common import ROOT, die, info
+
+VENV_PATH = ".pixi/envs"
+VENV_NAME = "default"
+LOCKFILE = ROOT / "pixi.lock"
+
+
+def detect_python_version() -> str:
+    m = re.search(r"/python-(\d+\.\d+)\.\d+-", LOCKFILE.read_text())
+    if m is None:
+        die(f"Could not find python package in {LOCKFILE.name}")
+    return m.group(1)
 
 
 def main() -> None:
@@ -12,8 +24,10 @@ def main() -> None:
             extra_paths.append(str(pkg_dir.relative_to(ROOT)))
 
     config = {
+        "venvPath": VENV_PATH,
+        "venv": VENV_NAME,
         "extraPaths": extra_paths,
-        "pythonVersion": "3.10",
+        "pythonVersion": detect_python_version(),
         "typeCheckingMode": "standard",
     }
 

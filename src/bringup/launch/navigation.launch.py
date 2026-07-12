@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, assert_never
 
 from bringup.launch_utils import MODES, Mode, gps_file_path, load_frames
 from launch import LaunchContext, LaunchDescription, LaunchDescriptionEntity
@@ -7,7 +7,6 @@ from launch.event_handlers import OnProcessExit
 from launch.events import Shutdown
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-from typing_extensions import assert_never
 
 
 def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[LaunchDescriptionEntity]:

@@ -3,7 +3,7 @@ from __future__ import annotations
 import ctypes
 import os
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum, IntEnum
 from typing import Any, Generic, TypeVar
 
@@ -96,47 +96,45 @@ class DataSource(IntEnum):
 
 
 # INS Status bitfield - VectorNav VN300 ICD section 2.7.1
-# LittleEndianStructure + from_buffer_copy(to_bytes("little")) pins LSB-first packing, so decoding is identical on
-# little- and big-endian hosts.
-# TODO: Change to LittleEndianUnion once 3.14+
-class InsStatusReg(ctypes.LittleEndianStructure):
-    _fields_ = [  # noqa: RUF012 (ctypes requires _fields_ as a plain list)
-        ("mode", ctypes.c_uint16, 2),  # 0-1
-        ("gnss_fix", ctypes.c_uint16, 1),  # 2
-        ("_reserved3", ctypes.c_uint16, 1),  # 3
-        ("imu_err", ctypes.c_uint16, 1),  # 4
-        ("mag_pres_err", ctypes.c_uint16, 1),  # 5
-        ("gnss_err", ctypes.c_uint16, 1),  # 6
-        ("_reserved7", ctypes.c_uint16, 1),  # 7
-        ("gnss_compass", ctypes.c_uint16, 2),  # 8-9
-        ("_reserved", ctypes.c_uint16, 6),  # 10-15
-    ]
+# LittleEndian* pins LSB-first packing, so decoding the wire value is identical on big-endian hosts.
+class InsStatusReg(ctypes.LittleEndianUnion):
+    class _Bits(ctypes.LittleEndianStructure):
+        _fields_ = [  # noqa: RUF012 (ctypes requires _fields_ as a plain list)
+            ("mode", ctypes.c_uint16, 2),  # 0-1
+            ("gnss_fix", ctypes.c_uint16, 1),  # 2
+            ("_reserved3", ctypes.c_uint16, 1),  # 3
+            ("imu_err", ctypes.c_uint16, 1),  # 4
+            ("mag_pres_err", ctypes.c_uint16, 1),  # 5
+            ("gnss_err", ctypes.c_uint16, 1),  # 6
+            ("_reserved7", ctypes.c_uint16, 1),  # 7
+            ("gnss_compass", ctypes.c_uint16, 2),  # 8-9
+            ("_reserved", ctypes.c_uint16, 6),  # 10-15
+        ]
 
-    @classmethod
-    def from_uint16(cls, value: int) -> InsStatusReg:
-        return cls.from_buffer_copy(value.to_bytes(2, "little"))
+    _anonymous_ = ("bits",)
+    _fields_ = [("bits", _Bits), ("value", ctypes.c_uint16)]  # noqa: RUF012
 
 
 # GNSS Status bitfield - VectorNav VN300 ICD section 2.5.17.
-class GnssStatusReg(ctypes.LittleEndianStructure):
-    _fields_ = [  # noqa: RUF012 (ctypes requires _fields_ as a plain list)
-        ("enabled", ctypes.c_uint16, 1),  # 0
-        ("operational", ctypes.c_uint16, 1),  # 1
-        ("fix", ctypes.c_uint16, 1),  # 2
-        ("antenna_signal_err", ctypes.c_uint16, 1),  # 3
-        ("used_for_nav", ctypes.c_uint16, 1),  # 4
-        ("used_for_compass", ctypes.c_uint16, 1),  # 5
-        ("_reserved6", ctypes.c_uint16, 2),  # 6-7
-        ("data_source", ctypes.c_uint16, 2),  # 8-9
-        ("_reserved10", ctypes.c_uint16, 1),  # 10
-        ("used_for_nav_curr", ctypes.c_uint16, 1),  # 11
-        ("pps_used_for_time", ctypes.c_uint16, 1),  # 12
-        ("_reserved13", ctypes.c_uint16, 3),  # 13-15
-    ]
+class GnssStatusReg(ctypes.LittleEndianUnion):
+    class _Bits(ctypes.LittleEndianStructure):
+        _fields_ = [  # noqa: RUF012 (ctypes requires _fields_ as a plain list)
+            ("enabled", ctypes.c_uint16, 1),  # 0
+            ("operational", ctypes.c_uint16, 1),  # 1
+            ("fix", ctypes.c_uint16, 1),  # 2
+            ("antenna_signal_err", ctypes.c_uint16, 1),  # 3
+            ("used_for_nav", ctypes.c_uint16, 1),  # 4
+            ("used_for_compass", ctypes.c_uint16, 1),  # 5
+            ("_reserved6", ctypes.c_uint16, 2),  # 6-7
+            ("data_source", ctypes.c_uint16, 2),  # 8-9
+            ("_reserved10", ctypes.c_uint16, 1),  # 10
+            ("used_for_nav_curr", ctypes.c_uint16, 1),  # 11
+            ("pps_used_for_time", ctypes.c_uint16, 1),  # 12
+            ("_reserved13", ctypes.c_uint16, 3),  # 13-15
+        ]
 
-    @classmethod
-    def from_uint16(cls, value: int) -> GnssStatusReg:
-        return cls.from_buffer_copy(value.to_bytes(2, "little"))
+    _anonymous_ = ("bits",)
+    _fields_ = [("bits", _Bits), ("value", ctypes.c_uint16)]  # noqa: RUF012
 
 
 # Field order matches the GnssCompassSignalHealthStatus array packed by the driver - VectorNav VN300 ICD section 4.8.1.
@@ -170,7 +168,7 @@ class TopicState(Generic[T]):
 
     def mark_received(self, ros_time: Time, value: T) -> None:
         self.last_time = ros_time
-        wall_time = datetime.fromtimestamp(ros_time.nanoseconds / 1e9, tz=timezone.utc).astimezone()
+        wall_time = datetime.fromtimestamp(ros_time.nanoseconds / 1e9, tz=UTC).astimezone()
         self.last_timestamp_str = wall_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         self._value = value
 
@@ -297,13 +295,13 @@ class VectornavMonitor(Node):
         self.create_timer(0.1, self.update_display)
 
     def ins_callback(self, msg: UInt16) -> None:
-        self.ins.mark_received(self.get_clock().now(), InsStatusReg.from_uint16(msg.data))
+        self.ins.mark_received(self.get_clock().now(), InsStatusReg(value=msg.data))
 
     def gnss1_callback(self, msg: UInt16) -> None:
-        self.gnss1.mark_received(self.get_clock().now(), GnssStatusReg.from_uint16(msg.data))
+        self.gnss1.mark_received(self.get_clock().now(), GnssStatusReg(value=msg.data))
 
     def gnss2_callback(self, msg: UInt16) -> None:
-        self.gnss2.mark_received(self.get_clock().now(), GnssStatusReg.from_uint16(msg.data))
+        self.gnss2.mark_received(self.get_clock().now(), GnssStatusReg(value=msg.data))
 
     def signal_health_callback(self, msg: Float32MultiArray) -> None:
         self.signal_health.mark_received(self.get_clock().now(), SignalHealth.from_array(msg.data))
@@ -463,7 +461,7 @@ class VectornavMonitor(Node):
         # fmt: off
         print("\033[H\033[2J", end="")
         print("==========================================================================")
-        print(f"  Vectornav Monitor | Live Time: {cyan(datetime.now(timezone.utc).astimezone().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3])} | Uptime: {green(uptime_str)}")
+        print(f"  Vectornav Monitor | Live Time: {cyan(datetime.now(UTC).astimezone().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3])} | Uptime: {green(uptime_str)}")
         print("==========================================================================")
         print(f"  System Phase: {phase_display}")
         print(self.build_transition_checklist(now))

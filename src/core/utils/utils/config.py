@@ -125,7 +125,7 @@ def _literal_entry(field_type: Any, key: str) -> _Entry[Any, Any]:
     return _Entry(base.raw_type, base.ros_type, deserialize, base.serialize)
 
 
-def _field_default(f: "Field[Any]") -> Any:
+def _field_default(f: Field[Any]) -> Any:
     """Return the field's declared default, or MISSING if the field is required."""
     if f.default is not MISSING:
         return f.default

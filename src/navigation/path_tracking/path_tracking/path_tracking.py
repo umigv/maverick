@@ -1,4 +1,5 @@
 import math
+from typing import assert_never
 
 import utils.config
 import utils.lifecycle
@@ -7,7 +8,6 @@ from geometry_msgs.msg import Twist
 from maverick_msgs.msg import MissionState
 from nav_msgs.msg import Odometry, Path
 from rclpy.node import Node
-from typing_extensions import assert_never
 from utils.geometry import Path2d, Pose2d
 
 from .controllers.controller import Controller

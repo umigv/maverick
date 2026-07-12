@@ -1,26 +1,66 @@
-[build-system]
-requires = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.build_meta"
+[tool.pixi.workspace]
+name = "maverick"
+channels = ["https://prefix.dev/robostack-humble", "https://prefix.dev/conda-forge"]
+platforms = ["linux-64", "linux-aarch64", "osx-arm64"]
 
-[project]
-name = "maverick-tooling"
-version = "0.1.0"
-description = "Tooling config for a ROS 2 Python workspace"
-requires-python = ">=3.10"
+[tool.pixi.feature.ros.dependencies]
+# Build toolchain
+ccache = "*"
+colcon-common-extensions = "*"
+pkg-config = "*"
+compilers = "*"
+ninja = "*"
+python = "3.11*"
 
-[project.optional-dependencies]
-tooling = [
-    "ruff>=0.6.0",
-    "mypy>=1.8",
-    "types-PyYAML",
-    "types-pyserial",
-]
+# Workspace dependencies
+geographiclib-cpp = "*"
+matplotlib-base = "*"
+numpy = "*"
+pyproj = "*"
+pyserial = "*"
+# ROS 2 launch_testing's pytest plugin uses the pre-8.0 pytest_pycollect_makemodule(path, ...)
+# hook signature; pytest 8 removed the `path` arg, breaking pytest collection entirely.
+pytest = "<8"
+pyubx2 = "*"
+# setuptools 80 removed the `develop` command that colcon's ament_python editable installs rely on
+setuptools = "<80"
+ros-humble-foxglove-bridge = "*"
+ros-humble-foxglove-msgs = "*"
+ros-humble-geographic-msgs = "*"
+ros-humble-joint-state-publisher = "*"
+ros-humble-joy = "*"
+ros-humble-robot-localization = "*"
+ros-humble-robot-state-publisher = "*"
+ros-humble-ros-base = "*"
+ros-humble-rviz2 = "*"
+ros-humble-teleop-twist-joy = "*"
+ros-humble-twist-mux = "*"
+ros-humble-urdf-launch = "*"
+ros-humble-xacro = "*"
+types-pyyaml = "*"
 
-[tool.setuptools]
-packages = []
+[tool.pixi.feature.ros.pypi-dependencies]
+odrive = "*"
+playsound3 = "*"
+types-pyserial = "*"
+
+[tool.pixi.feature.ros.activation]
+scripts = ["install/setup.bash"]
+
+[tool.pixi.feature.ros.activation.env]
+RCUTILS_COLORIZED_OUTPUT = "1"
+
+[tool.pixi.feature.tooling.dependencies]
+ruff = "*"
+mypy = "*"
+# Pin to version matching what Ubuntu ships with the ROS distro we use
+clang-format = "14.*"
+
+[tool.pixi.environments]
+default = { features = ["ros", "tooling"], solve-group = "default" }
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py311"
 line-length = 120
 extend-exclude = [
     "build",
@@ -62,7 +102,7 @@ ignore = [
 convention = "pep257"
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 
 # Output
 pretty = true
@@ -95,8 +135,8 @@ exclude = [
 ]
 
 [[tool.mypy.overrides]]
-# Modules with no usable type information: ROS 2 generated interfaces/packages and third-party libraries that ship no
-# stubs or py.typed marker. Keep alphabetical.
+# Dependencies that ship no type information (no py.typed marker, no stubs). Without this, mypy raises import-untyped
+# and fails; instead we accept Any from these modules. Keep alphabetical.
 module = [
     "ament_index_python.*",
     "builtin_interfaces.*",
@@ -105,11 +145,9 @@ module = [
     "geometry_msgs.*",
     "launch.*",
     "launch_ros.*",
-    "matplotlib.*",
     "maverick_msgs.*",
     "nav_msgs.*",
     "odrive.*",
-    "playsound",
     "pyubx2",
     "rclpy.*",
     "robot_localization.*",
