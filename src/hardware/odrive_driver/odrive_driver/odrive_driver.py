@@ -6,7 +6,7 @@ import odrive.utils
 import utils.config
 import utils.lifecycle
 from ament_index_python.packages import get_package_share_directory
-from geometry_msgs.msg import Twist, TwistWithCovariance, TwistWithCovarianceStamped, Vector3
+from geometry_msgs.msg import Twist, TwistStamped, TwistWithCovariance, TwistWithCovarianceStamped, Vector3
 from odrive.enums import AxisState, ControlMode, InputMode, ODriveError
 from playsound3 import playsound
 from rclpy.duration import Duration
@@ -24,7 +24,7 @@ class OdriveDriver(Node):
 
         self.watchdog_triggered = False
 
-        self.create_subscription(Twist, "cmd_vel", self.cmd_vel_callback, 10)
+        self.create_subscription(TwistStamped, "cmd_vel", self.cmd_vel_callback, 10)
 
         self.publisher = self.create_publisher(TwistWithCovarianceStamped, "enc_vel", 10)
 
@@ -52,7 +52,7 @@ class OdriveDriver(Node):
             self.get_logger().fatal(f"Failed to initialize ODrive: {e}")
             raise SystemExit(1) from None
 
-    def cmd_vel_callback(self, msg: Twist) -> None:
+    def cmd_vel_callback(self, msg: TwistStamped) -> None:
         self.watchdog_timer.reset()
         self.watchdog_triggered = False
 
@@ -61,7 +61,7 @@ class OdriveDriver(Node):
             self.set_motor_rps(0.0, 0.0)
             return
 
-        left_rps, right_rps = self.config.twist_to_motor_rps(msg.linear.x, msg.angular.z)
+        left_rps, right_rps = self.config.twist_to_motor_rps(msg.twist.linear.x, msg.twist.angular.z)
         self.set_motor_rps(left_rps, right_rps)
 
     def watchdog_callback(self) -> None:

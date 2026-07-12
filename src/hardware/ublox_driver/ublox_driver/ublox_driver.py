@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from typing import override
 
 import serial
 import utils.config
@@ -106,6 +107,7 @@ class UbloxDriver(Node):
 
         return Time(sec=int(seconds), nanosec=int(data.nano))
 
+    @override
     def destroy_node(self) -> None:
         if self.serial is not None and self.serial.is_open:
             self.serial.close()

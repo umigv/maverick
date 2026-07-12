@@ -7,8 +7,8 @@ Waits up to `ready_timeout_s` for the Arduino to send `READY` before starting.
 - `estop_file_path` - e-stop state written by `estop_driver`
 
 ## Subscribed Topics
-- `teleop_cmd_vel` (`geometry_msgs/Twist`) - marks teleop as active for `cmd_vel_timeout_s` after the last message
-- `nav_cmd_vel` (`geometry_msgs/Twist`) - marks the nav stack as active for `cmd_vel_timeout_s` after the last message
+- `teleop_cmd_vel` (`geometry_msgs/TwistStamped`) - marks teleop as active for `cmd_vel_timeout_s` after the last message
+- `nav_cmd_vel` (`geometry_msgs/TwistStamped`) - marks the nav stack as active for `cmd_vel_timeout_s` after the last message
 - `mission_state` (`maverick_msgs/MissionState`) - current mission state, latched
 
 ## LED Priority

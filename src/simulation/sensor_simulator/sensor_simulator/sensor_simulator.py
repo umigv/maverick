@@ -9,6 +9,7 @@ from geometry_msgs.msg import (
     Transform,
     TransformStamped,
     Twist,
+    TwistStamped,
     TwistWithCovariance,
     TwistWithCovarianceStamped,
     Vector3,
@@ -51,7 +52,7 @@ class SensorSimulator(Node):
         self.tf_broadcaster = TransformBroadcaster(self)
         self.imu_rotation_offset: Rotation2d | None = None
 
-        self.create_subscription(Twist, "cmd_vel", self.cmd_vel_callback, 10)
+        self.create_subscription(TwistStamped, "cmd_vel", self.cmd_vel_callback, 10)
 
         self.enc_vel_publisher = self.create_publisher(TwistWithCovarianceStamped, "enc_vel", 10)
         self.imu_publisher = self.create_publisher(Imu, "imu", 10)
@@ -87,8 +88,8 @@ class SensorSimulator(Node):
 
         self.create_timer(self.config.update_period_s, self.update)
 
-    def cmd_vel_callback(self, msg: Twist) -> None:
-        self.cmd_vel = msg
+    def cmd_vel_callback(self, msg: TwistStamped) -> None:
+        self.cmd_vel = msg.twist
         self.last_cmd_time = self.get_clock().now()
 
     def update(self) -> None:

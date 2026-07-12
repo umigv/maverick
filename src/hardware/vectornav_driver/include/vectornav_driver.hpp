@@ -1,8 +1,5 @@
 #pragma once
 
-#include <tf2_ros/buffer.h>
-#include <tf2_ros/transform_listener.h>
-
 #include <GeographicLib/LocalCartesian.hpp>
 #include <geometry_msgs/msg/twist_with_covariance_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
@@ -14,6 +11,8 @@
 #include <std_msgs/msg/u_int16.hpp>
 #include <tf2/LinearMath/Quaternion.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <tf2_ros/buffer.hpp>
+#include <tf2_ros/transform_listener.hpp>
 #include <unordered_map>
 #include <vectornav/Interface/Sensor.hpp>
 
@@ -104,8 +103,8 @@ class VectornavDriver : public rclcpp::Node {
         measurement_group_ = create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
         status_register_group_ = create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
 
-        measurement_timer_ = create_wall_timer(
-            std::chrono::milliseconds(0), [this] { publish_measurements(); }, measurement_group_);
+        measurement_timer_ =
+            create_wall_timer(std::chrono::milliseconds(0), [this] { publish_measurements(); }, measurement_group_);
         status_register_timer_ = create_wall_timer(
             std::chrono::duration<double>(status_register_poll_period_s_), [this] { publish_status_register(); },
             status_register_group_);

@@ -7,7 +7,7 @@ publishes encoder-derived velocity with propagated covariance. Motors are zeroed
 - `estop_file_path` - e-stop state written by `estop_driver`; commands zero velocity to both motors while estopped
 
 ## Subscribed Topics
-- `cmd_vel` (`geometry_msgs/Twist`)
+- `cmd_vel` (`geometry_msgs/TwistStamped`)
 
 ## Published Topics
 - `enc_vel` (`geometry_msgs/TwistWithCovarianceStamped`) - encoder derived linear/angular velocity with dynamic 

@@ -45,7 +45,7 @@ hardware's Kalman filter output.
 - Publishes `Odometry` in the `map` frame with `child_frame_id = ins_frame_id`
 
 ## Subscribed Topics
-- `cmd_vel` (`geometry_msgs/Twist`) - Velocity commands
+- `cmd_vel` (`geometry_msgs/TwistStamped`) - Velocity commands
 
 ## Published Topics
 - `enc_vel` (`geometry_msgs/TwistWithCovarianceStamped`) - Simulated encoder velocity in `base_frame_id`

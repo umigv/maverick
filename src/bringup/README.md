@@ -60,13 +60,13 @@ ros2 launch bringup core.launch.py
 Loads `maverick_description/urdf/maverick.xacro` and publishes TF transforms for all robot links.
 
 ### Subscribed Topics
-- `teleop_cmd_vel` (`geometry_msgs/Twist`) - Joystick velocity
-- `recovery_cmd_vel` (`geometry_msgs/Twist`) - Recovery velocity
-- `nav_cmd_vel` (`geometry_msgs/Twist`) - Nav velocity
+- `teleop_cmd_vel` (`geometry_msgs/TwistStamped`) - Joystick velocity
+- `recovery_cmd_vel` (`geometry_msgs/TwistStamped`) - Recovery velocity
+- `nav_cmd_vel` (`geometry_msgs/TwistStamped`) - Nav velocity
 
 ### Published Topics
 - `robot_description` (`std_msgs/String`) - URDF robot description
-- `cmd_vel` (`geometry_msgs/Twist`) - Multiplexed output velocity
+- `cmd_vel` (`geometry_msgs/TwistStamped`) - Multiplexed output velocity
 
 ### Broadcasted TF Frames
 See `maverick_description` for the full list of published frames.
@@ -98,9 +98,9 @@ ros2 launch bringup hardware.launch.py mode:=<mode> [course:=<course>]
 - `nav_test`: estop + LED + ODrive
 
 ### Subscribed Topics
-- `cmd_vel` (`geometry_msgs/Twist`) - Multiplexed velocity command driven by ODrive (all modes)
-- `teleop_cmd_vel` (`geometry_msgs/Twist`) - Joystick velocity, used by led_driver to detect teleop activity (all modes)
-- `nav_cmd_vel` (`geometry_msgs/Twist`) - Nav velocity, used by led_driver to detect nav stack activity when no mission state is available (from `navigation.launch.py`; all modes)
+- `cmd_vel` (`geometry_msgs/TwistStamped`) - Multiplexed velocity command driven by ODrive (all modes)
+- `teleop_cmd_vel` (`geometry_msgs/TwistStamped`) - Joystick velocity, used by led_driver to detect teleop activity (all modes)
+- `nav_cmd_vel` (`geometry_msgs/TwistStamped`) - Nav velocity, used by led_driver to detect nav stack activity when no mission state is available (from `navigation.launch.py`; all modes)
 - `mission_state` (`maverick_msgs/MissionState`) - Latched mission state used by led_driver for the state LEDs (from `navigation.launch.py`)
 
 ### Published Topics
@@ -122,7 +122,7 @@ ros2 launch bringup simulation.launch.py [course:=<course>]
 - `course`: Course profile in `courses/` to load map and GPS datum from, default `default`
 
 ### Subscribed Topics
-- `cmd_vel` (`geometry_msgs/Twist`) - Velocity the robot is commanded to move in
+- `cmd_vel` (`geometry_msgs/TwistStamped`) - Velocity the robot is commanded to move in
 
 ### Published Topics
 - `imu/raw` (`sensor_msgs/Imu`) - Simulated IMU
@@ -203,8 +203,8 @@ mission control + goal selection + recovery.
 
 ### Published Topics
 - `mission_state` (`maverick_msgs/MissionState`) - Latched mission state from autonav_mission_control (`autonav` only)
-- `nav_cmd_vel` (`geometry_msgs/Twist`) - Velocity command consumed by twist_mux
-- `recovery_cmd_vel` (`geometry_msgs/Twist`) - Recovery velocity command consumed by twist_mux (`autonav` only)
+- `nav_cmd_vel` (`geometry_msgs/TwistStamped`) - Velocity command consumed by twist_mux
+- `recovery_cmd_vel` (`geometry_msgs/TwistStamped`) - Recovery velocity command consumed by twist_mux (`autonav` only)
 
 ### Services
 - `request_recovery` (`std_srvs/Trigger`) - Sets `in_recovery` in the mission state (`autonav` only)
@@ -233,7 +233,7 @@ For all controllers:
 
 ### Published Topics
 - `joy` (`sensor_msgs/Joy`) - Raw joystick input
-- `teleop_cmd_vel` (`geometry_msgs/Twist`) - Joystick velocity command
+- `teleop_cmd_vel` (`geometry_msgs/TwistStamped`) - Joystick velocity command
 
 
 ## visualization.launch.py
