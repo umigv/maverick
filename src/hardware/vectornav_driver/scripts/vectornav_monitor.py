@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import ctypes
 import os
 from dataclasses import dataclass
@@ -166,8 +164,7 @@ class TopicState[T]:
 
     def mark_received(self, ros_time: Time, value: T) -> None:
         self.last_time = ros_time
-        wall_time = datetime.fromtimestamp(ros_time.nanoseconds / 1e9, tz=UTC).astimezone()
-        self.last_timestamp_str = wall_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        self.last_timestamp_str = ros_time.to_datetime().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         self._value = value
 
     def is_stale(self, now: Time, timeout_sec: float = STALE_TIMEOUT_SEC) -> bool:

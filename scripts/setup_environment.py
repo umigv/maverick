@@ -9,6 +9,7 @@ from common import ROOT, die, info, run, warning
 ROS2_COMPLETION_FILES = {
     "bash": (Path(".local/share/bash-completion/completions/ros2"), ()),
     "zsh": (Path(".zsh/completions/_ros2"), ()),
+    "fish": (Path(".config/fish/completions/ros2.fish"), ("--shell", "fish")),
 }
 
 GIT_HOOKS = {
@@ -25,7 +26,7 @@ def install_ros2_completion() -> None:
         if not shell:
             reason = "Could not detect your login shell ($SHELL is not set)"
         else:
-            reason = f"Login shell '{shell}' is not bash or zsh"
+            reason = f"Login shell '{shell}' is not bash, zsh, or fish"
         warning(
             f"{reason} - skipping ros2 completion setup\n"
             "Register 'register-python-argcomplete ros2' output with your shell's completion system"

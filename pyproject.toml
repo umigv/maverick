@@ -1,6 +1,6 @@
 [tool.pixi.workspace]
 name = "maverick"
-channels = ["https://prefix.dev/robostack-jazzy", "https://prefix.dev/conda-forge"]
+channels = ["https://prefix.dev/robostack-lyrical", "https://prefix.dev/conda-forge"]
 platforms = ["linux-64", "linux-aarch64", "osx-arm64"]
 
 [tool.pixi.feature.ros.dependencies]
@@ -10,7 +10,7 @@ colcon-common-extensions = "*"
 pkg-config = "*"
 compilers = "*"
 ninja = "*"
-python = "3.12*"
+python = "3.14*"
 
 # Workspace dependencies
 geographiclib-cpp = "*"
@@ -24,19 +24,19 @@ pytest = "<8"
 pyubx2 = "*"
 # setuptools 80 removed the `develop` command that colcon's ament_python editable installs rely on
 setuptools = "<80"
-ros-jazzy-foxglove-bridge = "*"
-ros-jazzy-foxglove-msgs = "*"
-ros-jazzy-geographic-msgs = "*"
-ros-jazzy-joint-state-publisher = "*"
-ros-jazzy-joy = "*"
-ros-jazzy-robot-localization = "*"
-ros-jazzy-robot-state-publisher = "*"
-ros-jazzy-ros-base = "*"
-ros-jazzy-rviz2 = "*"
-ros-jazzy-teleop-twist-joy = "*"
-ros-jazzy-twist-mux = "*"
-ros-jazzy-urdf-launch = "*"
-ros-jazzy-xacro = "*"
+ros-lyrical-foxglove-bridge = "*"
+ros-lyrical-foxglove-msgs = "*"
+ros-lyrical-geographic-msgs = "*"
+ros-lyrical-joint-state-publisher = "*"
+ros-lyrical-joy = "*"
+ros-lyrical-robot-localization = "*"
+ros-lyrical-robot-state-publisher = "*"
+ros-lyrical-ros-base = "*"
+ros-lyrical-rviz2 = "*"
+ros-lyrical-teleop-twist-joy = "*"
+ros-lyrical-twist-mux = "*"
+ros-lyrical-urdf-launch = "*"
+ros-lyrical-xacro = "*"
 types-pyyaml = "*"
 
 [tool.pixi.feature.ros.pypi-dependencies]
@@ -50,17 +50,35 @@ scripts = ["install/setup.bash"]
 [tool.pixi.feature.ros.activation.env]
 RCUTILS_COLORIZED_OUTPUT = "1"
 
+[tool.pixi.feature.ros.target.linux-64.activation.env]
+# OGRE's GLX renderer can't parent into a Wayland surface. Under WSLg (and native Wayland sessions), Qt6 defaults to
+# the wayland platform plugin since both sockets are present, which breaks rviz2's render window entirely. macOS has
+# no xcb plugin, so this is Linux-only.
+# TODO: Remove once rviz2 adopts OGRE's newer EGL/Wayland backend: https://github.com/ros2/rviz/issues/847
+# (engine-level support tracked at https://github.com/OGRECave/ogre/issues/2432).
+QT_QPA_PLATFORM = "xcb"
+# rviz2 moved to Qt6 in Lyrical, which enables high-DPI scaling by default. Even forced onto xcb above, we're still
+# composited through XWayland under WSLg, and a non-1.0 Qt scale factor there desyncs the OGRE viewport size from the
+# Qt widget size, causing flicker/tear. X11/macOS sessions without XWayland aren't affected, but there's no cheap way
+# to detect XWayland-vs-bare-X11 at activation time, so this stays Linux-only rather than global.
+# TODO: See https://github.com/ros2/rviz/issues/1079 and https://github.com/ros2/rviz/issues/1052.
+QT_ENABLE_HIGHDPI_SCALING = "0"
+
+[tool.pixi.feature.ros.target.linux-aarch64.activation.env]
+QT_QPA_PLATFORM = "xcb"
+QT_ENABLE_HIGHDPI_SCALING = "0"
+
 [tool.pixi.feature.tooling.dependencies]
 ruff = "*"
 mypy = "*"
 # Pin to version matching what Ubuntu ships with the ROS distro we use
-clang-format = "18.*"
+clang-format = "22.*"
 
 [tool.pixi.environments]
 default = { features = ["ros", "tooling"], solve-group = "default" }
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py314"
 line-length = 120
 extend-exclude = [
     "build",
@@ -102,7 +120,7 @@ ignore = [
 convention = "pep257"
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.14"
 
 # Output
 pretty = true
@@ -138,24 +156,13 @@ exclude = [
 # Dependencies that ship no type information (no py.typed marker, no stubs). Without this, mypy raises import-untyped
 # and fails; instead we accept Any from these modules. Keep alphabetical.
 module = [
-    "ament_index_python.*",
-    "builtin_interfaces.*",
-    "foxglove_msgs.*",
-    "geographic_msgs.*",
-    "geometry_msgs.*",
-    "launch.*",
-    "launch_ros.*",
+    # Ships type information but requires the workspace to be built, and lint currently doesn't build the workspace
+    # TODO: If one day we build before linting (i.e. introducing clang-tidy), remove this
     "maverick_msgs.*",
-    "nav_msgs.*",
     "odrive.*",
     "pyubx2",
-    "robot_localization.*",
-    "sensor_msgs.*",
-    "std_msgs.*",
-    "std_srvs.*",
     "tf2_geometry_msgs.*",
     "tf2_ros.*",
-    "visualization_msgs.*",
 ]
 ignore_missing_imports = true
 disable_error_code = ["attr-defined"]

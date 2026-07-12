@@ -61,6 +61,10 @@ This sends robot data to Foxglove. Then open [Foxglove Studio](https://foxglove.
 
 Alternatively, run `rviz2` in a new terminal and add the topics you want to visualize.
 
+> **WSL:** set Windows display scaling to a whole-number percentage (e.g. 100%, 200%). Fractional scaling (e.g. 125%,
+> 150%) isn't supported by WSLg and silently falls back to 100%, leaving rviz2's UI illegibly tiny.
+> TODO: See [microsoft/wslg#23](https://github.com/microsoft/wslg/issues/23).
+
 ## Testing
 ```bash
 # Run all tests

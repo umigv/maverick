@@ -215,6 +215,9 @@ class RecoveryExecutable(Node):
     def handle_response(self, future: Future) -> None:
         try:
             response = future.result()
+            if response is None:
+                self.get_logger().error("Service call returned no response")
+                return
             self.get_logger().info(f'Service response: success={response.success}, message="{response.message}"')
         except Exception as e:
             self.get_logger().error(f"Service call failed: {e}")

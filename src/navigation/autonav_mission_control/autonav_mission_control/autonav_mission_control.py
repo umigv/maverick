@@ -97,7 +97,11 @@ class AutonavMissionControl(Node):
                 request = FromLL.Request(ll_point=GeoPoint(latitude=w["latitude"], longitude=w["longitude"]))
                 future = from_ll_client.call_async(request)
                 rclpy.spin_until_future_complete(self, future)
-                point = Point2d.from_ros(future.result().map_point)
+                response = future.result()
+                if response is None:
+                    self.get_logger().fatal("fromLL service call returned no response")
+                    raise SystemExit(1)
+                point = Point2d.from_ros(response.map_point)
             else:
                 point = Point2d(x=float(w["x"]), y=float(w["y"]))
 

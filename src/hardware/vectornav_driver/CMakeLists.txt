@@ -31,19 +31,16 @@ target_include_directories(${PROJECT_NAME} PRIVATE
   third_party/vectornav_sdk/include
 )
 
-ament_target_dependencies(${PROJECT_NAME}
-  geometry_msgs
-  nav_msgs
-  rclcpp
-  sensor_msgs
-  std_msgs
-  tf2
-  tf2_geometry_msgs
-  tf2_ros
-)
-
 target_link_libraries(${PROJECT_NAME}
   oVnSensor
+  geometry_msgs::geometry_msgs
+  nav_msgs::nav_msgs
+  rclcpp::rclcpp
+  sensor_msgs::sensor_msgs
+  std_msgs::std_msgs
+  tf2::tf2
+  tf2_geometry_msgs::tf2_geometry_msgs
+  tf2_ros::tf2_ros
   GeographicLib::GeographicLib
 )
 
