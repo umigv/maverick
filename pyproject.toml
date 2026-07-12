@@ -54,14 +54,14 @@ RCUTILS_COLORIZED_OUTPUT = "1"
 # OGRE's GLX renderer can't parent into a Wayland surface. Under WSLg (and native Wayland sessions), Qt6 defaults to
 # the wayland platform plugin since both sockets are present, which breaks rviz2's render window entirely. macOS has
 # no xcb plugin, so this is Linux-only.
-# Remove once rviz2 adopts OGRE's newer EGL/Wayland backend: https://github.com/ros2/rviz/issues/847
+# TODO: Remove once rviz2 adopts OGRE's newer EGL/Wayland backend: https://github.com/ros2/rviz/issues/847
 # (engine-level support tracked at https://github.com/OGRECave/ogre/issues/2432).
 QT_QPA_PLATFORM = "xcb"
 # rviz2 moved to Qt6 in Lyrical, which enables high-DPI scaling by default. Even forced onto xcb above, we're still
 # composited through XWayland under WSLg, and a non-1.0 Qt scale factor there desyncs the OGRE viewport size from the
 # Qt widget size, causing flicker/tear. X11/macOS sessions without XWayland aren't affected, but there's no cheap way
 # to detect XWayland-vs-bare-X11 at activation time, so this stays Linux-only rather than global.
-# See https://github.com/ros2/rviz/issues/1079 and https://github.com/ros2/rviz/issues/1052.
+# TODO: See https://github.com/ros2/rviz/issues/1079 and https://github.com/ros2/rviz/issues/1052.
 QT_ENABLE_HIGHDPI_SCALING = "0"
 
 [tool.pixi.feature.ros.target.linux-aarch64.activation.env]
@@ -157,7 +157,7 @@ exclude = [
 # and fails; instead we accept Any from these modules. Keep alphabetical.
 module = [
     # Ships type information but requires the workspace to be built, and lint currently doesn't build the workspace
-    # If one day we build before linting (i.e. introducing clang-tidy), remove this
+    # TODO: If one day we build before linting (i.e. introducing clang-tidy), remove this
     "maverick_msgs.*",
     "odrive.*",
     "pyubx2",
