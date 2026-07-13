@@ -49,7 +49,7 @@ lint *args:
 
 # Create a new ROS 2 package (type: python|cpp)
 create-package dir package type='python':
-    python3 scripts/create_package.py {{dir}} {{package}} --type {{type}}
+    pixi run python3 scripts/create_package.py {{dir}} {{package}} --type {{type}}
     just generate-pyrightconfig
 
 # ── Devices ────────────────────────────────────────────────────────────────────
