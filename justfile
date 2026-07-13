@@ -84,7 +84,7 @@ publish topic input rate='once':
 
 # Start a tmux session containing rviz and split panes for bringup
 tmux:
-    pixi run tmux -f maverick.tmux.conf attach
+    pixi run tmux -f tmux.conf attach
 
 # ── ODrive ────────────────────────────────────────────────────────────────────
 
