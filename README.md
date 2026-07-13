@@ -70,16 +70,12 @@ See [bringup/README.md](src/bringup/README.md) for which displays are enabled by
 > TODO: See [microsoft/wslg#23](https://github.com/microsoft/wslg/issues/23).
 
 ### Tmux
-
 A tmux configuration is included to avoid creating too many terminals.
-
 ```bash
 # Runs rviz and divides terminal into panes in which to run the launch commands
 just tmux
 ```
-
 To exit, close the window by pressing the prefix key (Ctrl + B) and then `&` (Shift + 7), and then confirming by typing `y` and pressing Enter. A convenient cheatsheet for other tmux usage can be found at [tmuxcheatsheet.com](https://tmuxcheatsheet.com).
-
 
 ## Testing
 ```bash
