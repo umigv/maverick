@@ -71,14 +71,12 @@ QT_ENABLE_HIGHDPI_SCALING = "0"
 [tool.pixi.feature.tooling.dependencies]
 ruff = "*"
 mypy = "*"
+tmux = "*"
 # Pin to version matching what Ubuntu ships with the ROS distro we use
 clang-format = "22.*"
 
 [tool.pixi.environments]
 default = { features = ["ros", "tooling"], solve-group = "default" }
-
-[tool.pixi.dependencies]
-tmux = "*"
 
 [tool.ruff]
 target-version = "py314"
