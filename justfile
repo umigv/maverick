@@ -82,6 +82,10 @@ extract topic output:
 publish topic input rate='once':
     pixi run python3 scripts/publish_message.py {{topic}} {{input}} {{rate}}
 
+# Start a tmux session with containing rviz and split panes for bringup
+tmux:
+    tmux -f maverick.tmux.conf attach
+
 # ── ODrive ────────────────────────────────────────────────────────────────────
 
 # Calibrate the ODrive motor controllers
