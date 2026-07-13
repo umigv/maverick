@@ -77,6 +77,9 @@ clang-format = "22.*"
 [tool.pixi.environments]
 default = { features = ["ros", "tooling"], solve-group = "default" }
 
+[tool.pixi.dependencies]
+tmux = ">=3.7b_,<4"
+
 [tool.ruff]
 target-version = "py314"
 line-length = 120
