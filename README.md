@@ -69,6 +69,17 @@ See [bringup/README.md](src/bringup/README.md) for which displays are enabled by
 > 150%) isn't supported by WSLg and silently falls back to 100%, leaving rviz2's UI illegibly tiny.
 > TODO: See [microsoft/wslg#23](https://github.com/microsoft/wslg/issues/23).
 
+### Tmux
+
+A tmux configuration is included to avoid creating too many terminals.
+
+```bash
+just tmux      # run rviz and divides terminal into panes in which to run the launch commands
+```
+
+To exit, close the window by pressing the prefix key (Ctrl + B) and then `&` (Shift + 7), and then confirming by typing `y` and pressing Enter. A convenient cheatsheet for other tmux usage can be found at [tmuxcheatsheet.com](https://tmuxcheatsheet.com).
+
+
 ## Testing
 ```bash
 # Run all tests
