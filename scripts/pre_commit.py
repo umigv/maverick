@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 
-from common import discover_packages, file_to_package, info, run
+from common import discover_targets, info, run, target_from_file
 
 
 def get_staged_files() -> list[Path]:
@@ -14,13 +14,13 @@ def main() -> None:
     if not staged:
         return
 
-    pkg_dirs = discover_packages()
+    targets = discover_targets()
 
     affected: set[str] = set()
     for f in staged:
-        pkg = file_to_package(f, pkg_dirs)
-        if pkg is not None:
-            affected.add(pkg)
+        target = target_from_file(f, targets)
+        if target is not None:
+            affected.add(target.name)
 
     if not affected:
         return
