@@ -2,6 +2,8 @@
 import shlex
 import subprocess
 import sys
+from collections import Counter
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, NoReturn, overload
 
@@ -84,58 +86,86 @@ def run(
         sys.exit(e.returncode)
 
 
+@dataclass(frozen=True)
+class Target:
+    path: Path  # relative to ROOT
+    name: str = ""
+    recursive: bool = True
+
+    def __post_init__(self) -> None:
+        if not self.name:
+            object.__setattr__(self, "name", self.path.name)
+
+
 # Flat directories that are lint/format targets but not ROS packages (no package.xml).
-EXTRA_DIRS = [Path("scripts")]
+EXTRA_TARGETS = [
+    Target(Path(), name="root", recursive=False),
+    Target(Path("waypoints"), recursive=False),
+    Target(Path(".github")),
+    Target(Path("docs")),
+    Target(Path("scripts")),
+]
 
 
-def discover_packages() -> list[Path]:
-    """Return all lint/format targets relative to ROOT: ROS 2 packages (package.xml dirs under src/) plus EXTRA_DIRS."""
-    ros = sorted({p.parent.relative_to(ROOT) for p in (ROOT / "src").rglob("package.xml")})
-    return ros + EXTRA_DIRS
+def discover_targets() -> list[Target]:
+    """Return all lint/format targets relative to ROOT: ROS 2 packages (package.xml dirs under src/) plus EXTRA_TARGETS.
+
+    Dies if two targets share a basename, since --only/--ignore and pre-commit address targets by name.
+    """
+    ros_pkgs = sorted({p.parent.relative_to(ROOT) for p in (ROOT / "src").rglob("package.xml")})
+    targets = [Target(path) for path in ros_pkgs] + EXTRA_TARGETS
+
+    counts = Counter(t.name for t in targets)
+    if dupes := [name for name, n in counts.items() if n > 1]:
+        die(f"Duplicate target names: {', '.join(sorted(dupes))}")
+
+    return targets
 
 
-def resolve_target(name: str, pkg_dirs: list[Path]) -> Path:
-    """Resolve a target name to its path, dying if not found."""
-    matches = [d for d in pkg_dirs if d.name == name]
+def target_from_name(name: str, targets: list[Target]) -> Target:
+    """Return the target directory with the given name, dying if not found."""
+    matches = [t for t in targets if t.name == name]
     if not matches:
         die(f"'{name}' is not a valid target")
     return matches[0]
 
 
-def file_to_package(filepath: Path, pkg_dirs: list[Path]) -> str | None:
-    """Return the name of the package a file belongs to, or None if it is outside all targets.
+def target_from_file(file: Path, targets: list[Target]) -> Target | None:
+    """Return the target directory a file belongs to, or None if it is outside all targets.
 
-    The inverse of resolve_target. Deepest match wins so nested packages resolve to the innermost one.
+    Deepest match wins so nested packages resolve to the innermost one.
     """
-    for pkg_dir in sorted(pkg_dirs, key=lambda p: len(p.parts), reverse=True):
-        if filepath == pkg_dir or pkg_dir in filepath.parents:
-            return pkg_dir.name
+    for target in sorted(targets, key=lambda p: len(p.path.parts), reverse=True):
+        if file == target.path or target.path in (file.parents if target.recursive else [file.parent]):
+            return target
 
     return None
 
 
-def resolve_packages(only: list[str] | None, ignore: list[str] | None) -> tuple[list[Path], list[Path]]:
-    """Resolve the target list from --only/--ignore filters.
+def filter_targets(targets: list[Target], *, only: list[str] | None, ignore: list[str] | None) -> list[Target]:
+    """Apply --only/--ignore name filters to a target list, dying if nothing is left."""
+    if only and ignore:
+        die("only and ignore are mutually exclusive")
 
-    Returns (pkg_dirs, all_pkg_dirs) where pkg_dirs is the filtered set to operate on and all_pkg_dirs is the full
-    unfiltered set of targets (ROS packages plus EXTRA_DIRS), used as the MYPYPATH bases for type checking.
-    """
-    info("Discovering packages")
-    all_pkg_dirs = discover_packages()
-
-    pkg_dirs = all_pkg_dirs
+    filtered = targets
     if only:
-        pkg_dirs = [resolve_target(name, all_pkg_dirs) for name in only]
+        # Dedupe repeated names: passing the same directory to mypy twice fails with "Duplicate module".
+        filtered = list(dict.fromkeys(target_from_name(name, targets) for name in only))
     elif ignore:
-        ignored = {resolve_target(name, all_pkg_dirs) for name in ignore}
-        pkg_dirs = [p for p in pkg_dirs if p not in ignored]
+        ignored = {target_from_name(name, targets) for name in ignore}
+        filtered = [t for t in targets if t not in ignored]
 
-    if not pkg_dirs:
-        die("No packages left after filtering")
+    if not filtered:
+        die("No targets left after filtering")
 
-    return pkg_dirs, all_pkg_dirs
+    return filtered
 
 
-def files_in(dirs: list[Path], *patterns: str) -> list[Path]:
-    """Return all files matching any of the given glob patterns within the given directories."""
-    return [f for d in dirs for pattern in patterns for f in (ROOT / d).rglob(pattern)]
+def files_in(targets: list[Target], *patterns: str) -> list[Path]:
+    """Return all files matching any of the given glob patterns within the given targets."""
+    return [
+        f
+        for t in targets
+        for pattern in patterns
+        for f in (ROOT / t.path).glob(("**/" if t.recursive else "") + pattern)
+    ]

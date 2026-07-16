@@ -1,4 +1,5 @@
 # pure_pursuit
+
 Geometric path tracking controller that steers toward a moving lookahead point on the path.
 
 At each control step, the controller finds a point on the path a fixed distance (the lookahead distance) ahead of the robot, then computes the constant-curvature arc that passes through that point. The required angular velocity follows directly from the arc curvature and the commanded linear speed.

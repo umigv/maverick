@@ -72,11 +72,18 @@ QT_ENABLE_HIGHDPI_SCALING = "0"
 ruff = "*"
 mypy = "*"
 tmux = "*"
+mdformat = "*"
+mdformat-pyproject = "*"
+mdformat-gfm = "*"
 # Pin to version matching what Ubuntu ships with the ROS distro we use
 clang-format = "22.*"
 
 [tool.pixi.environments]
 default = { features = ["ros", "tooling"], solve-group = "default" }
+
+[tool.mdformat]
+wrap = "no"         # one line makes prs easier to read on github
+number = true       # 1. 2. 3. is more clear than 1. 1. 1.
 
 [tool.ruff]
 target-version = "py314"
