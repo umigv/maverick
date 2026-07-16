@@ -2,16 +2,16 @@
 import argparse
 import os
 import shutil
-from pathlib import Path
 
-from common import ROOT, die, discover_targets, files_in, filter_targets, info, run
+from common import ROOT, Target, die, discover_targets, files_in, filter_targets, info, run
 
 
-def lint_python(targets: list[Path], all_targets: list[Path]) -> None:
-    if not files_in(targets, "*.py"):
+def lint_python(targets: list[Target], all_targets: list[Target]) -> None:
+    py = files_in(targets, "*.py")
+    if not py:
         return
 
-    target_strs = [str(t) for t in targets]
+    target_strs = [str(f.relative_to(ROOT)) for f in py]
 
     info("Ruff format (check)")
     run("ruff", "format", "--check", *target_strs)
@@ -19,14 +19,14 @@ def lint_python(targets: list[Path], all_targets: list[Path]) -> None:
     info("Ruff lint")
     run("ruff", "check", *target_strs)
 
-    mypy_dirs = [t for t in targets if any(p.name != "setup.py" for p in files_in([t], "*.py"))]
-    info(f"mypy ({len(mypy_dirs)} targets)")
-    if mypy_dirs:
-        mypypath = ":".join(str(ROOT / t) for t in all_targets)
-        run("mypy", *[str(d) for d in mypy_dirs], env={**os.environ, "MYPYPATH": mypypath})
+    mypy_files = [p for p in files_in(targets, "*.py") if p.name != "setup.py"]
+    info(f"mypy ({len(mypy_files)} targets)")
+    if mypy_files:
+        mypypath = ":".join(str(ROOT / t.path) for t in all_targets)
+        run("mypy", *[str(f.relative_to(ROOT)) for f in mypy_files], env={**os.environ, "MYPYPATH": mypypath})
 
 
-def lint_cpp(targets: list[Path]) -> None:
+def lint_cpp(targets: list[Target]) -> None:
     cpp = files_in(targets, "*.cpp", "*.hpp", "*.h", "*.cc")
     if not cpp:
         return
@@ -35,7 +35,7 @@ def lint_cpp(targets: list[Path]) -> None:
     run("clang-format", "--dry-run", "--Werror", *[str(f.relative_to(ROOT)) for f in cpp])
 
 
-def lint_rviz(targets: list[Path]) -> None:
+def lint_rviz(targets: list[Target]) -> None:
     rviz = files_in(targets, "*.rviz")
     if not rviz:
         return

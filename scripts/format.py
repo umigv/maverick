@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 import argparse
 import shutil
-from pathlib import Path
 
-from common import ROOT, die, discover_targets, files_in, filter_targets, info, run
+from common import ROOT, Target, die, discover_targets, files_in, filter_targets, info, run
 
 
-def format_python(targets: list[Path]) -> None:
-    if not files_in(targets, "*.py"):
+def format_python(targets: list[Target]) -> None:
+    py = files_in(targets, "*.py")
+    if not py:
         return
 
-    target_strs = [str(t) for t in targets]
+    target_strs = [str(f.relative_to(ROOT)) for f in py]
 
     info("Ruff lint (fix)")
     run("ruff", "check", "--fix", "--exit-zero", *target_strs)
@@ -19,7 +19,7 @@ def format_python(targets: list[Path]) -> None:
     run("ruff", "format", *target_strs)
 
 
-def format_cpp(targets: list[Path]) -> None:
+def format_cpp(targets: list[Target]) -> None:
     cpp = files_in(targets, "*.cpp", "*.hpp", "*.h", "*.cc")
     if not cpp:
         return
