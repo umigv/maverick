@@ -75,7 +75,6 @@ tmux = "*"
 mdformat = "*"
 mdformat-pyproject = "*"
 mdformat-gfm = "*"
-mdformat-beautysh = "*"
 # Pin to version matching what Ubuntu ships with the ROS distro we use
 clang-format = "22.*"
 
