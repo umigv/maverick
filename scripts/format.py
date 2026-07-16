@@ -28,6 +28,15 @@ def format_cpp(targets: list[Target]) -> None:
     run("clang-format", "-i", *[str(f.relative_to(ROOT)) for f in cpp])
 
 
+def format_md(targets: list[Target]) -> None:
+    md = files_in(targets, "*.md")
+    if not md:
+        return
+
+    info("mdformat")
+    run("mdformat", *[str(f.relative_to(ROOT)) for f in md])
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Auto-format all source files")
     group = parser.add_mutually_exclusive_group()
@@ -35,7 +44,7 @@ def main() -> None:
     group.add_argument("--ignore", nargs="+", metavar="PKG")
     args = parser.parse_args()
 
-    missing = [t for t in ("ruff", "clang-format") if not shutil.which(t)]
+    missing = [t for t in ("ruff", "clang-format", "mdformat") if not shutil.which(t)]
     if missing:
         die(f"missing tools: {', '.join(missing)}. Run just setup")
 
@@ -43,6 +52,7 @@ def main() -> None:
 
     format_python(targets)
     format_cpp(targets)
+    format_md(targets)
 
 
 if __name__ == "__main__":

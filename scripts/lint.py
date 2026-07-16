@@ -49,6 +49,15 @@ def lint_rviz(targets: list[Target]) -> None:
             )
 
 
+def lint_md(targets: list[Target]) -> None:
+    md = files_in(targets, "*.md")
+    if not md:
+        return
+
+    info("mdformat")
+    run("mdformat", "--check", *[str(f.relative_to(ROOT)) for f in md])
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run all linters")
     group = parser.add_mutually_exclusive_group()
@@ -56,7 +65,7 @@ def main() -> None:
     group.add_argument("--ignore", nargs="+", metavar="PKG")
     args = parser.parse_args()
 
-    missing = [t for t in ("ruff", "mypy", "clang-format") if not shutil.which(t)]
+    missing = [t for t in ("ruff", "mypy", "clang-format", "mdformat") if not shutil.which(t)]
     if missing:
         die(f"missing tools: {', '.join(missing)}. Run just setup")
 
@@ -66,6 +75,7 @@ def main() -> None:
     lint_python(targets, all_targets)
     lint_cpp(targets)
     lint_rviz(targets)
+    lint_md(targets)
 
     info("All checks passed!")
 
