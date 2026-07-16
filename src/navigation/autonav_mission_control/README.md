@@ -1,26 +1,33 @@
 # autonav_mission_control
+
 Global mission state tracking for autonomous navigation: waypoint sequencing, no man's land zones, ramp approach, and lane detection gating.
 
 ## How it works
 
 ### The big picture
+
 This node is the single source of truth for mission state. It loads an ordered list of waypoints from a JSON file, tracks which waypoint the robot is currently targeting, and publishes a latched `mission_state` message on every state transition. Other nodes subscribe to `mission_state` and adjust their behavior accordingly (e.g. disabling lane detection inside no man's land, slowing down on ramp approach).
 
 ### Waypoint sequencing
+
 On each odometry message, the node computes the distance from the robot to the current waypoint. When that distance falls below `waypoint_reached_threshold_m`, the waypoint is marked reached and the index advances to the next one. When the final waypoint is reached, a one-shot timer starts and `mission_complete` is set after `mission_complete_delay_s` seconds. During that window, `current_waypoint` is a far point (10 km) projected along the robot's heading at the moment the final waypoint was reached, so normal goal selection keeps the robot driving straight ahead until the flag flips. When the timer fires, the node publishes the final state and exits; the autonav launch watches for this exit and shuts down the rest of the stack.
 
 ### No man's land
+
 Certain waypoints are flagged `no_mans_land_enter` or `no_mans_land_exit`. Reaching an enter waypoint sets `in_no_mans_land = true`; reaching an exit waypoint clears it. The course file is validated at startup to ensure enters and exits are balanced and properly sequenced. Any violation is fatal.
 
 Inside no man's land, `lane_detection_enabled` is normally `false` to suppress lane detection (lane markings are absent or unreliable in this zone). The exception: when the robot comes within `lane_detection_enable_near_exit_radius_m` of the next exit waypoint, `lane_detection_enabled` is re-enabled so the robot can see lane markings as it approaches the zone boundary.
 
 ### Ramp approach
+
 Waypoints flagged `ramp_approach` activate `in_ramp_approach` when the robot enters a radius of `ramp_approach_radius_m` around them. This lets downstream nodes (e.g. speed controller) switch to a slower, more careful mode before hitting the ramp. The flag is cleared when the waypoint is reached.
 
 ### Recovery
+
 External nodes can call the `request_recovery` service to set `in_recovery = true` and `recovery_complete` to clear it. The node publishes state on each transition so subscribers react immediately.
 
 ## Waypoints File Format
+
 ```json
 {
     "waypoints": [
@@ -36,11 +43,13 @@ External nodes can call the `request_recovery` service to set `in_recovery = tru
 Each waypoint is either map-frame `x`/`y` (meters) or GPS `latitude`/`longitude` (converted via `fromLL` at startup). The flags are mutually exclusive per waypoint: a single waypoint cannot have both `no_mans_land_enter` and `no_mans_land_exit` set. The course file is validated at startup and the node exits with a fatal error if pairs are unbalanced or out of order.
 
 ## Subscribed Topics
+
 | Topic | Type | Description |
 |---|---|---|
 | `odom` | `nav_msgs/Odometry` | Robot pose used to compute distance to waypoints |
 
 ## Published Topics
+
 | Topic | Type | Description |
 |---|---|---|
 | `mission_state` | `maverick_msgs/MissionState` | Latched mission state; published on every state transition |
@@ -48,20 +57,24 @@ Each waypoint is either map-frame `x`/`y` (meters) or GPS `latitude`/`longitude`
 `mission_state` is latched: publisher and subscribers must both use `utils.qos.LATCHED` - see the [utils README](../../core/utils/README.md#utilsqos).
 
 ### MissionState fields
+
 See [`MissionState.msg`](../../core/maverick_msgs/msg/MissionState.msg) for the field definitions and what each one means for subscribers.
 
 ## Services
+
 | Service | Type | Description |
 |---|---|---|
 | `request_recovery` | `std_srvs/Trigger` | Sets `in_recovery = true` and publishes state |
 | `recovery_complete` | `std_srvs/Trigger` | Clears `in_recovery` and publishes state |
 
 ## Service Clients
+
 | Service | Type | Description |
 |---|---|---|
 | `fromLL` | `robot_localization/FromLL` | Converts GPS waypoints to map-frame coordinates at startup |
 
 ## Adding new state fields
+
 There are two kinds of state in this node, and which kind a new field is determines where it belongs:
 
 - **Polled state** can be recomputed from scratch at any moment from current values (pose, waypoints, config, other state). It belongs in the compute-and-apply loop in `update_mission_state`, which samples it on every odometry message, diffs it against the stored value, and publishes on change. Compute functions must be pure reads - the loop owns the write.

@@ -1,7 +1,9 @@
 # maverick_description
+
 URDF description for Maverick. Publishes TF transforms for all robot links via `robot_state_publisher`.
 
 ## Launch
+
 ```bash
 ros2 launch urdf_launch display.launch.py urdf_package:=maverick_description urdf_package_path:=urdf/maverick.xacro
 ```
@@ -9,6 +11,7 @@ ros2 launch urdf_launch display.launch.py urdf_package:=maverick_description urd
 Opens RViz with the robot model and `joint_state_publisher_gui` for interactive joint control.
 
 ## Xacro Args
+
 | Arg | Default | Description |
 |---|---|---|
 | `base_frame_id` | `base_link` | Root link name |
@@ -17,6 +20,7 @@ Opens RViz with the robot model and `joint_state_publisher_gui` for interactive 
 | `gnss_b_name` | `gnss_b` | GNSS antenna B name prefix |
 
 ## TF Broadcasts
+
 | Frame | Description |
 |---|---|
 | `base_link` | Root frame, between drive wheels at ground level |
