@@ -23,9 +23,9 @@ The map file is a JSON file with the following structure:
 Each published grid is built in four steps, in order:
 
 1. **World lookup** - Each cell of the robot-centric grid is transformed to world coordinates using the ground-truth pose and marked occupied if it lands on an obstacle cell.
-1. **Occlusion** - Every cell whose line of sight from the robot passes through an obstacle is also marked occupied, mimicking a camera that cannot see behind obstacles. Note that occluded cells become occupied, not unknown.
-1. **Lane lines** - Lane line cells are stamped on after occlusion, so they are always visible: they neither cast shadows nor get hidden behind obstacles.
-1. **Blind spot** - A forward-pointing triangle of size `robot_blind_spot_height_m` of unknown cells is drawn in front of the robot, overwriting everything else. This simulates the camera's blind spot under the robot.
+2. **Occlusion** - Every cell whose line of sight from the robot passes through an obstacle is also marked occupied, mimicking a camera that cannot see behind obstacles. Note that occluded cells become occupied, not unknown.
+3. **Lane lines** - Lane line cells are stamped on after occlusion, so they are always visible: they neither cast shadows nor get hidden behind obstacles.
+4. **Blind spot** - A forward-pointing triangle of size `robot_blind_spot_height_m` of unknown cells is drawn in front of the robot, overwriting everything else. This simulates the camera's blind spot under the robot.
 
 The blind spot is why [autonav_goal_selection](../../navigation/autonav_goal_selection/README.md) and [path_planning](../../navigation/path_planning/README.md) treat unknown cells within a forward / sideways region around the robot as drivable (`max_unknown_forward_m` / `max_unknown_sideways_m`) - without that carve-out, the robot would consider its own position non-traversable.
 

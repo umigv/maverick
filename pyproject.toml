@@ -73,6 +73,7 @@ ruff = "*"
 mypy = "*"
 tmux = "*"
 mdformat = "*"
+mdformat-pyproject = "*"
 mdformat-gfm = "*"
 mdformat-beautysh = "*"
 # Pin to version matching what Ubuntu ships with the ROS distro we use
@@ -80,6 +81,11 @@ clang-format = "22.*"
 
 [tool.pixi.environments]
 default = { features = ["ros", "tooling"], solve-group = "default" }
+
+[tool.mdformat]
+wrap = "keep"       # possible values: {"keep", "no", INTEGER}
+number = true       # possible values: {false, true}
+end_of_line = "lf"  # possible values: {"lf", "crlf", "keep"}
 
 [tool.ruff]
 target-version = "py314"

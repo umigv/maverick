@@ -368,6 +368,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/mdformat-1.0.0-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/mdformat-beautysh-1.0.0-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/mdformat-gfm-1.0.0-pyhd8ed1ab_1.conda
+      - conda: https://prefix.dev/conda-forge/noarch/mdformat-pyproject-0.1.1-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/mdit-py-plugins-0.6.1-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/mdurl-0.1.2-pyhd8ed1ab_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/munkres-1.1.4-pyhd8ed1ab_1.conda
@@ -1024,6 +1025,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/mdformat-1.0.0-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/mdformat-beautysh-1.0.0-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/mdformat-gfm-1.0.0-pyhd8ed1ab_1.conda
+      - conda: https://prefix.dev/conda-forge/noarch/mdformat-pyproject-0.1.1-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/mdit-py-plugins-0.6.1-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/mdurl-0.1.2-pyhd8ed1ab_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/munkres-1.1.4-pyhd8ed1ab_1.conda
@@ -1398,6 +1400,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/mdformat-1.0.0-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/mdformat-beautysh-1.0.0-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/mdformat-gfm-1.0.0-pyhd8ed1ab_1.conda
+      - conda: https://prefix.dev/conda-forge/noarch/mdformat-pyproject-0.1.1-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/mdit-py-plugins-0.6.1-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/mdurl-0.1.2-pyhd8ed1ab_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/munkres-1.1.4-pyhd8ed1ab_1.conda
@@ -11877,6 +11880,20 @@ packages:
   run_exports: {}
   size: 16666
   timestamp: 1775476868100
+- conda: https://prefix.dev/conda-forge/noarch/mdformat-pyproject-0.1.1-pyhd8ed1ab_0.conda
+  sha256: bb1ea7871260cbff67eb4ac77601d2676a6442b3dfa4510213d5e7a0179fcd58
+  md5: c6b402ed79609ad263835ddbf2f01c3f
+  depends:
+  - mdformat >=1.0,<2
+  - python >=3.10
+  - tomli >=2.0,<3
+  license: MIT
+  license_family: MIT
+  purls:
+  - pkg:pypi/mdformat-pyproject?source=hash-mapping
+  run_exports: {}
+  size: 11257
+  timestamp: 1761763136376
 - conda: https://prefix.dev/conda-forge/noarch/mdit-py-plugins-0.6.1-pyhd8ed1ab_0.conda
   sha256: 49db23cbfb1c1d414a14d7540195208b994ebd747beba0f15c903f3a0a2dc446
   md5: ad6821df7a98510117db06e9a833281f

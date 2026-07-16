@@ -178,8 +178,8 @@ Although planner code operates on continuous world points, discrete graph search
 Each neighbor expansion:
 
 1. Projects the input world point into a grid cell
-1. Expands neighboring cells in grid index space
-1. Converts those neighboring cells back into world points by returning the center of each cell
+2. Expands neighboring cells in grid index space
+3. Converts those neighboring cells back into world points by returning the center of each cell
 
 Example pattern:
 

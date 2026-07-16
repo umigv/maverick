@@ -29,7 +29,7 @@ name,latitude,longitude
 In general, decimal latitude and longitude should be written to 7 decimal places (and 2 for altitude):
 
 1. It's around 1cm precision which is finer than what we can measure
-1. Doesn't match the 9dp precision of the data IGVC provides to prevent confusion
+2. Doesn't match the 9dp precision of the data IGVC provides to prevent confusion
 
 This should be kept in sync across all producers / consumers of GPS coordinates across ARV (i.e. `gps_origin_calculator`, `bringup/courses` `gps.json` files, course creation tool).
 

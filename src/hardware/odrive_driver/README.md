@@ -44,10 +44,10 @@ The indicator light should stop flashing red.
 If errors persist or if the scripts can't detect an ODrive, troubleshoot in the following order:
 
 1. Re-check power and the physical e-stop
-1. Unplug and replug the ODrive from both the USB hub and the computer USB port
-1. Run `odrivetool` and see if the official tool is able to detect them
-1. Close the terminal and open a new one
-1. Restart the laptop
+2. Unplug and replug the ODrive from both the USB hub and the computer USB port
+3. Run `odrivetool` and see if the official tool is able to detect them
+4. Close the terminal and open a new one
+5. Restart the laptop
 
 ### `scripts/plot_motor_signals.py`
 
