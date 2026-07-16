@@ -44,28 +44,28 @@ flowchart LR
 
 ### Topics
 
-| Topic | From | To |
-|---|---|---|
-| `joy` | joy | teleop_twist_joy |
-| `teleop_cmd_vel` | teleop_twist_joy | twist_mux, led_driver |
-| `nav_cmd_vel` | path_tracking | twist_mux, led_driver |
-| `recovery_cmd_vel` | recovery_behavior | twist_mux |
-| `cmd_vel` | twist_mux | odrive_driver / sensor_simulator |
-| `enc_vel/raw` | odrive_driver / sensor_simulator | ekf_local / enc_odom_publisher |
-| `imu/raw` | vectornav_driver / sensor_simulator | ekf_local |
-| `gps/raw` | vectornav_driver / sensor_simulator | gps_origin_calculator |
-| `ins_vel/raw` | vectornav_driver / sensor_simulator | (Unused) |
-| `odom/global` | vectornav_driver / sensor_simulator | map_odom_publisher, autonav_mission_control |
-| `odom/local` | ekf_local / enc_odom_publisher | autonav_goal_selection, path_planning, path_tracking |
-| `occupancy_grid/raw` | CV stack / occupancy_grid_simulator | occupancy_grid_transform |
-| `occupancy_grid/transformed` | occupancy_grid_transform | autonav_goal_selection |
-| `occupancy_grid/inflated` | occupancy_grid_transform | path_planning |
-| `goal` | autonav_goal_selection / CV / User | path_planning |
-| `path` | path_planning | path_smoothing |
-| `smoothed_path` | path_smoothing | path_tracking |
-| `mission_state` | autonav_mission_control | led_driver, occupancy_grid_transform, path_tracking, autonav_goal_selection, recovery_behavior |
-| `odom/ground_truth` | sensor_simulator | occupancy_grid_simulator, Foxglove |
-| `occupancy_grid/ground_truth` | occupancy_grid_simulator | Foxglove |
+| Topic                         | From                                | To                                                                                             |
+| ----------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `joy`                         | joy                                 | teleop_twist_joy                                                                               |
+| `teleop_cmd_vel`              | teleop_twist_joy                    | twist_mux, led_driver                                                                          |
+| `nav_cmd_vel`                 | path_tracking                       | twist_mux, led_driver                                                                          |
+| `recovery_cmd_vel`            | recovery_behavior                   | twist_mux                                                                                      |
+| `cmd_vel`                     | twist_mux                           | odrive_driver / sensor_simulator                                                               |
+| `enc_vel/raw`                 | odrive_driver / sensor_simulator    | ekf_local / enc_odom_publisher                                                                 |
+| `imu/raw`                     | vectornav_driver / sensor_simulator | ekf_local                                                                                      |
+| `gps/raw`                     | vectornav_driver / sensor_simulator | gps_origin_calculator                                                                          |
+| `ins_vel/raw`                 | vectornav_driver / sensor_simulator | (Unused)                                                                                       |
+| `odom/global`                 | vectornav_driver / sensor_simulator | map_odom_publisher, autonav_mission_control                                                    |
+| `odom/local`                  | ekf_local / enc_odom_publisher      | autonav_goal_selection, path_planning, path_tracking                                           |
+| `occupancy_grid/raw`          | CV stack / occupancy_grid_simulator | occupancy_grid_transform                                                                       |
+| `occupancy_grid/transformed`  | occupancy_grid_transform            | autonav_goal_selection                                                                         |
+| `occupancy_grid/inflated`     | occupancy_grid_transform            | path_planning                                                                                  |
+| `goal`                        | autonav_goal_selection / CV / User  | path_planning                                                                                  |
+| `path`                        | path_planning                       | path_smoothing                                                                                 |
+| `smoothed_path`               | path_smoothing                      | path_tracking                                                                                  |
+| `mission_state`               | autonav_mission_control             | led_driver, occupancy_grid_transform, path_tracking, autonav_goal_selection, recovery_behavior |
+| `odom/ground_truth`           | sensor_simulator                    | occupancy_grid_simulator, Foxglove                                                             |
+| `occupancy_grid/ground_truth` | occupancy_grid_simulator            | Foxglove                                                                                       |
 
 ### TF
 
@@ -81,11 +81,11 @@ flowchart LR
 
 ### Services
 
-| Service | Server | Client | Modes |
-|---|---|---|---|
-| `fromLL` (`robot_localization/FromLL`) | lat_lon_converter | autonav_mission_control at startup | `autonav` |
-| `request_recovery` (`std_srvs/Trigger`) | autonav_mission_control | autonav_goal_selection | `autonav` |
-| `recovery_complete` (`std_srvs/Trigger`) | autonav_mission_control | recovery_behavior | `autonav` |
+| Service                                  | Server                  | Client                             | Modes     |
+| ---------------------------------------- | ----------------------- | ---------------------------------- | --------- |
+| `fromLL` (`robot_localization/FromLL`)   | lat_lon_converter       | autonav_mission_control at startup | `autonav` |
+| `request_recovery` (`std_srvs/Trigger`)  | autonav_mission_control | autonav_goal_selection             | `autonav` |
+| `recovery_complete` (`std_srvs/Trigger`) | autonav_mission_control | recovery_behavior                  | `autonav` |
 
 ### E-stop file
 
@@ -139,11 +139,11 @@ ros2 launch bringup core.launch.py
 
 ### Velocity Multiplexing
 
-| Priority | Topic | Source | Timeout |
-|---|---|---|---|
-| 3 | `teleop_cmd_vel` | Joystick | 0.5s |
-| 2 | `recovery_cmd_vel` | Recovery system | 0.5s |
-| 1 | `nav_cmd_vel` | Autonomy | 0.5s |
+| Priority | Topic              | Source          | Timeout |
+| -------- | ------------------ | --------------- | ------- |
+| 3        | `teleop_cmd_vel`   | Joystick        | 0.5s    |
+| 2        | `recovery_cmd_vel` | Recovery system | 0.5s    |
+| 1        | `nav_cmd_vel`      | Autonomy        | 0.5s    |
 
 If a higher-priority source stops publishing, control falls back to the next source after its timeout. Config in `config/core/twist_mux.yaml`.
 
@@ -164,12 +164,12 @@ ros2 launch bringup hardware.launch.py mode:=<mode> [course:=<course>]
 
 ### Nodes per mode
 
-| Node | `autonav` | `self_drive` | `nav_test` |
-|---|---|---|---|
-| [estop_driver](../hardware/estop_driver/README.md) | ✓ | ✓ | ✓ |
-| [led_driver](../hardware/led_driver/README.md) | ✓ | ✓ | ✓ |
-| [odrive_driver](../hardware/odrive_driver/README.md) | ✓ | ✓ | ✓ |
-| [vectornav_driver](../hardware/vectornav_driver/README.md) | ✓ with `datum` (enables `odom/global`) | ✓ with `require_attitude: false` | - |
+| Node                                                       | `autonav`                              | `self_drive`                     | `nav_test` |
+| ---------------------------------------------------------- | -------------------------------------- | -------------------------------- | ---------- |
+| [estop_driver](../hardware/estop_driver/README.md)         | ✓                                      | ✓                                | ✓          |
+| [led_driver](../hardware/led_driver/README.md)             | ✓                                      | ✓                                | ✓          |
+| [odrive_driver](../hardware/odrive_driver/README.md)       | ✓                                      | ✓                                | ✓          |
+| [vectornav_driver](../hardware/vectornav_driver/README.md) | ✓ with `datum` (enables `odom/global`) | ✓ with `require_attitude: false` | -          |
 
 ______________________________________________________________________
 
@@ -207,13 +207,13 @@ ros2 launch bringup localization.launch.py mode:=<mode> [course:=<course>]
 
 ### Nodes per mode
 
-| Node | Modes |
-|---|---|
-| ekf_local | `autonav`, `self_drive` |
-| [enc_odom_publisher](../localization/enc_odom_publisher/README.md) | `nav_test` |
-| [map_odom_publisher](../localization/map_odom_publisher/README.md) | `autonav` |
-| static identity transform (`map` → `odom`) | `self_drive`, `nav_test` |
-| [lat_lon_converter](../localization/lat_lon_converter/README.md) | `autonav` |
+| Node                                                               | Modes                    |
+| ------------------------------------------------------------------ | ------------------------ |
+| ekf_local                                                          | `autonav`, `self_drive`  |
+| [enc_odom_publisher](../localization/enc_odom_publisher/README.md) | `nav_test`               |
+| [map_odom_publisher](../localization/map_odom_publisher/README.md) | `autonav`                |
+| static identity transform (`map` → `odom`)                         | `self_drive`, `nav_test` |
+| [lat_lon_converter](../localization/lat_lon_converter/README.md)   | `autonav`                |
 
 `ekf_local` (`robot_localization/ekf_node`) fuses encoder vx/vy from `enc_vel/raw` with IMU yaw rate from `imu/raw`; config in `config/localization/ekf.yaml`.
 
@@ -234,15 +234,15 @@ ros2 launch bringup navigation.launch.py mode:=<mode> [course:=<course>]
 
 ### Nodes per mode
 
-| Node | Modes |
-|---|---|
-| [occupancy_grid_transform](../navigation/occupancy_grid_transform/README.md) | all |
-| [path_planning](../navigation/path_planning/README.md) | all |
-| [path_smoothing](../navigation/path_smoothing/README.md) | all |
-| [path_tracking](../navigation/path_tracking/README.md) | all |
-| [autonav_mission_control](../navigation/autonav_mission_control/README.md) | `autonav` |
-| [autonav_goal_selection](../navigation/autonav_goal_selection/README.md) | `autonav` |
-| [recovery_behavior](../navigation/recovery_behavior/README.md) | `autonav` |
+| Node                                                                         | Modes     |
+| ---------------------------------------------------------------------------- | --------- |
+| [occupancy_grid_transform](../navigation/occupancy_grid_transform/README.md) | all       |
+| [path_planning](../navigation/path_planning/README.md)                       | all       |
+| [path_smoothing](../navigation/path_smoothing/README.md)                     | all       |
+| [path_tracking](../navigation/path_tracking/README.md)                       | all       |
+| [autonav_mission_control](../navigation/autonav_mission_control/README.md)   | `autonav` |
+| [autonav_goal_selection](../navigation/autonav_goal_selection/README.md)     | `autonav` |
+| [recovery_behavior](../navigation/recovery_behavior/README.md)               | `autonav` |
 
 In `autonav`, the launch shuts down when mission control exits on mission completion.
 

@@ -4,17 +4,17 @@
 
 ## `src/` Layout
 
-| Category | Contents |
-|---|---|
-| `bringup` | Launch files, mode/course configs, and the top-level entry points for running the stack |
-| `core` | Shared messages and library code used across packages |
-| `description` | URDFs and robot/world description packages |
-| `hardware` | Drivers for onboard hardware |
-| `localization` | Odometry and coordinate-frame conversion packages |
-| `navigation` | Path planning, path tracking, mission control, and recovery behavior packages |
-| `simulation` | Simulated sensors and environment for testing without hardware |
-| `visualization` | Visualization packages |
-| `template` | Package skeletons copied by `just create-package` |
+| Category        | Contents                                                                                |
+| --------------- | --------------------------------------------------------------------------------------- |
+| `bringup`       | Launch files, mode/course configs, and the top-level entry points for running the stack |
+| `core`          | Shared messages and library code used across packages                                   |
+| `description`   | URDFs and robot/world description packages                                              |
+| `hardware`      | Drivers for onboard hardware                                                            |
+| `localization`  | Odometry and coordinate-frame conversion packages                                       |
+| `navigation`    | Path planning, path tracking, mission control, and recovery behavior packages           |
+| `simulation`    | Simulated sensors and environment for testing without hardware                          |
+| `visualization` | Visualization packages                                                                  |
+| `template`      | Package skeletons copied by `just create-package`                                       |
 
 ## Setup
 

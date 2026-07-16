@@ -14,14 +14,14 @@ Drives the safety-light LED strip over serial based on the robot's current e-sto
 
 ## LED Priority
 
-| Priority | Condition | Code | Effect |
-|---|---|---|---|
-| 1 | e-stop file is `"1"` | `6` | Flashing red |
-| 2 | `teleop_cmd_vel` received within `cmd_vel_timeout_s` | `1` | Solid blue |
-| 3 | `mission_complete` | `7` | Solid green |
-| 4 | `in_recovery` | `4` | Flashing yellow |
-| 5 | `in_ramp_approach` | `5` | Flashing purple |
-| 6 | `in_no_mans_land` | `3` | Flashing green |
-| 7 | mission state received | `2` | Flashing blue |
-| 8 | no mission state, `nav_cmd_vel` received within `cmd_vel_timeout_s` | `2` | Flashing blue |
-| 9 | no mission state, nav stack inactive | `9` | Rainbow |
+| Priority | Condition                                                           | Code | Effect          |
+| -------- | ------------------------------------------------------------------- | ---- | --------------- |
+| 1        | e-stop file is `"1"`                                                | `6`  | Flashing red    |
+| 2        | `teleop_cmd_vel` received within `cmd_vel_timeout_s`                | `1`  | Solid blue      |
+| 3        | `mission_complete`                                                  | `7`  | Solid green     |
+| 4        | `in_recovery`                                                       | `4`  | Flashing yellow |
+| 5        | `in_ramp_approach`                                                  | `5`  | Flashing purple |
+| 6        | `in_no_mans_land`                                                   | `3`  | Flashing green  |
+| 7        | mission state received                                              | `2`  | Flashing blue   |
+| 8        | no mission state, `nav_cmd_vel` received within `cmd_vel_timeout_s` | `2`  | Flashing blue   |
+| 9        | no mission state, nav stack inactive                                | `9`  | Rainbow         |

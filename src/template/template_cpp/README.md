@@ -15,5 +15,5 @@ TODO: One or two sentences on what the node does and how it fits into the system
 ## Config Parameters
 
 | Parameter | Default | Description |
-|---|---|---|
-| `param` | `value` | Description |
+| --------- | ------- | ----------- |
+| `param`   | `value` | Description |

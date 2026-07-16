@@ -44,14 +44,14 @@ Each waypoint is either map-frame `x`/`y` (meters) or GPS `latitude`/`longitude`
 
 ## Subscribed Topics
 
-| Topic | Type | Description |
-|---|---|---|
+| Topic  | Type                | Description                                      |
+| ------ | ------------------- | ------------------------------------------------ |
 | `odom` | `nav_msgs/Odometry` | Robot pose used to compute distance to waypoints |
 
 ## Published Topics
 
-| Topic | Type | Description |
-|---|---|---|
+| Topic           | Type                         | Description                                                |
+| --------------- | ---------------------------- | ---------------------------------------------------------- |
 | `mission_state` | `maverick_msgs/MissionState` | Latched mission state; published on every state transition |
 
 `mission_state` is latched: publisher and subscribers must both use `utils.qos.LATCHED` - see the [utils README](../../core/utils/README.md#utilsqos).
@@ -62,15 +62,15 @@ See [`MissionState.msg`](../../core/maverick_msgs/msg/MissionState.msg) for the 
 
 ## Services
 
-| Service | Type | Description |
-|---|---|---|
-| `request_recovery` | `std_srvs/Trigger` | Sets `in_recovery = true` and publishes state |
-| `recovery_complete` | `std_srvs/Trigger` | Clears `in_recovery` and publishes state |
+| Service             | Type               | Description                                   |
+| ------------------- | ------------------ | --------------------------------------------- |
+| `request_recovery`  | `std_srvs/Trigger` | Sets `in_recovery = true` and publishes state |
+| `recovery_complete` | `std_srvs/Trigger` | Clears `in_recovery` and publishes state      |
 
 ## Service Clients
 
-| Service | Type | Description |
-|---|---|---|
+| Service  | Type                        | Description                                                |
+| -------- | --------------------------- | ---------------------------------------------------------- |
 | `fromLL` | `robot_localization/FromLL` | Converts GPS waypoints to map-frame coordinates at startup |
 
 ## Adding new state fields

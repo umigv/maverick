@@ -154,10 +154,10 @@ State of the occupancy grid at some point can be queried using `state(point)`, w
 
 `CellState` exposes the following properties:
 
-| Property | Description |
-|---|---|
-| `is_unknown` | True if the cell lies outside the grid bounds |
-| `is_drivable` | True if occupancy probability is ≤ 30 |
+| Property      | Description                                   |
+| ------------- | --------------------------------------------- |
+| `is_unknown`  | True if the cell lies outside the grid bounds |
+| `is_drivable` | True if occupancy probability is ≤ 30         |
 
 ### Full grid iteration in continuous space via in_bound_points
 

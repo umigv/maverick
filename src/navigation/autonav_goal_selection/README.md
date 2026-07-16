@@ -68,23 +68,23 @@ Goal publishing also stops once `mission_complete` is set.
 
 ## Subscribed Topics
 
-| Topic | Type | Description |
-|---|---|---|
-| `odom` | `nav_msgs/Odometry` | Robot pose in the world frame |
-| `occupancy_grid` | `nav_msgs/OccupancyGrid` | Local occupancy grid rays are cast through |
-| `mission_state` | `maverick_msgs/MissionState` | Mission state (latched); provides the current waypoint and behavior flags |
+| Topic            | Type                         | Description                                                               |
+| ---------------- | ---------------------------- | ------------------------------------------------------------------------- |
+| `odom`           | `nav_msgs/Odometry`          | Robot pose in the world frame                                             |
+| `occupancy_grid` | `nav_msgs/OccupancyGrid`     | Local occupancy grid rays are cast through                                |
+| `mission_state`  | `maverick_msgs/MissionState` | Mission state (latched); provides the current waypoint and behavior flags |
 
 ## Published Topics
 
-| Topic | Type | Description |
-|---|---|---|
-| `goal` | `geometry_msgs/PointStamped` | Selected local goal in the world frame |
+| Topic                  | Type                             | Description                                                    |
+| ---------------------- | -------------------------------- | -------------------------------------------------------------- |
+| `goal`                 | `geometry_msgs/PointStamped`     | Selected local goal in the world frame                         |
 | `goal_selection_debug` | `visualization_msgs/MarkerArray` | Ray visualization; only published when `publish_debug` is true |
 
 ## Service Clients
 
-| Service | Type | Description |
-|---|---|---|
+| Service            | Type               | Description                                      |
+| ------------------ | ------------------ | ------------------------------------------------ |
 | `request_recovery` | `std_srvs/Trigger` | Triggers recovery when no drivable goal is found |
 
 ## Debug Visualization
