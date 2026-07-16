@@ -23,8 +23,7 @@ Covariance is filled using u-blox accuracy fields:
 
 ## GPS Configurations
 
-> Note: Message “rate” in `CFG-MSG` is **messages per navigation cycle**.
-> With `CFG-RATE` set to **10 Hz**, a message rate of:
+> Note: Message “rate” in `CFG-MSG` is **messages per navigation cycle**. With `CFG-RATE` set to **10 Hz**, a message rate of:
 >
 > - `1` → 10 Hz
 > - `10` → 1 Hz

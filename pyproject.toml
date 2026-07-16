@@ -82,9 +82,8 @@ clang-format = "22.*"
 default = { features = ["ros", "tooling"], solve-group = "default" }
 
 [tool.mdformat]
-wrap = "keep"       # possible values: {"keep", "no", INTEGER}
-number = true       # possible values: {false, true}
-end_of_line = "lf"  # possible values: {"lf", "crlf", "keep"}
+wrap = "no"         # one line makes prs easier to read on github
+number = true       # 1. 2. 3. is more clear than 1. 1. 1.
 
 [tool.ruff]
 target-version = "py314"
