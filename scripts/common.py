@@ -98,8 +98,13 @@ class Target:
 
 
 # Flat directories that are lint/format targets but not ROS packages (no package.xml).
-# TODO: add more targets such as waypoints/README.md
-EXTRA_TARGETS = [Target(Path("scripts")), Target(Path(), "root", False)]
+EXTRA_TARGETS = [
+    Target(Path(), name="root", recursive=False),
+    Target(Path("waypoints"), recursive=False),
+    Target(Path(".github")),
+    Target(Path("docs")),
+    Target(Path("scripts")),
+]
 
 
 def discover_targets() -> list[Target]:
