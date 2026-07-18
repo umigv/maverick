@@ -6,11 +6,7 @@ Maverick is UMARV's autonomous ground robot for the 2025-2026 competition season
 
 ## Quick Start
 
-Set up the environment (first time only - see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for details):
-
-```bash
-just setup
-```
+For the first time, [set up the environment](docs/DEVELOPMENT.md#environment-setup)
 
 Build the workspace:
 
@@ -56,7 +52,7 @@ See [bringup/README.md](src/bringup/README.md) for which displays are enabled by
 
 ## Tmux
 
-A tmux configuration is included to avoid creating too many terminals.
+A tmux configuration is included to avoid needing to create too many terminals.
 
 ```bash
 # Runs rviz and divides terminal into panes in which to run the launch commands
@@ -67,7 +63,8 @@ To exit, close the window by pressing the prefix key (Ctrl + B) and then `&` (Sh
 
 ## Documentation
 
-- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) - Environment setup, build/test/lint loop, repo structure, dependency and code conventions
-- [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) - Branches, pull requests, CI, and documentation conventions
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) - Environment setup, build/test/lint loop, repo structure, dependency, code, and documentation conventions
+- [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) - Branches, pull requests, reviews, and CI
+- [docs/PLAYBOOK.md](docs/PLAYBOOK.md) - Operating the robot on test and competition days
 - [src/bringup/README.md](src/bringup/README.md) - System architecture: launch files, modes, and the stack-wide topic wiring
 - Every package documents its own interface and behavior in its README
