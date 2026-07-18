@@ -52,6 +52,8 @@ just rviz
 
 See [bringup/README.md](src/bringup/README.md) for which displays are enabled by default. If RViz asks to save the config on exit, decline - saving rewrites the shared config in RViz's verbose format. Keep personal tweaks in your own copy via File > Save Config As.
 
+> **WSL:** set Windows display scaling to a whole-number percentage (e.g. 100%, 200%). Fractional scaling (e.g. 125%, 150%) isn't supported by WSLg and silently falls back to 100%, leaving rviz2's UI illegibly tiny. TODO: See [microsoft/wslg#23](https://github.com/microsoft/wslg/issues/23).
+
 ## Tmux
 
 A tmux configuration is included to avoid creating too many terminals.
