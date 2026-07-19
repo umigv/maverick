@@ -16,7 +16,7 @@ How changes get into `main`: issues, branches, pull requests, reviews, and CI.
 
 ## Pull Requests
 
-Every change lands through a PR, squash-merged into `main`. **The PR title becomes the commit on `main`**. write it like a changelog entry ("Move all yaml config in bringup into the respective nodes"), not a work log ("more stuff").
+Every change lands through a PR, squash-merged into `main`. **The PR title becomes the commit on `main`**. Write it like a changelog entry ("Move all yaml config in bringup into the respective nodes"), not a work log ("more stuff").
 
 For a feature split across multiple PRs, use the stacked-PR title convention so the pieces read together in history:
 

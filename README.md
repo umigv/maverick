@@ -6,7 +6,7 @@ Maverick is UMARV's autonomous ground robot for the 2025-2026 competition season
 
 ## Quick Start
 
-For the first time, [set up the environment](docs/DEVELOPMENT.md#environment-setup)
+For the first time, [set up the environment](docs/DEVELOPMENT.md#environment-setup).
 
 Build the workspace:
 
