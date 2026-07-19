@@ -1,41 +1,112 @@
 # Playbook
 
-How to operate the physical robot on a test or competition day. For launch commands and what each mode does, see the [README](../README.md) and [bringup/README.md](../src/bringup/README.md).
-
-Everything runs directly on a laptop mounted on the robot - there is no remote connection to set up.
+How to operate the physical robot on a test or competition day. Everything runs directly on a laptop mounted on the robot.
 
 ## Field day sequence
 
-1. [Mech prep](#mech-prep)
-2. [Power on](#power-system): motor power switch on, breaker engaged, sensor power bank on
-3. Turn on the [remote e-stop](#remote-e-stop)
-4. [Calibrate the motors](#odrive)
-5. Wait for GPS startup: run `just vectornav-monitor` to watch INS and GNSS status live (see [vectornav_driver/README.md](../src/hardware/vectornav_driver/README.md))
-6. Record the GPS datum: with the robot stationary at the start position, run `ros2 launch bringup gps_origin_calculator.launch.py course:=<course>` - it writes the datum into the course's `gps.json` and shuts down automatically (see [Course setup](#course-setup))
-7. Launch the stack (see [README](../README.md) for commands and modes)
-8. Record rosbags for every run (see [Post-run](#post-run) for naming and upload)
+1. [Mech prep](#mech-prep).
+2. [Power on](#power-system-and-wiring): motor power switch on, breaker engaged, laptop power bank on.
+3. Turn on the [remote e-stop](#remote-e-stop).
+4. [Calibrate the motors](#odrive).
+5. Wait for GPS startup: run `just vectornav-monitor` to watch INS and GNSS status live (see [vectornav_driver/README.md](../src/hardware/vectornav_driver/README.md)).
+6. [Record the GPS datum](#course-setup) with the robot stationary at the start position.
+7. Launch the stack (see [README](../README.md) for commands and modes).
+8. Record rosbags as needed with `ros2 bag record --all` (see [Post-run](#post-run) for naming and upload).
+
+## What to bring
+
+- LiPO batteries.
+- Laptop and chargers.
+- Power banks and chargers.
+- Remote e-stop.
+- Chair.
+- Isopropyl alcohol and cloth.
+- A wifi source (e.g. hotspot).
+- PS4 controller.
+- Test obstacles.
+- Tools for quick repairs.
+
+For comp additionally:
+
+- A prepped replacement for every key part on the robot.
+- Aluminum stock that is easy to work with, for rapid prototyping on-site.
+- Umbrella - shade for the laptop screen.
+- Sunscreen - comp days are long hours in direct sun.
 
 ## Course setup
 
-Courses live in `src/bringup/courses/` - one subfolder per course, selected with the `course:=` launch argument. To set up at a new site, create a course folder with the [course creation tool](https://github.com/umigv/course_creation_tool); see [bringup/README.md](../src/bringup/README.md) for the schema.
+Courses live in `src/bringup/courses/` - one subfolder per course, selected with the `course:=` launch argument; see [bringup/README.md](../src/bringup/README.md) for the schema.
 
-On real runs only `gps.json` (GPS datum and waypoints) is used, so that is what needs to be filled out. `map.json` is only the simulation obstacle map. The datum in `gps.json` is recorded on-site with the GPS origin calculator (step 6 of the [field day sequence](#field-day-sequence)).
+On real runs only `gps.json` (GPS datum and waypoints) is used, so that is what needs to be filled out at a new site. The datum is recorded on-site: with the robot stationary at the start position, run `ros2 launch bringup gps_origin_calculator.launch.py course:=<course>` - it writes the datum into the course's `gps.json` and shuts down automatically.
+
+Competition waypoints are handed out in packed DMS format: store them verbatim in `waypoints/dms/` and run `just convert-waypoints` to generate the decimal-degree versions that go into `gps.json` - see [waypoints/README.md](../waypoints/README.md) for the format and workflow.
+
+`map.json` is only the simulation obstacle map, created with the [course creation tool](https://github.com/umigv/course_creation_tool) - it isn't needed for real runs.
 
 ## Mech prep
 
 - Check for loose screws. If any are loose, add a lock washer.
-- Lube the gearbox with dry lube. Do it outside since the smell stays.
-- Wipe the wheels down with isopropyl alcohol before running - it impacts wheel friction.
+- Lube the gearbox with dry lube outside if it is not smooth.
+- Wipe the wheels down with isopropyl alcohol before running to ensure consistent wheel friction.
 - Make sure the wheel shield isn't scraping the wheel. If the wheel is caving, check whether the gearbox plate is bent.
-- Run the robot in the same configuration as it runs at comp, including wiring and weight. After any physical change (cable management, remounting), test again before it counts: at comp the USB hub cable got moved right beside the GPS cable the day before and was never re-tested.
+- The payload is 25 pounds of gym weights mounted on the bottom of the robot. <img src="images/payload.jpg" alt="Payload weights mounted under the deck" width="600">
+- Run the robot in the same configuration as it runs at comp, including wiring, payload, and weight. After any physical change (cable management, remounting), test again before it counts. At IGVC 2026 we moved the USB hub cable right beside the GPS receiver cable without retesting. This impacted signal strength and took us 3 days to diagnose.
 - Before heading outside, make sure what you want to test is actually ready. Setup eats a ton of time, and warm testing weather is precious.
+
+## Power system and wiring
+
+- There are two sources of power: the LiPO batteries for the motors, and the Anker / Jackery power bank for the laptop (which powers all the USB devices).
+- The Anker lasts longer and charges faster than the Jackery, so prioritize the Anker, but make sure the other is charging while you use one.
+- The motor power system has a breaker, an e-stop, and a power switch. The power switch needs to be on and the breaker engaged. <img src="images/power_system.jpg" alt="Breaker, power switch, and e-stop locations" width="600">
+- The LiPO should generally never run out of battery given it has 500+ hours of battery life. Download "LiFePO4 Power" on your phone to monitor the current battery percentage.
+- Everything on the robot, especially wiring, should be labeled such that when facing forward, the left (port) side is red and the right (starboard) side is green.
+
+## Remote e-stop
+
+- The remote e-stop is connected to a power bank. The cable has a power switch on the back. <img src="images/remote_estop.jpg" alt="Remote e-stop power bank and cable power switch" width="400">
+- To turn on: make sure the power switch is on, then turn on the power bank.
+- To turn off: turn off the power switch on the back.
+
+## ODrive
+
+- Calibrate the motors with `just calibrate-odrive` before running. You don't need to recalibrate unless you unplug USB and turn off the main power (e-stop is fine).
+- Configuration is done through the [web GUI](https://gui.odriverobotics.com/#/dashboard).
+- [API docs](https://docs.odriverobotics.com/v/latest/fibre_types/com_odriverobotics_ODrive.html)
+- Support contact: info@odriverobotics.com
+
+## VN300
+
+- The antenna cables should point in the same direction when mounted or the attitude reading may not converge. <img src="images/vn300_antennas.jpg" alt="Antenna cables pointing in the same direction, with the folding ruler measuring the antenna offset" width="400">
+- The antennas are screwed onto the ground plane using plastic screws in the electrical box.
+- Use the Milwaukee folding ruler to measure the offsets between the sensors. The measured offsets go into the URDF as the sensor offset constants (base→IMU, IMU→GNSS A, GNSS A→GNSS B) in [maverick_description/urdf/constants.xacro](../src/description/maverick_description/urdf/constants.xacro); at startup the [vectornav driver](../src/hardware/vectornav_driver/README.md) reads the resulting TF and writes the offsets to the sensor.
+- Documentation PDFs are on Dropbox.
+- Support contact: support@vectornav.com or +1 (512) 772-3615.
+
+## Controller pairing
+
+- Wired: plug the controller in over USB and launch teleop with `controller:=ps4`.
+- Bluetooth: hold Share + PlayStation until the light bar flashes to enter pairing mode, then pair it in the Bluetooth settings panel. Then launch teleop with `controller:=ps4_wireless`.
+
+## Device aliases
+
+Hardware configs refer to devices by stable paths (`/dev/vn300`, `/dev/estop`, `/dev/led`) instead of raw `/dev/ttyUSB*` names that change between boots. On a new laptop, plug in each device and create its alias once:
+
+```bash
+just alias /dev/ttyUSB0 vn300
+```
+
+The alias is a udev rule keyed to the device's USB vendor/product/serial, so it survives replugging and reboots. `just unalias <name>` removes one.
+
+## Software practices
+
+- Use light mode when it's bright outside - easier to see.
+- Code changes go on the shared test-day branch and get sorted into PRs afterwards - see [CONTRIBUTING.md](CONTRIBUTING.md#branches). Do this per test day so the pile of unmerged changes doesn't explode.
 
 ## Post-run
 
-- Turn off the motor power switch so the LiPO doesn't drain.
-- Put both batteries on charge. The Anker lasts longer and charges faster than the Jackery, so prioritize the Anker, but make sure the other is charging while you use one.
-- Upload rosbags to Dropbox at the end of the day. Name them so people can tell what they are. Delete useless rosbags, and don't commit them to the repo. (TODO: link the Dropbox folder)
-- TODO: note what broke or acted weird while it's fresh - where do issues get logged?
+- Turn off the motor power switch so the LiPO doesn't drain. Put both power banks on charge.
+- Upload rosbags to Dropbox at the end of the day. Name them so people can tell what they are. Delete useless rosbags, and don't commit them to the repo.
+- File a GitHub issue for anything that broke or acted weird while it's fresh (see [CONTRIBUTING.md](CONTRIBUTING.md#issues)).
 
 ## Troubleshooting
 
@@ -43,62 +114,10 @@ When things go wrong: suspect hardware more than you think (consider what is dif
 
 **ODrive says the e-stop is engaged but it isn't.** Check the wiring across the system, starting with the power connections - something likely came loose.
 
-**ODrive hits the current limit.** Lube the gearbox and reduce kp on the ODrive - both lower the torque needed to drive the gearbox, which reduces current.
+**ODrive hits the current limit.** Lube the gearbox if unlubed for a while and reduce kp on the ODrive - both lower the torque needed to drive the gearbox, which reduces current.
 
-**Odometry is off / robot goes crazy on a simple turn at high speed.** Suspect wheel slip - it's hard to diagnose and happens when the robot moves, accelerates, or turns too fast. Wipe the wheels with isopropyl and lower the speed (see [Mech prep](#mech-prep)). Consider the floor's coefficient of friction when testing (asphalt > cement > marble).
+**Odometry is off / robot goes crazy on a simple turn at high speed.** Suspect wheel slip - it's hard to diagnose and happens when the robot moves, accelerates, or turns too fast. Wipe the wheels with isopropyl and lower the speed. Consider the floor's coefficient of friction when testing (asphalt > cement > marble).
 
 **Robot doesn't follow paths precisely.** Likely inertia - the controllers may need retuning. Note that weight changes affect path tracking tuning, and gear ratio or wheel diameter changes affect odometry, so physical changes to the platform mean software retuning.
 
-**Robot drives out of bounds in real runs but behaved in sim.** The simulation occupancy grid has no unknown cells - real runs do. Don't trust sim behavior around unknowns.
-
 **GPS fix is bad or satellite count drops.** Run `just vectornav-monitor` to see the decoded INS and GNSS status. The VN300 antenna is sensitive to USB 3.0 EMI - this is an ongoing problem to be fixed. Make sure nothing running USB 3.0 (ZED camera, USB hub) is close to the antenna cables; move them physically as far apart as possible. Elevating the receivers also improves signal.
-
-**Motors lost calibration.** Calibration persists across e-stop, but is lost if you unplug USB and turn off the main power. Recalibrate (see [ODrive](#odrive)).
-
-## Power system
-
-- There are two sources of power: the LiPO batteries for the motors, and the Anker / Jackery power bank for the laptop (which powers all the sensors).
-- The motor power system has a breaker, an e-stop, and a power switch. The power switch needs to be on and the breaker engaged.
-- The LiPO should generally never run out of battery. (TODO: state why - over-discharge damage? - and what voltage to stop at)
-- TODO: LiPO power monitoring instructions
-- TODO: LiPO charging and storage safety rules
-- Everything on the robot, especially wiring, should be labeled such that when facing forward, the left (port) side is red and the right (starboard) side is green.
-
-## Remote e-stop
-
-- The remote e-stop is connected to a power bank. The cable has a power switch on the back.
-- To turn on: make sure the power switch is on, then turn on the power bank.
-- To turn off: turn off the power switch on the back.
-
-## ODrive
-
-- Calibrate the motors before running. You don't need to recalibrate unless you unplug USB and turn off the main power (e-stop is fine).
-- Configuration is done through the [web GUI](https://gui.odriverobotics.com/#/dashboard).
-- [API docs](https://docs.odriverobotics.com/v/latest/fibre_types/com_odriverobotics_ODrive.html)
-
-## VN300
-
-- The antenna cables should point in the same direction when mounted. (TODO: photo, and what goes wrong otherwise)
-- Antenna mounting hardware: plastic screw from the electrical box, plus an 8-32 borrowed from MTBR. (TODO: rewrite this so someone else can actually do it - photo)
-- Use the Milwaukee folding ruler to measure the offsets between the sensors. (TODO: where do the measured offsets go?)
-- Documentation PDFs are on Dropbox. (TODO: link)
-- VectorNav Control Center doesn't run in the virtual machine - use the team laptop for it.
-- Support contact: support@vectornav.com or +1 (512) 772-3615.
-
-## Software practices
-
-- Use light mode when it's bright outside - easier to see.
-- Use a test branch for test-day code changes, then clean it up after. Don't commit to main. Do it daily so the number of code changes doesn't explode.
-
-## Packing list
-
-- LiPO batteries (charged) and their charger
-- Anker and Jackery power banks (charged) and their chargers
-- Laptop and laptop charger
-- Remote e-stop and its power bank
-- Game controller for teleop (xbox or ps4)
-- Isopropyl alcohol (wheel wipe)
-- Dry lube (gearbox)
-- Lock washers and basic tools (screwdrivers, hex keys)
-- Milwaukee folding ruler (sensor offset measurements)
-- TODO: spares worth carrying - fuses, connectors, zip ties?
