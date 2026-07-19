@@ -61,7 +61,7 @@ All dependencies are installed by pixi and declared in `pyproject.toml`:
 | Python library only on PyPI                      | `[tool.pixi.feature.ros.pypi-dependencies]`                                    |
 | Repo-wide dev/lint tooling                       | `[tool.pixi.feature.tooling.dependencies]`                                     |
 
-`package.xml` only requires dependencies on other packages in this workspace - colcon reads it for build ordering. External dependencies doesn't need a `package.xml` entry.
+`package.xml` only requires dependencies on other packages in this workspace - colcon reads it for build ordering. External dependencies don't need a `package.xml` entry.
 
 After changing dependencies, the refreshed `pixi.lock` is part of the change - commit it. Never add a `requirements.txt` or install anything with apt/pip by hand: the environment must stay fully described by `pyproject.toml` + `pixi.lock` so it is reproducible on every machine and in CI.
 
