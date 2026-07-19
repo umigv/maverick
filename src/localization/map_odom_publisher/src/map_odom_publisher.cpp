@@ -3,6 +3,7 @@
 #include <memory>
 #include <nav_msgs/msg/odometry.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <stdexcept>
 #include <string>
 #include <tf2/LinearMath/Transform.hpp>
 #include <tf2/exceptions.hpp>
@@ -14,14 +15,11 @@
 class MapOdomPublisher : public rclcpp::Node {
   public:
     MapOdomPublisher() : Node("map_odom_publisher") {
-        declare_parameter<std::string>("map_frame_id", "map");
-        declare_parameter<std::string>("odom_frame_id", "odom");
-        declare_parameter<std::string>("base_frame_id", "base_link");
-        declare_parameter<double>("publish_period_s", 0.01);
+        map_frame_id = declare_frame_parameter("map_frame_id");
+        odom_frame_id = declare_frame_parameter("odom_frame_id");
+        base_frame_id = declare_frame_parameter("base_frame_id");
 
-        map_frame_id = get_parameter("map_frame_id").as_string();
-        odom_frame_id = get_parameter("odom_frame_id").as_string();
-        base_frame_id = get_parameter("base_frame_id").as_string();
+        declare_parameter<double>("publish_period_s", 0.01);
         const double period = get_parameter("publish_period_s").as_double();
 
         tf_buffer = std::make_shared<tf2_ros::Buffer>(get_clock());
@@ -38,6 +36,15 @@ class MapOdomPublisher : public rclcpp::Node {
     }
 
   private:
+    std::string declare_frame_parameter(const std::string& name) {
+        const auto value = declare_parameter<std::string>(name, "");
+        if (value.empty()) {
+            RCLCPP_FATAL(get_logger(), "%s must be set", name.c_str());
+            throw std::invalid_argument(name + " must be set");
+        }
+        return value;
+    }
+
     void odom_callback(const nav_msgs::msg::Odometry::SharedPtr odom) {
         if (odom->header.frame_id != map_frame_id) {
             RCLCPP_ERROR(get_logger(), "Dropping odometry: frame_id '%s' != map_frame_id '%s'",

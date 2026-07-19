@@ -47,9 +47,6 @@ class Vn300Config:
     where drift is an Ornstein-Uhlenbeck process with the given steady-state std and time constant.
 
     Attributes:
-        imu_frame_id: TF frame ID for the IMU.
-        ins_frame_id: TF frame ID for the INS reference point.
-
         position_noise_std_m: Per-sample Gaussian noise on horizontal position (m).
         position_drift_std_m: OU position-drift steady-state std (m), e.g. multipath and ionospheric error. Set to 0
             to disable drift.
@@ -66,9 +63,6 @@ class Vn300Config:
         yaw_drift_std_rad: OU yaw-drift steady-state std (rad). Set to 0 to disable drift.
         yaw_drift_time_constant_s: OU mean-reversion time constant for yaw drift (s).
     """
-
-    imu_frame_id: str
-    ins_frame_id: str
 
     position_noise_std_m: float
     position_drift_std_m: float
@@ -116,21 +110,30 @@ class SensorSimulatorConfig:
     Attributes:
         datum: ENU origin as [latitude (deg), longitude (deg), altitude (m)]. Map (0, 0, 0) maps to this point.
 
-        enc_vel: Encoder velocity sensor noise and drift config.
-        vn300: VN-300 INS config. Shared error state drives gps, imu, ins_vel, and odom.
-
-        initial_yaw_rad: Initial heading of the robot in map frame in true north ENU (rad).
-
         map_frame_id: TF frame ID for the map frame.
         base_frame_id: TF frame ID for the robot base frame.
         ground_truth_base_frame_id: TF frame ID for the ground truth robot pose. Use this frame for simulation nodes
             that need the true robot pose rather than the EKF-estimated pose.
+        imu_frame_id: TF frame ID for the simulated VN-300 IMU.
+        ins_frame_id: TF frame ID for the simulated VN-300 INS reference point.
+
+        enc_vel: Encoder velocity sensor noise and drift config.
+        vn300: VN-300 INS config. Shared error state drives gps, imu, ins_vel, and odom.
+
+        initial_yaw_rad: Initial heading of the robot in map frame in true north ENU (rad).
 
         cmd_vel_timeout_s: Seconds without a cmd_vel message before velocity is zeroed (s).
         update_period_s: Publish period for all sensors.
     """
 
     datum: list[float]
+
+    map_frame_id: str
+    base_frame_id: str
+    ground_truth_base_frame_id: str
+    imu_frame_id: str
+    ins_frame_id: str
+
     enc_vel: EncVelConfig = EncVelConfig(
         vx_noise_std_mps=0.01,
         wz_noise_std_radps=0.01,
@@ -139,8 +142,6 @@ class SensorSimulatorConfig:
         drift_time_constant_s=60.0,
     )
     vn300: Vn300Config = Vn300Config(
-        imu_frame_id="imu_link",
-        ins_frame_id="base_link",
         position_noise_std_m=0.05,
         position_drift_std_m=0.5,
         position_drift_time_constant_s=120.0,
@@ -154,10 +155,6 @@ class SensorSimulatorConfig:
         yaw_drift_time_constant_s=300.0,
     )
     initial_yaw_rad: float = 0.0
-
-    map_frame_id: str = "map"
-    base_frame_id: str = "base_link"
-    ground_truth_base_frame_id: str = "base_link_ground_truth"
 
     cmd_vel_timeout_s: float = 0.5
     update_period_s: float = 0.01

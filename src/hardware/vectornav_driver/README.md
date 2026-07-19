@@ -23,14 +23,14 @@ ROS 2 driver node for the VectorNav VN-300 IMU/INS. Publishes IMU, GNSS fix, bod
 | `baud_rate`                     | `int`      | `115200`     | Serial baud rate. Valid: `9600 19200 38400 57600 115200 128000 230400 460800 921600`                   |
 | `measurement_publish_period_s`  | `float`    | `0.01`       | Measurement publish period (s). Must correspond to an integer divisor of the 400 Hz sensor sample rate |
 | `status_register_poll_period_s` | `float`    | `1.0`        | Period (s) for polling the GNSS compass signal health and startup status registers                     |
-| `imu_frame_id`                  | `str`      | `vectornav`  | TF frame ID for the IMU origin                                                                         |
-| `ins_frame_id`                  | `str`      | `vectornav`  | TF frame ID for the INS reference point                                                                |
+| `imu_frame_id`                  | `str`      | -            | TF frame ID for the IMU origin (required)                                                              |
+| `ins_frame_id`                  | `str`      | -            | TF frame ID for the INS reference point (required)                                                     |
 | `gnss_a_frame_id`               | `str`      | -            | TF frame ID for GNSS antenna A (required)                                                              |
 | `gnss_b_frame_id`               | `str`      | -            | TF frame ID for GNSS antenna B (required)                                                              |
 | `linear_accel_covariance`       | `float[9]` | `diag(0)`    | 3×3 row-major covariance for linear acceleration (m/s²)² in FLU body frame                             |
 | `angular_vel_covariance`        | `float[9]` | `diag(0)`    | 3×3 row-major covariance for angular velocity (rad/s)² in FLU body frame                               |
 | `datum`                         | `float[3]` | -            | ENU odometry origin as `[lat, lon, alt]`. Required to publish odometry                                 |
-| `map_frame_id`                  | `str`      | `map`        | TF frame ID for the odometry map frame                                                                 |
+| `map_frame_id`                  | `str`      | -            | TF frame ID for the odometry map frame (required when `datum` is provided)                             |
 | `require_attitude`              | `bool`     | `true`       | If true, drop IMU messages until the INS filter has valid attitude                                     |
 
 ## TF Requirements

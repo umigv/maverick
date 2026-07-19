@@ -209,7 +209,7 @@ class SensorSimulator(Node):
 
         self.imu_publisher.publish(
             Imu(
-                header=Header(stamp=time.to_msg(), frame_id=vn.imu_frame_id),
+                header=Header(stamp=time.to_msg(), frame_id=self.config.imu_frame_id),
                 orientation=Rotation2d(imu_yaw).to_ros(),
                 orientation_covariance=orientation_cov,
                 angular_velocity=Vector3(z=self.vn_wz),
@@ -228,7 +228,7 @@ class SensorSimulator(Node):
 
         self.ins_vel_publisher.publish(
             TwistWithCovarianceStamped(
-                header=Header(stamp=time.to_msg(), frame_id=self.config.vn300.ins_frame_id),
+                header=Header(stamp=time.to_msg(), frame_id=self.config.ins_frame_id),
                 twist=TwistWithCovariance(
                     twist=Twist(
                         linear=Vector3(x=self.vn_vx),
@@ -258,7 +258,7 @@ class SensorSimulator(Node):
         self.ins_odom_publisher.publish(
             Odometry(
                 header=Header(stamp=time.to_msg(), frame_id=self.config.map_frame_id),
-                child_frame_id=self.config.vn300.ins_frame_id,
+                child_frame_id=self.config.ins_frame_id,
                 pose=PoseWithCovariance(
                     pose=Pose(
                         position=Point2d(x=self.vn_x, y=self.vn_y).to_ros(),
@@ -290,7 +290,7 @@ class SensorSimulator(Node):
 
         self.gps_publisher.publish(
             NavSatFix(
-                header=Header(stamp=time.to_msg(), frame_id=vn.ins_frame_id),
+                header=Header(stamp=time.to_msg(), frame_id=self.config.ins_frame_id),
                 status=NavSatStatus(status=NavSatStatus.STATUS_SBAS_FIX, service=NavSatStatus.SERVICE_GPS),
                 latitude=lat,
                 longitude=lon,
@@ -304,15 +304,15 @@ class SensorSimulator(Node):
         if self.imu_rotation_offset is not None:
             return
 
-        vn = self.config.vn300
-
         try:
             self.imu_rotation_offset = Rotation2d.from_ros(
-                self.tf_buffer.lookup_transform(self.config.base_frame_id, vn.imu_frame_id, Time()).transform.rotation
+                self.tf_buffer.lookup_transform(
+                    self.config.base_frame_id, self.config.imu_frame_id, Time()
+                ).transform.rotation
             )
         except TransformException as e:
             self.get_logger().warning(
-                f"TF {self.config.base_frame_id}->{vn.imu_frame_id} unavailable, skipping publishing IMU: {e}"
+                f"TF {self.config.base_frame_id}->{self.config.imu_frame_id} unavailable, skipping publishing IMU: {e}"
             )
 
     @staticmethod

@@ -37,13 +37,14 @@ class OccupancyGridTransformConfig:
     """Configuration for transforming a robot-centric occupancy grid into a world-aligned ROS `nav_msgs/msg/OccupancyGrid`.
 
     Attributes:
+        frame_id: TF frame the transformed grids are published in.
         inflation_params: Parameters controlling obstacle inflation applied to the grid prior to publishing.
         no_mans_land_inflation_params: Inflation parameters used instead of `inflation_params` while the mission
             state has `in_no_mans_land` set. Defaults to a larger fully inflated core so the robot keeps more
             distance from obstacles where lane markings are absent.
-        frame_id: TF frame the transformed grids are published in.
     """
 
+    frame_id: str
     inflation_params: InflationParams = InflationParams(
         inflation_radius_cells=12,
         inflation_falloff_extent_cells=0,
@@ -54,4 +55,3 @@ class OccupancyGridTransformConfig:
         inflation_falloff_extent_cells=0,
         inflation_decay_factor=0.9,
     )
-    frame_id: str = "odom"

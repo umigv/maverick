@@ -11,16 +11,18 @@ class PathTrackingConfig:
     """Configuration for path tracking.
 
     Attributes:
+        base_frame_id: Frame ID of the robot base, used as the child frame in odometry validation.
+        odom_frame_id: Frame ID of the odometry frame, used to validate incoming odom and path messages.
         pure_pursuit: Configuration for the pure pursuit controller.
         stanley: Configuration for the Stanley controller.
         differential_drive: Configuration for the differential-drive unicycle controller.
         algorithm: Which controller to run. One of "pure_pursuit", "stanley", "differential_drive".
         control_period_s: Period of the control loop timer (s).
-        base_frame_id: Frame ID of the robot base, used as the child frame in odometry validation.
-        odom_frame_id: Frame ID of the odometry frame, used to validate incoming odom and path messages.
         ramp_max_speed_mps: Maximum forward speed (m/s) while the mission state has in_ramp_approach set.
     """
 
+    base_frame_id: str
+    odom_frame_id: str
     # The controller configs are frozen dataclasses, so sharing one default instance is safe. RUF009 flags them only
     # because it cannot verify immutability across modules.
     pure_pursuit: PurePursuitConfig = PurePursuitConfig(  # noqa: RUF009
@@ -52,8 +54,6 @@ class PathTrackingConfig:
     )
     algorithm: Algorithm = "differential_drive"
     control_period_s: float = 0.01
-    base_frame_id: str = "base_link"
-    odom_frame_id: str = "odom"
     ramp_max_speed_mps: float = 1.0
 
     def __post_init__(self) -> None:

@@ -7,16 +7,16 @@ class UbloxDriverConfig:
     """Configuration for the ublox driver node.
 
     Attributes:
+        ublox_frame_id: The TF frame ID to use in published GPS messages.
         serial_port: The serial port device path for the GPS receiver.
         baud_rate: Serial baud rate for communication.
         poll_period_s: The period in seconds between GPS polls.
-        ublox_frame_id: The TF frame ID to use in published GPS messages.
     """
 
+    ublox_frame_id: str
     serial_port: Path = Path("/dev/ublox")
     baud_rate: int = 460800
     poll_period_s: float = 0.1
-    ublox_frame_id: str = "gps_link"
 
     def __post_init__(self) -> None:
         if self.baud_rate <= 0:
