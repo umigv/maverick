@@ -4,7 +4,7 @@
 <!-- Dimensions: 57.0mm diameter x 15.0mm height (cylindrical) -->
 <!-- Mass: 110g (excluding cable) -->
 <!-- Mounting Location: ARP (Antenna Reference Point) at bottom center of housing -->
-<!-- Phase Center Offset from ARP: not published in datasheet — set to 0, update if calibration data available -->
+<!-- Phase Center Offset from ARP: not published in datasheet - set to 0, update if calibration data available -->
 <!-- Joint Type: fixed -->
 <!-- Param name: name of the antenna -->
 <!-- Param parent: name of the parent link, defaulted to base_link -->
