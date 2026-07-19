@@ -1,28 +1,28 @@
 # Development
 
-How to work in this codebase: environment setup, the build/test loop, repo structure, and the conventions every change is expected to follow. For how changes get merged (branches, PRs, CI), see [CONTRIBUTING.md](CONTRIBUTING.md). For running the robot, see the [README](../README.md).
+How to work in this codebase: environment setup, the build/test loop, repo structure, and the conventions every change is expected to follow.
 
 ## Environment Setup
 
-Linux (x64/arm64) and macOS (Apple silicon) are supported. First run the [host bootstrap](https://github.com/umigv/nav-environment) if you haven't - it provides the two system tools this repo expects (`just` and `direnv`). Then:
+We offer first class support for:
+
+- System: Linux (x64/arm64), MacOS (Apple Silicon). Windows is supported through WSL2 and MacOS (Intel) support is untested
+- Shell: bash, zsh, fish
+- Editor: VSCode. Install recommended extensions in this repo (it should automatically prompt you)
+
+First run the [host bootstrap](https://github.com/umigv/nav-environment) if you haven't. Then:
 
 ```bash
 just setup
 ```
 
-Everything else - ROS, the build toolchain, and all workspace dependencies - lives in the pixi environment, defined in `pyproject.toml` (`[tool.pixi.*]`) with exact versions pinned in `pixi.lock`. The environment is created and kept up to date automatically whenever something runs through `pixi run`; there is no apt, rosdep, or pip step. Setup itself is idempotent and performs:
+Everything - ROS itself, the build toolchain, all dependencies - lives in the pixi environment, which direnv activates automatically inside the repo. Never install ROS system-wide or `source /opt/ros/...`. Mixing a system ROS into the pixi environment breaks in confusing ways (wrong Python, broken `rclpy` imports).
 
-- Initializes git submodules (and clears `build`/`install`/`log` if they changed)
-- Allows direnv in the repo: entering the directory auto-activates the pixi environment (`.envrc` runs `pixi shell-hook`), so raw `ros2` and `colcon` commands work in any shell inside the repo
-- Installs `ros2` CLI completions for your shell (bash, zsh, or fish)
-- Generates `pyrightconfig.json`
-- Installs git hooks: `pre-commit` runs lint; `post-checkout`/`post-merge`/`post-rewrite` regenerate `pyrightconfig.json`
+## Tooling
 
-Open a new terminal afterwards for the shell changes to take effect. VS Code: install the recommended extensions when prompted.
+All workflows go through `just` recipes, which run inside the pixi environment via `pixi run`, so they work even in a shell where the environment isn't activated. Don't invoke the scripts in `scripts/` directly.
 
-## The Core Loop
-
-All workflows go through `just` - run bare `just` to list every recipe. Recipes run inside the pixi environment via `pixi run`, so they work even in a shell where the environment isn't activated. The scripts in `scripts/` are implementation details of the recipes; don't invoke them directly.
+Run bare `just` to list every recipe. The core workflows:
 
 ```bash
 just build                # Build the workspace
@@ -52,14 +52,20 @@ Each package documents its own interface (topics, services, behavior) in its REA
 
 ## Where to Add Dependencies
 
-| Dependency                                       | Where it goes                                                                                                                                                        |
-| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ROS package used by a node                       | `[tool.pixi.feature.ros.dependencies]` in `pyproject.toml` as `ros-<distro>-*` (robostack channel), plus a `<depend>`/`<exec_depend>` in the package's `package.xml` |
-| Python or C/C++ library available on conda-forge | `[tool.pixi.feature.ros.dependencies]`, plus the `package.xml` entry                                                                                                 |
-| Python library only on PyPI                      | `[tool.pixi.feature.ros.pypi-dependencies]`, plus a `-pip`-suffixed `package.xml` entry (e.g. `python3-odrive-pip`)                                                  |
-| Repo-wide dev/lint tooling                       | `[tool.pixi.feature.tooling.dependencies]`                                                                                                                           |
+All dependencies are installed by pixi and declared in `pyproject.toml`:
 
-pixi is what installs dependencies; `package.xml` still declares what each package uses (colcon reads it for build ordering, and it keeps per-package usage auditable). After changing dependencies, the refreshed `pixi.lock` is part of the change - commit it. Never add a `requirements.txt` or install anything with apt/pip by hand: the environment must stay fully described by `pyproject.toml` + `pixi.lock` so it is reproducible on every machine and in CI.
+| Dependency                                       | Where it goes                                                                  |
+| ------------------------------------------------ | ------------------------------------------------------------------------------ |
+| ROS package used by a node                       | `[tool.pixi.feature.ros.dependencies]` as `ros-<distro>-*` (robostack channel) |
+| Python or C/C++ library available on conda-forge | `[tool.pixi.feature.ros.dependencies]`                                         |
+| Python library only on PyPI                      | `[tool.pixi.feature.ros.pypi-dependencies]`                                    |
+| Repo-wide dev/lint tooling                       | `[tool.pixi.feature.tooling.dependencies]`                                     |
+
+`package.xml` only requires dependencies on other packages in this workspace - colcon reads it for build ordering. External dependencies doesn't need a `package.xml` entry.
+
+After changing dependencies, the refreshed `pixi.lock` is part of the change - commit it. Never add a `requirements.txt` or install anything with apt/pip by hand: the environment must stay fully described by `pyproject.toml` + `pixi.lock` so it is reproducible on every machine and in CI.
+
+The ROS distro is named only in `pyproject.toml` (the `ros-<distro>-*` dependency names). Never hardcode the distro anywhere else - a distro bump should touch only `pyproject.toml` and `pixi.lock`.
 
 ## Creating a Package
 
@@ -67,18 +73,34 @@ pixi is what installs dependencies; `package.xml` still declares what each packa
 just create-package <dir> <package> [--type python|cpp]
 ```
 
-Copies [`template_python`](../src/template/template_python) or [`template_cpp`](../src/template/template_cpp) into `<dir>/<package>`: a README stub, a config dataclass (Python), and the standard `setup.py`/`CMakeLists.txt`/`package.xml` shape.
+Copies [`template_python`](../src/template/template_python) or [`template_cpp`](../src/template/template_cpp) into `<dir>/<package>`. Fill out every `TODO` the template leaves.
 
-Config convention: first-party nodes take no YAML files. Parameters live in a frozen config dataclass loaded via `utils.config`, with validation in `__post_init__` - the dataclass and its docstring are the parameter documentation. See the [utils README](../src/core/utils/README.md#utilsconfig) for the loader semantics. Launch files inject cross-cutting values (frame IDs, file paths) as inline parameters.
+## Node Configuration
+
+- First-party nodes take no YAML files.
+- Parameters live in a frozen config dataclass loaded via `utils.config`, with validation in `__post_init__` - the dataclass and its docstring are the parameter documentation. See the [utils README](../src/core/utils/README.md#utilsconfig) for the loader semantics.
+- Parameters shared with other nodes (e.g. frame IDs, GPS datum and course file paths, e-stop file path) are required and never defaulted. They are to be injected by launch files to ensure no drift.
+
+## Documentation
+
+- Every package has a README documenting its interface and behavior; `just create-package` scaffolds one. Update it in the same PR as the behavior it documents.
+- Section vocabulary (in this order, behavior sections first): free-form behavior/algorithm sections, then `Subscribed Topics`, `Published Topics`, `Services`, `Service Clients`, `Read Files`, `Written Files`, `TF Broadcasts`, `TF Requirements`, `Config Parameters`, `Scripts`. Delete sections that don't apply.
+- Parameters live in the config dataclass, so Python READMEs don't document them. C++ packages (no config loader) get a `Config Parameters` table.
+- Markdown is soft-wrapped: one line per paragraph, no manual line breaks. `.editorconfig` and the VS Code word-wrap settings keep soft-wrapped lines readable in editors.
+- Use a plain hyphen surrounded by spaces as the separator, never an em-dash. Bullet descriptions after the separator start capitalized.
+- Topic bullets follow `` `topic` (`pkg/Msg`) - Description `` with the `msg`/`srv` segment omitted from type names.
 
 ## Code Style
 
-- `just lint` runs ruff (format check + lint), mypy, clang-format, and mdformat; `just format` auto-fixes formatting. All are configured in `pyproject.toml`.
-- The whole lint toolchain is pinned by pixi (e.g. `clang-format = "22.*"`), so local results always match CI - there is no version drift to debug.
+Beyond what the linters enforce:
+
+- Numeric names carry unit suffixes: `_m`, `_s`, `_mps`, `_radps`, `_m2`, and so on (e.g. `waypoint_reached_threshold_m`, `control_period_s`).
+- Recurring timing is expressed as a period in seconds (`publish_period_s`), never as a rate or frequency in Hz.
 - C++ includes: `<...>` for external dependencies, `"..."` for the package's own headers.
 
 ## Cross-Cutting Conventions
 
-- TF frame names are defined once in `bringup/config/frames.yaml` and injected into nodes by launch files - never hardcode a frame name in a node.
-- Latched topics (`mission_state`, ground-truth maps) must use `utils.qos.LATCHED` on both the publisher and subscriber - a QoS mismatch silently drops all messages.
+- TF frame names are defined once in `bringup/config/frames.yaml`.
+- Nodes publish and subscribe generic topic names (`odom`, `occupancy_grid`, `goal`). Launch files remap them to the stack-wide wiring documented in [bringup/README.md](../src/bringup/README.md). Never hardcode a stack-specific topic path in a node.
+- Latched topics (e.g. `mission_state`, ground-truth maps) must use `utils.qos.LATCHED` on both the publisher and subscriber - a QoS mismatch silently drops all messages.
 - The e-stop state is a file, not a topic: `estop_driver` writes it, other nodes read it directly. See [estop_driver](../src/hardware/estop_driver/README.md).

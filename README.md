@@ -55,7 +55,6 @@ See [bringup/README.md](src/bringup/README.md) for which displays are enabled by
 A tmux configuration is included to avoid needing to create too many terminals.
 
 ```bash
-# Runs rviz and divides terminal into panes in which to run the launch commands
 just tmux
 ```
 
