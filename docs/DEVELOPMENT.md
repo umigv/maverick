@@ -83,10 +83,10 @@ Copies [`template_python`](../src/template/template_python) or [`template_cpp`](
 
 ## Documentation
 
-- Every package has a README documenting its interface and behavior; `just create-package` scaffolds one. Update it in the same PR as the behavior it documents.
-- Section vocabulary (in this order, behavior sections first): free-form behavior/algorithm sections, then `Subscribed Topics`, `Published Topics`, `Services`, `Service Clients`, `Read Files`, `Written Files`, `TF Broadcasts`, `TF Requirements`, `Config Parameters`, `Scripts`. Delete sections that don't apply.
-- Parameters live in the config dataclass, so Python READMEs don't document them. C++ packages (no config loader) get a `Config Parameters` table.
-- Markdown is soft-wrapped: one line per paragraph, no manual line breaks. `.editorconfig` and the VS Code word-wrap settings keep soft-wrapped lines readable in editors.
+Beyond what the linters enforce and what's in the template README instructions:
+
+- Update documentation in the same PR as the behavior it documents.
+- Only C++ packages get a `Config Parameters` table as they have no dataclasses with all the configs documented together.
 - Use a plain hyphen surrounded by spaces as the separator, never an em-dash. Bullet descriptions after the separator start capitalized.
 - Topic bullets follow `` `topic` (`pkg/Msg`) - Description `` with the `msg`/`srv` segment omitted from type names.
 
@@ -97,6 +97,7 @@ Beyond what the linters enforce:
 - Numeric names carry unit suffixes: `_m`, `_s`, `_mps`, `_radps`, `_m2`, and so on (e.g. `waypoint_reached_threshold_m`, `control_period_s`).
 - Recurring timing is expressed as a period in seconds (`publish_period_s`), never as a rate or frequency in Hz.
 - C++ includes: `<...>` for external dependencies, `"..."` for the package's own headers.
+- No em-dash and no `“`. Unfortunately they are too AI-coded nowadays.
 
 ## Cross-Cutting Conventions
 
