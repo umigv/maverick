@@ -6,7 +6,7 @@ Small utilities for ROS 2 Python nodes:
 
 Adds a simple config-loading utility for ROS 2.
 
-To use, you will want to create a python dataclass where each field in the config dataclass corresponds to a ROS 2 parameter key. The field’s default value (if provided) is used as the parameter’s default.
+To use, you will want to create a python dataclass where each field in the config dataclass corresponds to a ROS 2 parameter key. The field's default value (if provided) is used as the parameter's default.
 
 Mapping rules:
 
