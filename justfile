@@ -23,11 +23,11 @@ test *args:
     pixi run colcon test-result --verbose
 
 # Build a single package and its dependencies
-build-pkg pkg *args:
+build-package pkg *args:
     pixi run colcon build --packages-up-to {{pkg}} {{args}}
 
 # Run tests for a single package
-test-pkg pkg *args:
+test-package pkg *args:
     pixi run colcon test --packages-select {{pkg}} {{args}}
     pixi run colcon test-result --verbose
 
