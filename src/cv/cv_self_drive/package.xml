@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>cv_self_drive</name>
+  <version>0.0.1</version>
+  <description>CV selfdrive stack</description>
+
+  <maintainer>UMARV</maintainer>
+  <license></license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <exec_depend>rclpy</exec_depend>
+
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>python3-pyzed</exec_depend>
+  <exec_depend>python3-pip</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
+  <exec_depend>python3-torch</exec_depend>
+  <exec_depend>python3-ultralytics-pip</exec_depend>
+
+</package>

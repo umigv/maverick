@@ -1,0 +1,54 @@
+{
+    "0": {
+        "white": {
+            "h_upper": 179,
+            "h_lower": 0,
+            "s_upper": 28,
+            "s_lower": 0,
+            "v_upper": 255,
+            "v_lower": 224
+        },
+        "yellow": {
+            "h_upper": 61,
+            "h_lower": 29,
+            "s_upper": 255,
+            "s_lower": 129,
+            "v_upper": 255,
+            "v_lower": 87
+        },
+        "__ZED_SETTINGS__": {
+            "BRIGHTNESS": 5,
+            "CONTRAST": 5,
+            "HUE": 9,
+            "SATURATION": 5,
+            "SHARPNESS": 5,
+            "GAMMA": 6
+        }
+    },
+    "1": {
+        "yellow": {
+            "h_upper": 68,
+            "h_lower": 28,
+            "s_upper": 255,
+            "s_lower": 221,
+            "v_upper": 255,
+            "v_lower": 63
+        },
+        "white": {
+            "h_upper": 179,
+            "h_lower": 0,
+            "s_upper": 37,
+            "s_lower": 0,
+            "v_upper": 255,
+            "v_lower": 54
+        },
+        "__ZED_SETTINGS__": {
+            "BRIGHTNESS": 2,
+            "CONTRAST": 2,
+            "HUE": 3,
+            "SATURATION": 4,
+            "SHARPNESS": 0,
+            "GAMMA": 1
+        }
+    }
+}
