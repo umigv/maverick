@@ -40,7 +40,7 @@ just
 just build
 
 # Build a single package including dependencies
-just build-pkg <package>
+just build-package <package>
 ```
 
 Run each of these commands in separate terminals:
@@ -101,7 +101,7 @@ To exit, close the window by pressing the prefix key (Ctrl + B) and then `&` (Sh
 just test
 
 # Run tests for a single package
-just test-pkg <package>
+just test-package <package>
 ```
 
 ## Formatting & Linting

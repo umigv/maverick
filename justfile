@@ -23,12 +23,12 @@ test *args:
     pixi run colcon test-result --verbose
 
 # Build a single package and its dependencies
-build-pkg pkg *args:
-    pixi run colcon build --packages-up-to {{pkg}} {{args}}
+build-package package *args:
+    pixi run colcon build --packages-up-to {{package}} {{args}}
 
 # Run tests for a single package
-test-pkg pkg *args:
-    pixi run colcon test --packages-select {{pkg}} {{args}}
+test-package package *args:
+    pixi run colcon test --packages-select {{package}} {{args}}
     pixi run colcon test-result --verbose
 
 # Delete build, install, and log directories
