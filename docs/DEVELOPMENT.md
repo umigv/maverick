@@ -26,9 +26,9 @@ Run bare `just` to list every recipe. The core workflows:
 
 ```bash
 just build                # Build the workspace
-just build-pkg <package>  # Build one package and its dependencies
+just build-package <package>  # Build one package and its dependencies
 just test                 # Run all tests
-just test-pkg <package>   # Run tests for one package
+just test-package <package>   # Run tests for one package
 just lint                 # Check formatting and lint
 just format               # Auto-fix formatting
 just clean                # Delete build/install/log
