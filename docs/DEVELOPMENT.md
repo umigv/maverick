@@ -97,7 +97,7 @@ Beyond what the linters enforce:
 - Numeric names carry unit suffixes: `_m`, `_s`, `_mps`, `_radps`, `_m2`, and so on (e.g. `waypoint_reached_threshold_m`, `control_period_s`).
 - Recurring timing is expressed as a period in seconds (`publish_period_s`), never as a rate or frequency in Hz.
 - C++ #includes: `<...>` for external dependencies, `"..."` for the package's own headers.
-- No em-dash and no `“`. Unfortunately they are too AI-coded nowadays.
+- No em-dash and no `“` (smart quotes). Unfortunately, they are too AI-coded nowadays.
 
 ## Cross-Cutting Conventions
 
