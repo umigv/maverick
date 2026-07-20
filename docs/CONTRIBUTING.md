@@ -4,7 +4,7 @@ How changes get into `main`: issues, branches, pull requests, reviews, and CI.
 
 ## Issues
 
-- Work is tracked in GitHub issues - one issue per bug, feature, or improvement, so nothing lives only in someone's head or a chat scroll.
+- Work is tracked in GitHub issues - one issue per bug, feature, or improvement - so nothing lives only in someone's head or a chat scroll.
 - A PR that finishes an issue closes it via the PR template ("Closes #NN"); partial progress gets a comment on the issue instead.
 - Assign yourself to an issue before starting on it, so two people don't build the same thing.
 

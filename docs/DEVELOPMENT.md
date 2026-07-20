@@ -6,9 +6,9 @@ How to work in this codebase: environment setup, the build/test loop, repo struc
 
 We offer first class support for:
 
-- System: Linux (x64/arm64), MacOS (Apple Silicon). Windows is supported through WSL2 and MacOS (Intel) support is untested
+- System: Linux (x64/arm64), MacOS (Apple Silicon). Windows is supported through WSL2, and MacOS (Intel) support is untested.
 - Shell: bash, zsh, fish
-- Editor: VSCode. Install recommended extensions in this repo (it should automatically prompt you)
+- Editor: VSCode. Install recommended extensions in this repo (it should automatically prompt you).
 
 First run the [host bootstrap](https://github.com/umigv/nav-environment) if you haven't. Then:
 
@@ -63,7 +63,7 @@ All dependencies are installed by pixi and declared in `pyproject.toml`:
 
 `package.xml` only requires dependencies on other packages in this workspace - colcon reads it for build ordering. External dependencies don't need a `package.xml` entry.
 
-After changing dependencies, the refreshed `pixi.lock` is part of the change - commit it. Never add a `requirements.txt` or install anything with apt/pip by hand: the environment must stay fully described by `pyproject.toml` + `pixi.lock` so it is reproducible on every machine and in CI.
+After changing dependencies, `pixi.lock` should change to reflect edited dependencies. It is part of the change - commit it. Never add a `requirements.txt` or install anything with apt/pip by hand: the environment must stay fully described by `pyproject.toml` + `pixi.lock` so it is reproducible on every machine and in CI.
 
 The ROS distro is named only in `pyproject.toml` (the `ros-<distro>-*` dependency names). Never hardcode the distro anywhere else - a distro bump should touch only `pyproject.toml` and `pixi.lock`.
 
@@ -96,7 +96,7 @@ Beyond what the linters enforce:
 
 - Numeric names carry unit suffixes: `_m`, `_s`, `_mps`, `_radps`, `_m2`, and so on (e.g. `waypoint_reached_threshold_m`, `control_period_s`).
 - Recurring timing is expressed as a period in seconds (`publish_period_s`), never as a rate or frequency in Hz.
-- C++ includes: `<...>` for external dependencies, `"..."` for the package's own headers.
+- C++ #includes: `<...>` for external dependencies, `"..."` for the package's own headers.
 - No em-dash and no `“`. Unfortunately they are too AI-coded nowadays.
 
 ## Cross-Cutting Conventions

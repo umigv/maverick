@@ -15,23 +15,23 @@ How to operate the physical robot on a test or competition day. Everything runs 
 
 ## What to bring
 
-- LiPO batteries.
-- Laptop and chargers.
-- Power banks and chargers.
-- Remote e-stop.
-- Chair.
-- Isopropyl alcohol and cloth.
-- A wifi source (e.g. hotspot).
-- PS4 controller.
-- Test obstacles.
-- Tools for quick repairs.
+- LiPO batteries
+- Laptop and chargers
+- Power banks and chargers
+- Remote e-stop
+- Chair
+- Isopropyl alcohol and cloth
+- A wifi source (e.g. hotspot)
+- PS4 controller
+- Test obstacles
+- Tools for quick repairs
 
 For comp additionally:
 
-- A prepped replacement for every key part on the robot.
-- Aluminum stock that is easy to work with, for rapid prototyping on-site.
-- Umbrella - shade for the laptop screen.
-- Sunscreen - comp days are long hours in direct sun.
+- A prepped replacement for every key part on the robot
+- Aluminum extrusion, fastener joints, and power tools like table saw and drill for rapid prototyping on-site
+- Umbrella for shade for the laptop screen
+- Sunscreen - comp days are long hours in direct sun
 
 ## Course setup
 
@@ -80,7 +80,7 @@ Competition waypoints are handed out in packed DMS format: store them verbatim i
 - The antennas are screwed onto the ground plane using plastic screws in the electrical box.
 - Use the Milwaukee folding ruler to measure the offsets between the sensors. The measured offsets go into the URDF as the sensor offset constants (base→IMU, IMU→GNSS A, GNSS A→GNSS B) in [maverick_description/urdf/constants.xacro](../src/description/maverick_description/urdf/constants.xacro); at startup the [vectornav driver](../src/hardware/vectornav_driver/README.md) reads the resulting TF and writes the offsets to the sensor.
 - Documentation PDFs are on Dropbox.
-- Support contact: support@vectornav.com or +1 (512) 772-3615.
+- Support contact: support@vectornav.com or +1 (512) 772-3615
 
 ## Controller pairing
 
@@ -121,3 +121,7 @@ When things go wrong: suspect hardware more than you think (consider what is dif
 **Robot doesn't follow paths precisely.** Likely inertia - the controllers may need retuning. Note that weight changes affect path tracking tuning, and gear ratio or wheel diameter changes affect odometry, so physical changes to the platform mean software retuning.
 
 **GPS fix is bad or satellite count drops.** Run `just vectornav-monitor` to see the decoded INS and GNSS status. The VN300 antenna is sensitive to USB 3.0 EMI - this is an ongoing problem to be fixed. Make sure nothing running USB 3.0 (ZED camera, USB hub) is close to the antenna cables; move them physically as far apart as possible. Elevating the receivers also improves signal.
+
+**ZED camera initialization fails or frames are intermittent.** - Check the cable's connection to the back of the camera. The screws need to be absolutely tight.
+
+**ZED camera is inaccurate after autocalibration.** - Retry with a scene with more detail. Being too close to an object or seeing only empty space may inhibit its accuracy.
