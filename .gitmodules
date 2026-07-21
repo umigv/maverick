@@ -1,3 +1,6 @@
 [submodule "src/hardware/vectornav_driver/third_party/vectornav_sdk"]
 	path = src/hardware/vectornav_driver/third_party/vectornav_sdk
 	url = git@github.com:umigv/vectornav_sdk.git
+[submodule "src/cv/cv_self_drive/cv_self_drive/cv-depth-segmentation"]
+	path = src/cv/cv_self_drive/cv_self_drive/cv-depth-segmentation
+	url = https://github.com/umigv/cv-depth-segmentation/
