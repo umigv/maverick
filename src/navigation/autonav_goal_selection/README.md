@@ -91,6 +91,6 @@ Goal publishing also stops once `mission_complete` is set.
 
 With `publish_debug: true`, subscribe to `goal_selection_debug` in RViz (MarkerArray display). You will see:
 
-- Thin lines for all rays, colored red→green by normalized score
+- Thin lines for all rays, colored red->green by normalized score
 - A thick yellow line for the chosen (highest-scoring) ray
 - A thick blue line for the momentum-aligned ray

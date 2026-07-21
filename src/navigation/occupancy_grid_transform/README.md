@@ -27,7 +27,7 @@ The occupancy grid from CV is expected to match the convention of [`nav_msgs/Occ
 After the grid is converted and a border is added, obstacle inflation is applied. Inflation turns the border into a soft wall that discourages planning near the grid edges. For each occupied cell, surrounding cells are inflated based on their distance:
 
 - Cells within `inflation_radius_cells` are set to fully occupied (100)
-- Cells in the next `inflation_falloff_extent_cells` ring decay as `100 × decay^(dist - inflation_radius_cells)`
+- Cells in the next `inflation_falloff_extent_cells` ring decay as `100 * decay^(dist - inflation_radius_cells)`
 - Cells beyond `inflation_radius_cells + inflation_falloff_extent_cells` are unaffected
 
 Two parameter sets are configured: `inflation_params` is used normally, and `no_mans_land_inflation_params` is used while the mission state has `in_no_mans_land` set. Since spaced out obstacles form the border of no man's land instead of the usual lane lines, the no man's land set uses a larger inflation radius to keep the robot further from obstacles and therefore within the border.

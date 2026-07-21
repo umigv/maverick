@@ -182,7 +182,7 @@ class OccupancyGridSimulator(Node):
         """
         Return the parametric interval `(t_enter, t_exit)` on the ray `robot + t * delta` that passes through the 1-D slab `[obstacle, obstacle + 1)`.
 
-        Handle parallel rays (`|delta| ≈ 0`) by returning an open interval if the robot is inside the slab, or an empty
+        Handle parallel rays (`|delta| ~= 0`) by returning an open interval if the robot is inside the slab, or an empty
         interval otherwise.
         """
         parallel = np.abs(delta) <= OccupancyGridSimulator.EPSILON
@@ -205,7 +205,7 @@ class OccupancyGridSimulator(Node):
         robot_col = -self.config.offset_x_m / self.resolution_m - 0.5
         robot_row = -self.config.offset_y_m / self.resolution_m - 0.5
 
-        # Axes: col → (1, W, 1), row → (H, 1, 1), obstacles → (1, 1, N); broadcast to (H, W, N).
+        # Axes: col -> (1, W, 1), row -> (H, 1, 1), obstacles -> (1, 1, N); broadcast to (H, W, N).
         delta_col = np.arange(self.width_cells)[np.newaxis, :, np.newaxis] + 0.5 - robot_col
         delta_row = np.arange(self.height_cells)[:, np.newaxis, np.newaxis] + 0.5 - robot_row
         obs_col = obstacle_cols[np.newaxis, np.newaxis, :].astype(np.float64)
@@ -217,7 +217,7 @@ class OccupancyGridSimulator(Node):
         t_enter = np.maximum(t_enter_col, t_enter_row)  # (H, W, N)
         t_exit = np.minimum(t_exit_col, t_exit_row)  # (H, W, N)
 
-        # Cell is occluded if any obstacle intersects the ray at t ∈ (0, 1).
+        # Cell is occluded if any obstacle intersects the ray at t in (0, 1).
         blocking = (t_enter < 1.0 - self.EPSILON) & (t_exit > self.EPSILON) & (t_enter < t_exit)
         obstacle_grid[np.any(blocking, axis=2)] = self.OCCUPIED
 

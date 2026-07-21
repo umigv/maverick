@@ -119,7 +119,7 @@ Math utilities.
 
 ### `Rotation2d`
 
-Wraps a yaw angle in radians. Angle is automatically wrapped to `[-π, π]` and `cos`/`sin` are cached on construction.
+Wraps a yaw angle in radians. Angle is automatically wrapped to `[-pi, pi]` and `cos`/`sin` are cached on construction.
 
 ### `Point2d`
 
@@ -150,14 +150,14 @@ The supplied occupancy grid is assumed to have the following conventions (matchi
 
 ### State
 
-State of the occupancy grid at some point can be queried using `state(point)`, which returns a `CellState`. Points outside `[0..width) × [0..height)` return an unknown cell.
+State of the occupancy grid at some point can be queried using `state(point)`, which returns a `CellState`. Points outside `[0..width) x [0..height)` return an unknown cell.
 
 `CellState` exposes the following properties:
 
 | Property      | Description                                   |
 | ------------- | --------------------------------------------- |
 | `is_unknown`  | True if the cell lies outside the grid bounds |
-| `is_drivable` | True if occupancy probability is ≤ 30         |
+| `is_drivable` | True if occupancy probability is \<= 30       |
 
 ### Full grid iteration in continuous space via in_bound_points
 

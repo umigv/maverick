@@ -12,12 +12,12 @@ from .math import clamp
 class Rotation2d:
     """A 2D rotation represented as a yaw angle in radians.
 
-    The angle is automatically wrapped to [-π, π] on construction. cos and sin
+    The angle is automatically wrapped to [-pi, pi] on construction. cos and sin
     are cached to avoid redundant trigonometry when rotating multiple points by
     the same rotation.
 
     Attributes:
-        angle: Yaw angle in radians, wrapped to [-π, π].
+        angle: Yaw angle in radians, wrapped to [-pi, pi].
     """
 
     angle: float

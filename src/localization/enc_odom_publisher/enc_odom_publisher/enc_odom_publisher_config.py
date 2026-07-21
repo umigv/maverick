@@ -8,9 +8,9 @@ class EncOdomPublisherConfig:
     Attributes:
         odom_frame_id: Parent frame for odometry and TF.
         base_frame_id: Child frame for odometry and TF.
-        pose_x_variance_m2: Pose covariance for x (m²).
-        pose_y_variance_m2: Pose covariance for y (m²).
-        pose_yaw_variance_rad2: Pose covariance for yaw (rad²).
+        pose_x_variance_m2: Pose covariance for x (m^2).
+        pose_y_variance_m2: Pose covariance for y (m^2).
+        pose_yaw_variance_rad2: Pose covariance for yaw (rad^2).
         max_dt_s: Maximum allowed dt (s) between encoder messages; updates exceeding this are dropped.
         publish_period_s: Period (s) at which odom and TF are published.
     """

@@ -32,8 +32,8 @@ TEXT_NO = red("No")
 TEXT_OK = green("OK")
 TEXT_ERR = red("ERROR")
 
-CHECKMARK_OK = green("[✓]")
-CHECKMARK_NO = red("[✗]")
+CHECKMARK_OK = green("[Y]")
+CHECKMARK_NO = red("[N]")
 CHECKMARK_UNKNOWN = yellow("[?]")
 
 # A topic is considered stale once this many seconds pass without a fresh message.
@@ -193,7 +193,7 @@ def _signal_health_hints(sh: SignalHealth) -> str:
     # Diagnostic interpretations based on VectorNav VN300 ICD section 4.8.1
     hints = []
     if sh.com_rtk < 6:
-        hints.append(f"  {red('GNSS compass requires ≥6 common RTK sats')}")
+        hints.append(f"  {red('GNSS compass requires >=6 common RTK sats')}")
 
     a_sky = sh.pvt_a < 8 and sh.rtk_a < 6 and sh.cn0_a >= 50
     b_sky = sh.pvt_b < 8 and sh.rtk_b < 6 and sh.cn0_b >= 50
@@ -320,16 +320,16 @@ class VectornavMonitor(Node):
                 return f"  {green('System fully operational')}"
 
             case Phase.HEADING_CONVERGENCE:
-                header = f"  Next → {Phase.TRACKING.label}"
+                header = f"  Next -> {Phase.TRACKING.label}"
 
                 if self.yaw.is_stale(now):
-                    return f"{header}\n    {CHECKMARK_UNKNOWN} Yaw uncertainty < 2°  (data stale)"
+                    return f"{header}\n    {CHECKMARK_UNKNOWN} Yaw uncertainty < 2 deg  (data stale)"
 
                 chk = CHECKMARK_OK if self.yaw.value < 2.0 else CHECKMARK_NO
-                return f"{header}\n    {chk} Yaw uncertainty < 2°  (current: {self.yaw.value:.2f}°)"
+                return f"{header}\n    {chk} Yaw uncertainty < 2 deg  (current: {self.yaw.value:.2f} deg)"
 
             case Phase.COMPASS_TRACKING:
-                header = f"  Next → {Phase.HEADING_CONVERGENCE.label}"
+                header = f"  Next -> {Phase.HEADING_CONVERGENCE.label}"
 
                 if self.startup.is_stale(now):
                     return f"{header}\n    {CHECKMARK_UNKNOWN} Startup % = 100%  (data stale)"
@@ -338,25 +338,25 @@ class VectornavMonitor(Node):
                 return f"{header}\n    {chk} Startup % = 100%  (current: {self.startup.value:.0f}%)"
 
             case Phase.ALIGNING:
-                header = f"  Next → {Phase.COMPASS_TRACKING.label}"
+                header = f"  Next -> {Phase.COMPASS_TRACKING.label}"
                 if self.signal_health.is_stale(now):
-                    return f"{header}\n    {CHECKMARK_UNKNOWN} Common RTK sats ≥ 6  (data stale)"
+                    return f"{header}\n    {CHECKMARK_UNKNOWN} Common RTK sats >= 6  (data stale)"
 
                 rtk_ok = self.signal_health.value.com_rtk >= 6
                 chk = CHECKMARK_OK if rtk_ok else CHECKMARK_NO
-                lines = [header, f"    {chk} Common RTK sats ≥ 6  (current: {self.signal_health.value.com_rtk:.0f})"]
+                lines = [header, f"    {chk} Common RTK sats >= 6  (current: {self.signal_health.value.com_rtk:.0f})"]
                 if rtk_ok:
                     lines.append(
-                        f"    {yellow('Still in C despite RTK ≥ 6? Try unplugging and replugging the sensor')}"
+                        f"    {yellow('Still in C despite RTK >= 6? Try unplugging and replugging the sensor')}"
                     )
                 return "\n".join(lines)
 
             case Phase.GNSS_FIX:
-                return f"  Next → {Phase.ALIGNING.label}\n    Automatic (~1s after GNSS fix)"
+                return f"  Next -> {Phase.ALIGNING.label}\n    Automatic (~1s after GNSS fix)"
 
             case Phase.INIT:
                 return (
-                    f"  Next → {Phase.GNSS_FIX.label}\n    {CHECKMARK_NO} GNSS fix  (waiting, ~30-45s with clear sky)"
+                    f"  Next -> {Phase.GNSS_FIX.label}\n    {CHECKMARK_NO} GNSS fix  (waiting, ~30-45s with clear sky)"
                 )
 
             case _:

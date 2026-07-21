@@ -1,7 +1,7 @@
 default:
     @just --list
 
-# ── Environment ────────────────────────────────────────────────────────────────
+# -- Environment -------------------------------------------------------------------------------------------------------
 
 # Install dependencies and configure the dev environment
 setup:
@@ -11,7 +11,7 @@ setup:
 generate-pyrightconfig:
     pixi run python3 scripts/generate_pyrightconfig.py
 
-# ── Build & Test ───────────────────────────────────────────────────────────────
+# -- Build & Test ------------------------------------------------------------------------------------------------------
 
 # Build the entire workspace
 build *args:
@@ -35,7 +35,7 @@ test-package package *args:
 clean:
     rm -rf build install log
 
-# ── Code Quality ───────────────────────────────────────────────────────────────
+# -- Code Quality ------------------------------------------------------------------------------------------------------
 
 # Auto-format all source files
 format *args:
@@ -45,14 +45,14 @@ format *args:
 lint *args:
     pixi run python3 scripts/lint.py {{args}}
 
-# ── Packages ───────────────────────────────────────────────────────────────────
+# -- Packages ----------------------------------------------------------------------------------------------------------
 
 # Create a new ROS 2 package (type: python|cpp)
 create-package dir package type='python':
     pixi run python3 scripts/create_package.py {{dir}} {{package}} --type {{type}}
     just generate-pyrightconfig
 
-# ── Devices ────────────────────────────────────────────────────────────────────
+# -- Devices -----------------------------------------------------------------------------------------------------------
 
 # Create a udev alias for a device
 alias device name:
@@ -62,13 +62,13 @@ alias device name:
 unalias name:
     pixi run python3 scripts/remove_device_alias.py {{name}}
 
-# ── Waypoints ──────────────────────────────────────────────────────────────────
+# -- Waypoints ---------------------------------------------------------------------------------------------------------
 
 # Convert all packed-DMS waypoints (waypoints/dms/) to decimal degrees (waypoints/decimal/)
 convert-waypoints:
     pixi run python3 scripts/convert_waypoint.py
 
-# ── ROS 2 ──────────────────────────────────────────────────────────────────────
+# -- ROS 2 -------------------------------------------------------------------------------------------------------------
 
 # Open RViz with the shared stack configuration
 rviz:
@@ -86,7 +86,7 @@ publish topic input rate='once':
 tmux:
     pixi run tmux -f tmux.conf attach
 
-# ── ODrive ────────────────────────────────────────────────────────────────────
+# -- ODrive ------------------------------------------------------------------------------------------------------------
 
 # Calibrate the ODrive motor controllers
 calibrate-odrive:
@@ -100,7 +100,7 @@ clear-odrive-errors:
 plot-odrive *args:
     pixi run python3 src/hardware/odrive_driver/scripts/plot_motor_signals.py {{args}}
 
-# ── VectorNav ──────────────────────────────────────────────────────────────────
+# -- VectorNav ---------------------------------------------------------------------------------------------------------
 
 # Monitor IMU orientation as Euler angles
 euler-monitor *args:

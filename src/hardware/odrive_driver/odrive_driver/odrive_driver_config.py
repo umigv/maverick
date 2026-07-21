@@ -69,8 +69,8 @@ class ControllerConfig:
         vel_integrator_gain: Velocity controller integrator gain (A / (m/s * s)).
         vel_integrator_limit: Integrator output clamp (A). 0.0 disables the limit.
         vel_limit_mps: Motor velocity hard limit (m/s). Trips an error if exceeded.
-        accel_limit_mps2: Maximum linear acceleration applied via ODrive velocity ramp (m/s²).
-        inertia: Feed-forward inertia compensation (Nm / (m/s²)).
+        accel_limit_mps2: Maximum linear acceleration applied via ODrive velocity ramp (m/s^2).
+        inertia: Feed-forward inertia compensation (Nm / (m/s^2)).
     """
 
     vel_gain: float
@@ -100,15 +100,15 @@ class CovarianceConfig:
     """Dynamic covariance model for the published twist estimate.
 
     Variance scales with speed to reflect increased uncertainty at higher velocities:
-        linear_variance  = linear_variance_static  + linear_variance_gain  * linear_mps²
+        linear_variance  = linear_variance_static  + linear_variance_gain  * linear_mps^2
         angular_variance = angular_variance_static + angular_variance_gain *
-                           (linear_mps² / track_width_m² + angular_radps²)
+                           (linear_mps^2 / track_width_m^2 + angular_radps^2)
 
     Attributes:
-        linear_variance_static: Baseline linear velocity variance, independent of speed (m²/s²).
-        linear_variance_gain: Speed-dependent gain on linear velocity variance (m²/s² per (m/s)²).
-        angular_variance_static: Baseline angular velocity variance, independent of speed (rad²/s²).
-        angular_variance_gain: Speed-dependent gain on angular velocity variance (rad²/s² per (m/s)²).
+        linear_variance_static: Baseline linear velocity variance, independent of speed (m^2/s^2).
+        linear_variance_gain: Speed-dependent gain on linear velocity variance (m^2/s^2 per (m/s)^2).
+        angular_variance_static: Baseline angular velocity variance, independent of speed (rad^2/s^2).
+        angular_variance_gain: Speed-dependent gain on angular velocity variance (rad^2/s^2 per (m/s)^2).
     """
 
     linear_variance_static: float

@@ -38,7 +38,7 @@ class ImuEulerNode(Node):
         pitch_deg = math.degrees(pitch)
         yaw_deg = math.degrees(yaw)
 
-        self.get_logger().info(f"Roll: {roll_deg:7.2f}°  Pitch: {pitch_deg:7.2f}°  Yaw: {yaw_deg:7.2f}°")
+        self.get_logger().info(f"Roll: {roll_deg:7.2f} deg  Pitch: {pitch_deg:7.2f} deg  Yaw: {yaw_deg:7.2f} deg")
 
 
 def main() -> None:

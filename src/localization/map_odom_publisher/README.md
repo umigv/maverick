@@ -1,8 +1,8 @@
 # map_odom_publisher
 
-Computes and broadcasts the `map_frame_id`→`odom_frame_id` TF by combining global odometry with the local TF tree.
+Computes and broadcasts the `map_frame_id`->`odom_frame_id` TF by combining global odometry with the local TF tree.
 
-Caches the latest `odom` message and recomputes on a timer at `publish_period_s`. On each tick, looks up `odom_frame_id` →`base_frame_id` from TF and computes:
+Caches the latest `odom` message and recomputes on a timer at `publish_period_s`. On each tick, looks up `odom_frame_id` ->`base_frame_id` from TF and computes:
 
 ```
 T_map_odom = T_map_base * T_odom_base^-1
@@ -14,7 +14,7 @@ T_map_odom = T_map_base * T_odom_base^-1
 
 ## TF Broadcasts
 
-- `map_frame_id` → `odom_frame_id`
+- `map_frame_id` -> `odom_frame_id`
 
 ## Config Parameters
 

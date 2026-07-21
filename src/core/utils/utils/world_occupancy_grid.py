@@ -107,7 +107,7 @@ class WorldOccupancyGrid:
         Generate 4-connected neighboring world points for discrete grid search.
 
         Neighbors correspond to the centers of the grid cells adjacent to the cell containing `point` in the cardinal
-        directions (±X, ±Y).
+        directions (+-X, +-Y).
 
         Args:
             point: World-coordinate point whose grid cell is expanded.

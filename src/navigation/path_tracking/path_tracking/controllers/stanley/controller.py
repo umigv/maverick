@@ -54,7 +54,8 @@ class StanleyController:
             max=self.config.max_steer_rad,
         )
 
-        # Bicycle model: ω = v·tan(δ)/L, using front_offset_m as wheelbase (unicycle approximation for diff drive)
+        # Bicycle model: omega = v*tan(steering_angle)/L, using front_offset_m as wheelbase (unicycle approximation for
+        # diff drive)
         angular_velocity = clamp(
             linear_velocity * math.tan(steering_angle) / self.config.front_offset_m,
             min=-self.config.max_angular_speed_radps,
