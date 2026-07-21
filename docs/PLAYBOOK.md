@@ -78,7 +78,7 @@ Competition waypoints are handed out in packed DMS format: store them verbatim i
 
 - The antenna cables should point in the same direction when mounted or the attitude reading may not converge. <img src="images/vn300_antennas.jpg" alt="Antenna cables pointing in the same direction, with the folding ruler measuring the antenna offset" width="400">
 - The antennas are screwed onto the ground plane using plastic screws in the electrical box.
-- Use the Milwaukee folding ruler to measure the offsets between the sensors. The measured offsets go into the URDF as the sensor offset constants (base→IMU, IMU→GNSS A, GNSS A→GNSS B) in [maverick_description/urdf/constants.xacro](../src/description/maverick_description/urdf/constants.xacro); at startup the [vectornav driver](../src/hardware/vectornav_driver/README.md) reads the resulting TF and writes the offsets to the sensor.
+- Use the Milwaukee folding ruler to measure the offsets between the sensors. The measured offsets go into the URDF as the sensor offset constants (base->IMU, IMU->GNSS A, GNSS A->GNSS B) in [maverick_description/urdf/constants.xacro](../src/description/maverick_description/urdf/constants.xacro); at startup the [vectornav driver](../src/hardware/vectornav_driver/README.md) reads the resulting TF and writes the offsets to the sensor.
 - Documentation PDFs are on Dropbox.
 - Support contact: support@vectornav.com or +1 (512) 772-3615
 
