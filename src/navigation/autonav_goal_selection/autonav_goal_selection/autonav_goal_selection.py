@@ -1,6 +1,6 @@
 from typing import Any
 
-import tf2_geometry_msgs  # noqa: F401 — registers PointStamped transform
+import tf2_geometry_msgs  # noqa: F401 - registers PointStamped transform
 import tf2_ros
 import utils.config
 import utils.lifecycle

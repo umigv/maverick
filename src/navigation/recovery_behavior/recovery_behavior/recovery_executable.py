@@ -74,7 +74,7 @@ class RecoveryExecutable(Node):
             latest = None
             while self.arduino.in_waiting > 0:
                 packet = self.arduino.readline()
-                latest = packet  # keep overwriting — only the last matters
+                latest = packet  # keep overwriting - only the last matters
             if latest:
                 reading_str = latest.decode("utf-8", errors="ignore").strip()
                 self.get_logger().info(f"raw ultrasound reading: {reading_str}")

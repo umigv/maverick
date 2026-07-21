@@ -6,7 +6,7 @@ Small utilities for ROS 2 Python nodes:
 
 Adds a simple config-loading utility for ROS 2.
 
-To use, you will want to create a python dataclass where each field in the config dataclass corresponds to a ROS 2 parameter key. The field’s default value (if provided) is used as the parameter’s default.
+To use, you will want to create a python dataclass where each field in the config dataclass corresponds to a ROS 2 parameter key. The field's default value (if provided) is used as the parameter's default.
 
 Mapping rules:
 
@@ -171,7 +171,7 @@ for candidate in grid.in_bound_points():
         # found drivable cell, do something special
 ```
 
-### Discrete “search” in continuous space via neighbors
+### Discrete "search" in continuous space via neighbors
 
 Although planner code operates on continuous world points, discrete graph search can still be performed using `neighbors4(point)`, `neighbors8(point)`, or `neighbors_forward(point)`.
 

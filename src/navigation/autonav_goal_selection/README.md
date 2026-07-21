@@ -49,7 +49,7 @@ If the winning ray is shorter than `min_goal_progress_m`, the robot is considere
 After choosing a direction, the stored **momentum angle** is nudged toward the chosen ray's angle using an exponential moving average (EMA):
 
 ```
-momentum_angle += ema_alpha * (chosen_angle − momentum_angle)
+momentum_angle += ema_alpha * (chosen_angle - momentum_angle)
 ```
 
 Low `ema_alpha` means momentum changes slowly; high values make it respond faster to sharp turns.
