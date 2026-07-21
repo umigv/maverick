@@ -122,18 +122,18 @@ class AutonavGoalSelectionConfig:
 
     Attributes:
         goal_selection_params: Parameters for the ray-cast goal selection algorithm.
+        world_frame_id: TF frame ID for the world coordinate frame.
         goal_publish_period_s: How often (seconds) to publish a new local goal.
         waypoint_approach_radius_m: Distance (m) from the current waypoint within which ray-cast goal selection is
             bypassed and the waypoint itself is published directly as the goal.
-        world_frame_id: TF frame ID for the world coordinate frame.
         publish_debug: When true, publish a MarkerArray on `goal_selection_debug` showing all rays, the chosen ray, the
             chosen endpoint, and the waypoint direction.
     """
 
     goal_selection_params: GoalSelectionParams
+    world_frame_id: str
     goal_publish_period_s: float = 1
     waypoint_approach_radius_m: float = 5.0
-    world_frame_id: str = "odom"
     publish_debug: bool = True
 
     def __post_init__(self) -> None:

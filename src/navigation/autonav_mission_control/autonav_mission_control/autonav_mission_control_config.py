@@ -8,6 +8,7 @@ class AutonavMissionControlConfig:
 
     Attributes:
         waypoints_file_path: Path to a JSON file containing the ordered list of waypoints.
+        map_frame_id: TF frame ID for the map coordinate frame. Global odometry must publish in this frame.
         waypoint_reached_threshold_m: Distance (m) within which a waypoint is considered reached.
         ramp_approach_radius_m: Distance (m) from a ramp_approach waypoint at which ramp mode activates.
         lane_detection_enable_near_exit_radius_m: Distance (m) from a no_mans_land_exit waypoint within which lane
@@ -16,16 +17,15 @@ class AutonavMissionControlConfig:
             goal selection continues during this window.
         from_ll_service_timeout_s: Time (s) to wait for the fromLL service before giving up on lat/lon waypoint
             conversion.
-        map_frame_id: TF frame ID for the map coordinate frame. Global odometry must publish in this frame.
     """
 
     waypoints_file_path: pathlib.Path
+    map_frame_id: str
     waypoint_reached_threshold_m: float = 0.5
     ramp_approach_radius_m: float = 12.0
     lane_detection_enable_near_exit_radius_m: float = 3.0
     mission_complete_delay_s: float = 10.0
     from_ll_service_timeout_s: float = 10.0
-    map_frame_id: str = "map"
 
     def __post_init__(self) -> None:
         if self.waypoint_reached_threshold_m <= 0:

@@ -17,7 +17,7 @@ class PathPlanningConfig:
             checks. Smaller values give more accurate collision checking at the cost of more computation.
     """
 
-    frame_id: str = "odom"
+    frame_id: str
     max_unknown_forward_m: float = 5.0
     max_unknown_sideways_m: float = 2.5
     line_of_sight_step_m: float = 0.05

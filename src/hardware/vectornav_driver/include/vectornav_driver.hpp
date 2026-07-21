@@ -145,12 +145,12 @@ class VectornavDriver : public rclcpp::Node {
             return false;
         }
 
-        if (imu_frame_id_ = declare_parameter<std::string>("imu_frame_id", "vectornav"); imu_frame_id_.empty()) {
+        if (imu_frame_id_ = declare_parameter<std::string>("imu_frame_id", ""); imu_frame_id_.empty()) {
             RCLCPP_FATAL(get_logger(), "imu_frame_id must be set");
             return false;
         }
 
-        if (ins_frame_id_ = declare_parameter<std::string>("ins_frame_id", "vectornav"); ins_frame_id_.empty()) {
+        if (ins_frame_id_ = declare_parameter<std::string>("ins_frame_id", ""); ins_frame_id_.empty()) {
             RCLCPP_FATAL(get_logger(), "ins_frame_id must be set");
             return false;
         }
@@ -192,7 +192,7 @@ class VectornavDriver : public rclcpp::Node {
             datum_projection_.emplace(datum[0], datum[1], datum[2]);
             RCLCPP_INFO(get_logger(), "Odometry datum: lat=%f lon=%f alt=%f", datum[0], datum[1], datum[2]);
 
-            map_frame_id_ = declare_parameter<std::string>("map_frame_id", "map");
+            map_frame_id_ = declare_parameter<std::string>("map_frame_id", "");
             if (map_frame_id_.empty()) {
                 RCLCPP_FATAL(get_logger(), "map_frame_id must be set when datum is provided");
                 return false;

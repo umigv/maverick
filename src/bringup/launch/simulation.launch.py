@@ -22,8 +22,8 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
             {"map_frame_id": frames["map_frame"]},
             {"base_frame_id": frames["base_frame"]},
             {"ground_truth_base_frame_id": frames["ground_truth_base_frame"]},
-            {"vn300.imu_frame_id": frames["imu_frame"]},
-            {"vn300.ins_frame_id": frames["base_frame"]},
+            {"imu_frame_id": frames["imu_frame"]},
+            {"ins_frame_id": frames["base_frame"]},
             {"datum": [gps_file["datum"]["latitude"], gps_file["datum"]["longitude"], gps_file["datum"]["altitude"]]},
         ],
         remappings=[

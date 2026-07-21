@@ -18,9 +18,9 @@ T_map_odom = T_map_base * T_odom_base^-1
 
 ## Config Parameters
 
-| Parameter          | Default     | Description                                                    |
-| ------------------ | ----------- | -------------------------------------------------------------- |
-| `map_frame_id`     | `map`       | Expected `frame_id` of `odom` and parent of the broadcasted TF |
-| `odom_frame_id`    | `odom`      | Child frame of the broadcasted TF; used for TF lookup          |
-| `base_frame_id`    | `base_link` | Expected `child_frame_id` of `odom`; used for TF lookup        |
-| `publish_period_s` | `0.01`      | Timer period in seconds for broadcasting the TF                |
+| Parameter          | Default | Description                                                    |
+| ------------------ | ------- | -------------------------------------------------------------- |
+| `map_frame_id`     | -       | Expected `frame_id` of `odom` and parent of the broadcasted TF |
+| `odom_frame_id`    | -       | Child frame of the broadcasted TF; used for TF lookup          |
+| `base_frame_id`    | -       | Expected `child_frame_id` of `odom`; used for TF lookup        |
+| `publish_period_s` | `0.01`  | Timer period in seconds for broadcasting the TF                |
