@@ -87,18 +87,18 @@ Beyond what the linters enforce and what's in the template README instructions:
 
 - Update documentation in the same PR as the behavior it documents.
 - Only C++ packages get a `Config Parameters` table as they have no dataclasses with all the configs documented together.
-- Use a plain hyphen surrounded by spaces as the separator, never an em-dash. Bullet descriptions after the separator start capitalized.
+- Use a plain hyphen surrounded by spaces as the separator. Bullet descriptions after the separator start capitalized.
 - Topic bullets follow `` `topic` (`pkg/Msg`) - Description `` with the `msg`/`srv` segment omitted from type names.
 
 ## Code Style
 
 Beyond what the linters enforce:
 
-- Avoid abbreviations unless it’s an established convention. One that’s obvious to you may not be obvious to others.
+- Avoid abbreviations unless it's an established convention. One that's obvious to you may not be obvious to others.
 - Numeric names carry SI unit suffixes: `_m`, `_s`, `_mps`, `_radps`, `_m2`, and so on (e.g. `waypoint_reached_threshold_m`, `control_period_s`).
 - Recurring timing is expressed as a period in seconds (`publish_period_s`), never as a rate or frequency in Hz.
 - C++ #includes: `<...>` for external dependencies, `"..."` for the package's own headers.
-- No em-dash and no `“` (smart quotes). Unfortunately, they are too AI-coded nowadays.
+- No unicode characters. Use ASCII equivalents e.g. `->` for arrows, `^2` for superscripts, `deg` for degrees, and spelled-out names (`pi`, `theta`, `omega`) for Greek letters.
 
 ## Cross-Cutting Conventions
 
