@@ -10,7 +10,7 @@ class DifferentialDriveConfig:
         kp_heading: Proportional gain on heading error (rad/s per rad).
         kp_cross: Proportional gain on cross-track error, further scaled by cos(heading_error) (rad/s per m).
         max_angular_speed_radps: Maximum angular velocity command (rad/s).
-        max_lateral_speed_mps: Maximum lateral drift speed (m/s). Caps forward speed via v*sin(θ) ≤ this value,
+        max_lateral_speed_mps: Maximum lateral drift speed (m/s). Caps forward speed via v*sin(theta) <= this value,
             preventing forward travel faster than heading can correct.
         heading_lookahead_m: Distance ahead on the path used to compute the heading reference when near corners (m).
             Points toward a lookahead point rather than the local segment tangent, smoothing heading error buildup.

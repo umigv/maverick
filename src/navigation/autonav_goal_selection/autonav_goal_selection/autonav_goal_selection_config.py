@@ -63,7 +63,7 @@ class GoalSelectionParams:
     Attributes:
         momentum: All parameters controlling momentum strength, alignment bias, obstacle scaling, and EMA smoothing.
         arc_angle_rad: Full angular width (rad) of the forward arc; rays span symmetrically around the robot's heading.
-            math.pi = 180° forward semicircle.
+            math.pi = 180 deg forward semicircle.
         ray_interval_rad: Angular spacing (rad) between adjacent rays. Controls density independently of arc size;
             num_rays is derived as int(arc / interval) + 1.
         step_size_m: Step size used when walking each ray; should be ~grid resolution.

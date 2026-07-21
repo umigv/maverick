@@ -27,8 +27,8 @@ ROS 2 driver node for the VectorNav VN-300 IMU/INS. Publishes IMU, GNSS fix, bod
 | `ins_frame_id`                  | `str`      | -            | TF frame ID for the INS reference point                                                                |
 | `gnss_a_frame_id`               | `str`      | -            | TF frame ID for GNSS antenna A                                                                         |
 | `gnss_b_frame_id`               | `str`      | -            | TF frame ID for GNSS antenna B                                                                         |
-| `linear_accel_covariance`       | `float[9]` | `diag(0)`    | 3×3 row-major covariance for linear acceleration (m/s²)² in FLU body frame                             |
-| `angular_vel_covariance`        | `float[9]` | `diag(0)`    | 3×3 row-major covariance for angular velocity (rad/s)² in FLU body frame                               |
+| `linear_accel_covariance`       | `float[9]` | `diag(0)`    | 3x3 row-major covariance for linear acceleration (m/s^2)^2 in FLU body frame                           |
+| `angular_vel_covariance`        | `float[9]` | `diag(0)`    | 3x3 row-major covariance for angular velocity (rad/s)^2 in FLU body frame                              |
 | `datum`                         | `float[3]` | -            | ENU odometry origin as `[lat, lon, alt]`. Required to publish odometry                                 |
 | `map_frame_id`                  | `str`      | -            | TF frame ID for the odometry map frame (required when `datum` is provided)                             |
 | `require_attitude`              | `bool`     | `true`       | If true, drop IMU messages until the INS filter has valid attitude                                     |
@@ -37,13 +37,13 @@ ROS 2 driver node for the VectorNav VN-300 IMU/INS. Publishes IMU, GNSS fix, bod
 
 At startup the driver waits up to 10 seconds for TF transforms to configure sensor offsets on the device. All transforms must be available or the driver will exit.
 
-| Transform                          | Description                                                          |
-| ---------------------------------- | -------------------------------------------------------------------- |
-| `imu_frame_id` → `ins_frame_id`    | INS reference point offset from IMU origin (used when frames differ) |
-| `imu_frame_id` → `gnss_a_frame_id` | GNSS antenna A position offset from IMU origin                       |
-| `imu_frame_id` → `gnss_b_frame_id` | GNSS antenna B position offset from IMU origin                       |
+| Transform                           | Description                                                          |
+| ----------------------------------- | -------------------------------------------------------------------- |
+| `imu_frame_id` -> `ins_frame_id`    | INS reference point offset from IMU origin (used when frames differ) |
+| `imu_frame_id` -> `gnss_a_frame_id` | GNSS antenna A position offset from IMU origin                       |
+| `imu_frame_id` -> `gnss_b_frame_id` | GNSS antenna B position offset from IMU origin                       |
 
-Offsets are written to the sensor in FRD body frame; the driver converts from FLU automatically. If `imu_frame_id` → `ins_frame_id` has changed since last boot, the sensor is reset so the new offset takes effect as InsRefOffset is a static register.
+Offsets are written to the sensor in FRD body frame; the driver converts from FLU automatically. If `imu_frame_id` -> `ins_frame_id` has changed since last boot, the sensor is reset so the new offset takes effect as InsRefOffset is a static register.
 
 ## Message Filtering
 
@@ -71,7 +71,7 @@ Messages are silently dropped when the sensor reports bad state.
 The sensor outputs data in NED (North-East-Down) / FRD (Forward-Right-Down). The driver converts all outputs to ROS-standard ENU (East-North-Up) / FLU (Forward-Left-Up) before publishing.
 
 - **Orientation** - Rotated via `q_ned_to_enu * q_in * q_frd_to_flu`
-- **Angular velocity, linear acceleration, body velocity** - FRD→FLU by negating Y and Z axes
+- **Angular velocity, linear acceleration, body velocity** - FRD->FLU by negating Y and Z axes
 
 ## Scripts
 

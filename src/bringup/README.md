@@ -27,7 +27,7 @@ TF frame names are centralized in `config/frames.yaml` and injected into every n
 
 The diagram shows what crosses launch-file boundaries; the Topics table below it is the full node-level wiring, including topics internal to a launch file (per-node debug topics live in the package READMEs). Status-only consumers (led_driver's LED inputs, Foxglove) are omitted from the diagram. Topic names are the stack-wide (remapped) names. `a / b` means either fills that role depending on configuration (hardware vs simulation, or mode).
 
-A topic is live in a mode exactly when its producer node runs in that mode - see each launch file's node table below for the node ↔ mode mapping. The one exception is `goal`, which switches producer: autonav_goal_selection in `autonav`, CV / the user in `self_drive` and `nav_test`.
+A topic is live in a mode exactly when its producer node runs in that mode - see each launch file's node table below for the node \<-> mode mapping. The one exception is `goal`, which switches producer: autonav_goal_selection in `autonav`, CV / the user in `self_drive` and `nav_test`.
 
 ```mermaid
 flowchart LR
@@ -69,7 +69,7 @@ flowchart LR
 
 ### TF
 
-The robot's global pose is the composition of two independently maintained transforms: localization owns `odom` → `base_link` (smooth, drifts), and `map` → `odom` absorbs the global correction on top of it. Edge labels are the broadcasters; which one runs per mode is in the localization node table below.
+The robot's global pose is the composition of two independently maintained transforms: localization owns `odom` -> `base_link` (smooth, drifts), and `map` -> `odom` absorbs the global correction on top of it. Edge labels are the broadcasters; which one runs per mode is in the localization node table below.
 
 ```mermaid
 flowchart LR
@@ -166,10 +166,10 @@ ros2 launch bringup hardware.launch.py mode:=<mode> [course:=<course>]
 
 | Node                                                       | `autonav`                              | `self_drive`                     | `nav_test` |
 | ---------------------------------------------------------- | -------------------------------------- | -------------------------------- | ---------- |
-| [estop_driver](../hardware/estop_driver/README.md)         | ✓                                      | ✓                                | ✓          |
-| [led_driver](../hardware/led_driver/README.md)             | ✓                                      | ✓                                | ✓          |
-| [odrive_driver](../hardware/odrive_driver/README.md)       | ✓                                      | ✓                                | ✓          |
-| [vectornav_driver](../hardware/vectornav_driver/README.md) | ✓ with `datum` (enables `odom/global`) | ✓ with `require_attitude: false` | -          |
+| [estop_driver](../hardware/estop_driver/README.md)         | Y                                      | Y                                | Y          |
+| [led_driver](../hardware/led_driver/README.md)             | Y                                      | Y                                | Y          |
+| [odrive_driver](../hardware/odrive_driver/README.md)       | Y                                      | Y                                | Y          |
+| [vectornav_driver](../hardware/vectornav_driver/README.md) | Y with `datum` (enables `odom/global`) | Y with `require_attitude: false` | -          |
 
 ______________________________________________________________________
 
@@ -212,7 +212,7 @@ ros2 launch bringup localization.launch.py mode:=<mode> [course:=<course>]
 | ekf_local                                                          | `autonav`, `self_drive`  |
 | [enc_odom_publisher](../localization/enc_odom_publisher/README.md) | `nav_test`               |
 | [map_odom_publisher](../localization/map_odom_publisher/README.md) | `autonav`                |
-| static identity transform (`map` → `odom`)                         | `self_drive`, `nav_test` |
+| static identity transform (`map` -> `odom`)                        | `self_drive`, `nav_test` |
 | [lat_lon_converter](../localization/lat_lon_converter/README.md)   | `autonav`                |
 
 `ekf_local` (`robot_localization/ekf_node`) fuses encoder vx/vy from `enc_vel/raw` with IMU yaw rate from `imu/raw`; config in `config/localization/ekf.yaml`.

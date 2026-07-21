@@ -48,4 +48,4 @@ Follows the standard [`nav_msgs/OccupancyGrid`](https://docs.ros.org/en/rolling/
 - `info.origin` is the bottom-left corner of the grid in the robot frame
 - Cell values: `0` = free, `100` = occupied, `-1` = unknown (only in the blind spot)
 
-The robot-centric grid is sized `width_m × height_m` centered such that the robot sits at `(-offset_x_m, -offset_y_m)` within the grid (by default, horizontally centered and offset forward so the grid extends mostly in front of the robot).
+The robot-centric grid is sized `width_m x height_m` centered such that the robot sits at `(-offset_x_m, -offset_y_m)` within the grid (by default, horizontally centered and offset forward so the grid extends mostly in front of the robot).

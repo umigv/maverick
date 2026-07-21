@@ -15,7 +15,7 @@ waypoints/
 - **`dms/`** is what you edit. These hold the coordinates exactly as the competition provides them. Add a new course by dropping a CSV in here.
 - **`decimal/`** is generated from `dms/` by the converter. Treat it as a build artifact: never edit it by hand, just regenerate.
 
-Files in the two folders share a basename (`igvc2026_autonav.csv` → `igvc2026_autonav.csv`), so a `dms/` file always maps to the `decimal/` file of the same name.
+Files in the two folders share a basename (`igvc2026_autonav.csv` -> `igvc2026_autonav.csv`), so a `dms/` file always maps to the `decimal/` file of the same name.
 
 ## CSV format
 
@@ -38,7 +38,7 @@ This should be kept in sync across all producers / consumers of GPS coordinates 
 The `latitude`/`longitude` numbers in `dms/` are **not** decimal degrees. They pack degrees, minutes, and seconds into a single float as `DD.MMSSsssss`.
 
 ```
-42.400577100  ==  42° 40' 05.771"
+42.400577100  ==  42 deg 40 min 05.771 sec
 ```
 
 Converted to decimal degrees that's `42 + 40/60 + 5.771/3600 = 42.6682697`, which is what lands in `decimal/`.

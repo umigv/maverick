@@ -14,7 +14,7 @@ Timestamps are taken from GNSS time when valid (`validDate && validTime && fully
 
 Covariance is filled using u-blox accuracy fields:
 
-- `hAcc` / `vAcc` (mm → meters → meters²), floored at 0.05 m / 0.08 m before squaring, published as diagonal covariance
+- `hAcc` / `vAcc` (mm -> meters -> meters^2), floored at 0.05 m / 0.08 m before squaring, published as diagonal covariance
 - `NavSatStatus` is `STATUS_GBAS_FIX` when the fix is differential-corrected (`diffSoln`), otherwise `STATUS_FIX`
 
 ## Published Topics
@@ -25,8 +25,8 @@ Covariance is filled using u-blox accuracy fields:
 
 > Note: Message "rate" in `CFG-MSG` is **messages per navigation cycle**. With `CFG-RATE` set to **10 Hz**, a message rate of:
 >
-> - `1` → 10 Hz
-> - `10` → 1 Hz
+> - `1` -> 10 Hz
+> - `10` -> 1 Hz
 
 The GPS must be configured with the following on [u-center](https://www.u-blox.com/en/product/u-center):
 

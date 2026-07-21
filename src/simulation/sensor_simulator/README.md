@@ -17,20 +17,20 @@ Sensor noise is modeled using two components: per-sample **Gaussian white noise*
 
 - Publishes `TwistWithCovarianceStamped` in the `base_frame_id` frame
 - Applies OU multiplicative scale-factor drift and per-sample Gaussian white noise (measurement model documented in `EncVelConfig`)
-- Reported covariance is state-dependent: `var = noise_std² + (measurement × drift_std)²`
+- Reported covariance is state-dependent: `var = noise_std^2 + (measurement * drift_std)^2`
 
 ### VN-300 INS (IMU, GPS, INS velocity, INS odometry)
 
 The VN-300 is modeled as a single sensor: all four outputs draw from shared error states (per-quantity mapping documented in `Vn300Config`), so `gps`, `imu`, `ins_vel`, and `odom` stay mutually consistent like the real hardware's Kalman filter output.
 
 - Applies additive OU drift and per-sample Gaussian white noise per quantity (measurement model documented in `Vn300Config`). Unlike the encoder's multiplicative drift, position and yaw drift accumulate even while stationary
-- Reported covariance is fixed rather than state-dependent: `var = noise_std² + drift_std²` per quantity; the IMU reports no linear-acceleration estimate (covariance `-1`)
+- Reported covariance is fixed rather than state-dependent: `var = noise_std^2 + drift_std^2` per quantity; the IMU reports no linear-acceleration estimate (covariance `-1`)
 
 #### IMU
 
 - Publishes `Imu` in the `imu_frame_id` frame
 - Reports absolute orientation (yaw in ENU, relative to true north) and body-frame angular velocity z
-- Looks up `base_frame_id` → `imu_frame_id` to apply the mounting offset to the robot's true yaw
+- Looks up `base_frame_id` -> `imu_frame_id` to apply the mounting offset to the robot's true yaw
 
 #### GPS
 
@@ -62,8 +62,8 @@ The VN-300 is modeled as a single sensor: all four outputs draw from shared erro
 
 ## TF Broadcasts
 
-- `map` → `base_link_ground_truth` - Noiseless true robot pose, broadcast every update
+- `map` -> `base_link_ground_truth` - Noiseless true robot pose, broadcast every update
 
 ## TF Requirements
 
-- `base_link` → `imu_link` - IMU mounting orientation (used to compute yaw offset for IMU topic)
+- `base_link` -> `imu_link` - IMU mounting orientation (used to compute yaw offset for IMU topic)
