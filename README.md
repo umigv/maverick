@@ -2,48 +2,19 @@
 
 ![Maverick](docs/images/maverick.jpg)
 
-## `src/` Layout
+Maverick is UMARV's autonomous ground robot for the 2025-2026 competition season. This repository is its full ROS 2 stack: hardware drivers, localization, navigation, and simulation, launched through a single set of entry points with interchangeable real and simulated sensors.
 
-| Category        | Contents                                                                                |
-| --------------- | --------------------------------------------------------------------------------------- |
-| `bringup`       | Launch files, mode/course configs, and the top-level entry points for running the stack |
-| `core`          | Shared messages and library code used across packages                                   |
-| `description`   | URDFs and robot/world description packages                                              |
-| `hardware`      | Drivers for onboard hardware                                                            |
-| `localization`  | Odometry and coordinate-frame conversion packages                                       |
-| `navigation`    | Path planning, path tracking, mission control, and recovery behavior packages           |
-| `simulation`    | Simulated sensors and environment for testing without hardware                          |
-| `visualization` | Visualization packages                                                                  |
-| `template`      | Package skeletons copied by `just create-package`                                       |
+## Quick Start
 
-## Setup
+For the first time, [set up the environment](docs/DEVELOPMENT.md#environment-setup).
 
-First run the [host bootstrap](https://github.com/umigv/nav-environment) if you haven't. Then:
+Build the workspace:
 
 ```bash
-just setup
-```
-
-VSCode: Install recommended extensions in this repo (it should automatically prompt you).
-
-## Commands
-
-```bash
-# See available commands
-just
-```
-
-## Running the Stack
-
-```bash
-# Build the workspace
 just build
-
-# Build a single package including dependencies
-just build-package <package>
 ```
 
-Run each of these commands in separate terminals:
+Then run the stack, each command in its own terminal. `simulation:=true` runs without hardware:
 
 ```bash
 ros2 launch bringup base.launch.py mode:=<mode> [simulation:=true] [course:=<course>]
@@ -59,13 +30,9 @@ and / or
 ros2 launch bringup navigation.launch.py mode:=<mode> [course:=<course>]
 ```
 
-### Mode and Course Configuration
+See [bringup/README.md](src/bringup/README.md) for what each mode does and how courses are configured.
 
-See [bringup/README.md](src/bringup/README.md) for mode and course configuration details.
-
-### Visualization
-
-Run in a separate terminal:
+## Visualization
 
 ```bash
 ros2 launch bringup visualization.launch.py
@@ -83,41 +50,20 @@ See [bringup/README.md](src/bringup/README.md) for which displays are enabled by
 
 > **WSL:** set Windows display scaling to a whole-number percentage (e.g. 100%, 200%). Fractional scaling (e.g. 125%, 150%) isn't supported by WSLg and silently falls back to 100%, leaving rviz2's UI illegibly tiny. TODO: See [microsoft/wslg#23](https://github.com/microsoft/wslg/issues/23).
 
-### Tmux
+## Tmux
 
-A tmux configuration is included to avoid creating too many terminals.
+A tmux configuration is included to avoid needing to create too many terminals.
 
 ```bash
-# Runs rviz and divides terminal into panes in which to run the launch commands
 just tmux
 ```
 
 To exit, close the window by pressing the prefix key (Ctrl + B) and then `&` (Shift + 7), and then confirming by typing `y` and pressing Enter. A convenient cheatsheet for other tmux usage can be found at [tmuxcheatsheet.com](https://tmuxcheatsheet.com).
 
-## Testing
+## Documentation
 
-```bash
-# Run all tests
-just test
-
-# Run tests for a single package
-just test-package <package>
-```
-
-## Formatting & Linting
-
-```bash
-# Check formatting and lint
-just lint
-
-# Auto-fix formatting
-just format
-```
-
-## Adding a New Package
-
-```bash
-just create-package <dir> <package> [python|cpp]
-```
-
-Copies [`template_python`](src/template/template_python) or [`template_cpp`](src/template/template_cpp) into `<dir>/<package>`.
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) - Environment setup, build/test/lint loop, repo structure, dependency, code, and documentation conventions
+- [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) - Branches, pull requests, reviews, and CI
+- [docs/PLAYBOOK.md](docs/PLAYBOOK.md) - Operating the robot on test and competition days
+- [src/bringup/README.md](src/bringup/README.md) - System architecture: launch files, modes, and the stack-wide topic wiring
+- Every package documents its own interface and behavior in its README
