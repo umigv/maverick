@@ -4,10 +4,15 @@ import cv2
 import h5py
 import numpy as np
 import numpy.typing as npt
-import pyzed.sl as sl
 from cv2.typing import Scalar
 from ransac.common import CameraPosition, GridConfiguration
 from ransac.pipeline import BasicHSV, DepthSegementation, HDF5Source, LiveSource
+
+try:
+    import pyzed.sl as sl
+except ImportError:
+    print("[warn] pyzed not found, live tuning will not work")
+    sl = None
 
 
 def to_point(arr: npt.NDArray) -> tuple[int, int]:
