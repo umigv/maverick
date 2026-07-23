@@ -3,11 +3,12 @@
 import abc
 import random
 from multiprocessing import Pool
-from typing import cast
+from typing import Any, cast
 
 import cv2
 import h5py
 import numpy as np
+import numpy.typing as npt
 
 from . import occu, plane
 from .common import CameraPosition, GridConfiguration, Intrinsics
@@ -31,11 +32,11 @@ class DepthSource(metaclass=abc.ABCMeta):
         """Trigger an update, grabbing a new frame if possible."""
 
     @abc.abstractmethod
-    def image(self) -> np.ndarray:
+    def image(self) -> npt.NDArray:
         pass
 
     @abc.abstractmethod
-    def depth_map(self) -> np.ndarray:
+    def depth_map(self) -> npt.NDArray:
         pass
 
     @abc.abstractmethod
@@ -50,7 +51,7 @@ class DepthSource(metaclass=abc.ABCMeta):
 class HDF5Source(DepthSource):
     """Provides a data source from the new multi-camera hdf5 format."""
 
-    def __init__(self, file: h5py.File, dataset_index=0):
+    def __init__(self, file: h5py.File, dataset_index: int = 0):
         self.file = file
 
         self.info = cast(h5py.Dataset, self.file["inf" + str(dataset_index)])
@@ -72,7 +73,7 @@ class HDF5Source(DepthSource):
         self.frame_number = 0
         self.update()
 
-    def __delete__(self):
+    def __delete__(self) -> None:
         self.file.close()
 
     def update(self) -> bool:
@@ -82,7 +83,7 @@ class HDF5Source(DepthSource):
         self._depth_map = np.array(self.depth_maps[self.frame_number])
         return True
 
-    def use_frame(self, frame=-1):
+    def use_frame(self, frame: int = -1) -> int:
         if frame < 0 or frame >= self.frame_count:
             self.frame_number = random.randint(0, self.frame_count - 1)
         else:
@@ -91,20 +92,20 @@ class HDF5Source(DepthSource):
 
         return self.frame_number
 
-    def timestamp(self):
+    def timestamp(self) -> int:
         """Return the timestamp associatede with the image/depth data."""
         return self._timestamp
 
-    def image(self):
+    def image(self) -> npt.NDArray:
         return self._image
 
-    def depth_map(self):
+    def depth_map(self) -> npt.NDArray:
         return self._depth_map
 
-    def intrinsics(self):
+    def intrinsics(self) -> Intrinsics:
         return self._intrinsics
 
-    def about(self):
+    def about(self) -> str:
         return f"hdf5 depth source ({self.file.filename})"
 
 
@@ -125,7 +126,7 @@ class LiveSource(DepthSource):
 
     def __init__(
         self,
-        zed_init_params=None,
+        zed_init_params: sl.InitParameters | None = None,
         max_res: tuple[int, int] | None = None,
     ):
         self._timestamp = 0
@@ -167,7 +168,7 @@ class LiveSource(DepthSource):
         else:
             print("[warn] LiveSource should not be initialised without the Zed SDK")
 
-    def __delete__(self):
+    def __delete__(self) -> None:
         if sl:
             self.cam.close()
 
@@ -191,11 +192,11 @@ class LiveSource(DepthSource):
         """Return the timestamp associatede with the image/depth data."""
         return self._timestamp
 
-    def image(self) -> np.ndarray:
-        return self._image_mat.get_data()
+    def image(self) -> npt.NDArray:
+        return cast(npt.NDArray, self._image_mat.get_data())
 
-    def depth_map(self) -> np.ndarray:
-        return self._depth_map_mat.get_data()
+    def depth_map(self) -> npt.NDArray:
+        return cast(npt.NDArray, self._depth_map_mat.get_data())
 
     def intrinsics(self) -> Intrinsics:
         return self._intrinsics
@@ -208,22 +209,22 @@ class MaskMethod(metaclass=abc.ABCMeta):
     """Provides a filtering process (by default, simple HSV), for `DepthSegmentation`. Object must be callable, taking an argument of the current image mask."""
 
     @abc.abstractmethod
-    def __call__(self, image: np.ndarray) -> np.ndarray:
+    def __call__(self, image: npt.NDArray) -> npt.NDArray:
         pass
 
 
 class NoMask(MaskMethod):
-    def __call__(self, image: np.ndarray):
+    def __call__(self, image: npt.NDArray) -> npt.NDArray:
         return 255 * np.zeros((image.shape[0], image.shape[1]))
 
 
 class BasicHSV(MaskMethod):
     def __init__(
         self,
-        lower=(0, 0, 200),
-        upper=(179, 50, 255),
-        min_area=200,
-    ):
+        lower: tuple[int, int, int] = (0, 0, 200),
+        upper: tuple[int, int, int] = (179, 50, 255),
+        min_area: int = 200,
+    ) -> None:
         """
         Construct a basic HSV filter.
 
@@ -234,7 +235,7 @@ class BasicHSV(MaskMethod):
         self.upper = np.array(upper, dtype=np.uint8)
         self.min_area = min_area
 
-    def __call__(self, image: np.ndarray):
+    def __call__(self, image: npt.NDArray) -> npt.NDArray:
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, self.lower, self.upper)
         filtered_mask = np.zeros_like(mask)
@@ -255,12 +256,12 @@ class DepthSegementation:
         self,
         sources: list[tuple[DepthSource, CameraPosition]],
         grid_conf: GridConfiguration,
-        processes=4,
-        *args,
+        processes: int = 4,
+        *args: Any,
         mask_method: MaskMethod | None = None,
         ignore_mask: MaskMethod | None = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """
         Construct a depth segmentation pipeline.
 
@@ -284,7 +285,7 @@ class DepthSegementation:
         self._processes = processes
         self._pool = Pool(processes) if processes > 0 else None
 
-    def process(self, force_update=False) -> bool:
+    def process(self, force_update: bool = False) -> bool:
         """Run the depth segmentation pipeline, with optional `force_update` to recompute occupancy grids even if new data was not received."""
         updated = force_update
 
@@ -325,17 +326,17 @@ class DepthSegementation:
 
         return updated
 
-    def overlap(self):
-        return np.logical_and.reduce([grid != 127 for grid in self.grids])
+    def overlap(self) -> npt.NDArray:
+        """Return the combined grid of locations where all individual grids are known."""
+        return cast(npt.NDArray, np.logical_and.reduce([grid != 127 for grid in self.grids]))
 
-    def merge_simple(self, strategy=np.maximum):
+    def merge_simple(self, strategy: Any = np.maximum) -> npt.NDArray:
         """Apply the specified `strategy` to merge the grids. This is not optimal, `merge_grids` is recommended for competition use."""
         if len(self.grids) == 0:
             return np.array([])
+        return cast(npt.NDArray, strategy.reduce(self.grids))
 
-        return strategy.reduce(self.grids)
-
-    def merge_grids(self):
+    def merge_grids(self) -> npt.NDArray:
         """Merge occupancy grids by granting highest priority to a camera which sees a cell to be free from any angle."""
         seen = np.where(self.merge_simple(np.maximum) == 255, 255, 127)
         blocked = np.logical_or(self.merge_simple(np.minimum) == 0, seen != 255)

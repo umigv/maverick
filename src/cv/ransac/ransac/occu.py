@@ -1,27 +1,31 @@
 # occupancy grid generation
 
 import math
+from typing import cast
 
 import numpy as np
+import numpy.typing as npt
 
 from . import plane
 from .common import CameraPosition, GridConfiguration, Intrinsics
 
 
-def create_ground_cloud(coords, ransac_coeffs):
+def create_ground_cloud(coords: npt.NDArray, pixel_coeffs: tuple[float, float, float]) -> npt.NDArray:
     """
     Generate a (pixel-space) cloud of points on the ground plane.
 
-    - `coords`: N by 2 numpy array containing coordinates in the image
-    - `ransac_coeffs`: plane coefficients outputted by `ground_plane()`
+    - `coords`: N by 2 numpy array containing pixel coordinates in the image
+    - `pixel_coeffs`: plane coefficients outputted by `ground_plane()`
     """
-    c1, c2, c3 = ransac_coeffs
+    c1, c2, c3 = pixel_coeffs
     z = 1 / (c1 * coords[:, 0] + c2 * coords[:, 1] + c3)
     z = z.reshape(-1, 1)
     return np.concatenate((coords.astype(np.float64), z), axis=1)
 
 
-def pixel_to_real(pixel_cloud, real_coeffs, intr: Intrinsics, orientation: float = 0.0):
+def pixel_to_real(
+    pixel_cloud: npt.NDArray, real_coeffs: npt.NDArray, intr: Intrinsics, orientation: float = 0.0
+) -> npt.NDArray:
     """
     Convert a point cloud from pixel-space to camera-space.
 
@@ -46,20 +50,20 @@ def pixel_to_real(pixel_cloud, real_coeffs, intr: Intrinsics, orientation: float
     s_2 = math.sin(orientation)
     rotation_matrix = rotation_matrix @ np.array([[c_2, 0.0, -s_2], [0.0, 1.0, 0.0], [s_2, 0.0, c_2]]).transpose()
 
-    return cloud @ rotation_matrix
+    return cast(npt.NDArray, cloud @ rotation_matrix)
 
 
 # TODO decompose pitch + roll angles
 # TODO can shave off a few ms by computing transformation matrix and using cv2.warpPerspective
 def occ_grid(
-    mask_in,
-    real_coeffs,
+    mask_in: npt.NDArray,
+    real_coeffs: npt.NDArray,
     intr: Intrinsics,
     conf: GridConfiguration,
     pos: CameraPosition,
-    thres=200,
-    resolution=2,
-):
+    thres: int = 200,
+    resolution: int = 2,
+) -> npt.NDArray[np.uint8]:
     """
     Generate a bird's-eye view occupancy grid using bilinear interpolation.
 

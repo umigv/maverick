@@ -2,34 +2,37 @@ import signal
 import threading
 import time
 from pathlib import Path
+from typing import Any
 
 import cv2
 import h5py
 import numpy as np
+import numpy.typing as npt
 import pyzed.sl as sl
 
-zed_list = []
-left_list = []
-depth_list = []
-timestamp_list = []
-thread_list = []
+zed_list: list[sl.Camera] = []
+left_list: list[sl.Mat] = []
+depth_list: list[sl.Mat] = []
+timestamp_list: list[int] = []
+thread_list: list[threading.Thread] = []
 stop_signal = False
 
-resolution_list = []
+resolution_list: list[sl.Resolution] = []
 
-timestamps = {}
-images = {}
-depths = {}
+# maps camera serial numbers to respective data
+timestamps: dict[str, list[int]] = {}
+images: dict[str, list[npt.NDArray]] = {}
+depths: dict[str, list[npt.NDArray]] = {}
 
 
-def signal_handler(signal, frame):
+def signal_handler(signal: Any, frame: Any) -> None:
     global stop_signal
     stop_signal = True
     time.sleep(0.5)
     exit()
 
 
-def grab_run(index):
+def grab_run(index: int) -> None:
     global stop_signal
     global zed_list
     global timestamp_list
@@ -47,7 +50,7 @@ def grab_run(index):
     zed_list[index].close()
 
 
-def main():
+def main() -> None:
     global stop_signal
     global zed_list
     global left_list
@@ -64,14 +67,14 @@ def main():
     init.camera_fps = 30  # The framerate is lowered to avoid any USB3 bandwidth issues
 
     # List and open cameras
-    name_list = []
+    serial_list = []
     last_ts_list = []
     cameras = sl.Camera.get_device_list()
     index = 0
     for cam in cameras:
         init.set_from_serial_number(cam.serial_number)
-        name_list.append(f"{cam.serial_number}")
-        print(f"Opening {name_list[index]}")
+        serial_list.append(f"{cam.serial_number}")
+        print(f"Opening {serial_list[index]}")
         zed_list.append(sl.Camera())
         left_list.append(sl.Mat(mat_type=sl.MAT_TYPE.U8_C3))
         depth_list.append(sl.Mat())
@@ -98,26 +101,26 @@ def main():
             thread_list[index].start()
 
     # Display camera images
-    key = ""
+    key = 0
     while key != 113:  # for 'q' key
+        key = cv2.waitKey(10)
         for index in range(len(zed_list)):
             if zed_list[index].is_opened() and timestamp_list[index] > last_ts_list[index]:
-                serial = name_list[index]
+                serial = serial_list[index]
                 timestamps[serial].append(timestamp_list[index])
                 images[serial].append(left_list[index].get_data()[:, :, :3].copy())
                 depths[serial].append(depth_list[index].get_data().copy())
 
-                cv2.imshow(name_list[index], left_list[index].get_data())
+                cv2.imshow(serial_list[index], left_list[index].get_data())
 
                 # get depth at central pixel
                 x = round(depth_list[index].get_width() / 2)
                 y = round(depth_list[index].get_height() / 2)
                 _, depth_value = depth_list[index].get_value(x, y)
                 if np.isfinite(depth_value):
-                    print(f"{name_list[index]} depth at center: {round(depth_value)}MM")
+                    print(f"{serial_list[index]} depth at center: {round(depth_value)}MM")
 
                 last_ts_list[index] = timestamp_list[index]
-        key = cv2.waitKey(10)
 
     output_dir = Path("./out/")
     if not output_dir.is_dir():
