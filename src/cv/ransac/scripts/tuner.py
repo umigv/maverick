@@ -245,7 +245,11 @@ def tune_live() -> None:
 
 def tune_offline() -> None:
     filepath = input("Filename of recording (*.hdf5): ")
-    file = h5py.File(filepath, "r")
+    try:
+        file = h5py.File(filepath, "r")
+    except FileNotFoundError:
+        print(f'[err] There is no .hdf5 recording at path "{filepath}"')
+        return
     left = HDF5Source(file, 0)
     right = HDF5Source(file, 1)
 
