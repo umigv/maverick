@@ -109,3 +109,21 @@ euler-monitor *args:
 # Monitor VectorNav INS/GNSS status
 vectornav-monitor:
     pixi run python3 src/hardware/vectornav_driver/scripts/vectornav_monitor.py
+
+# -- RANSAC --
+
+# Inspect an HDF5 recording
+ransac-inspect:
+    pixi run python3 src/cv/ransac/scripts/inspect_dual.py
+
+# Show a live preview of RANSAC on one camera
+ransac-live:
+    pixi run python3 src/cv/ransac/scripts/live_single.py
+
+# Create an HDF5 recording
+ransac-record:
+    pixi run python3 src/cv/ransac/scripts/record_multi.py
+
+# Open the camera merge tuning software
+ransac-tune:
+    pixi run python3 src/cv/ransac/scripts/tuner.py

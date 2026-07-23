@@ -8,6 +8,7 @@
 | --------------- | --------------------------------------------------------------------------------------- |
 | `bringup`       | Launch files, mode/course configs, and the top-level entry points for running the stack |
 | `core`          | Shared messages and library code used across packages                                   |
+| `cv`            | Computer vision algorithms                                                              |
 | `description`   | URDFs and robot/world description packages                                              |
 | `hardware`      | Drivers for onboard hardware                                                            |
 | `localization`  | Odometry and coordinate-frame conversion packages                                       |
