@@ -4,7 +4,7 @@ from ransac.common import CameraPosition, GridConfiguration
 from ransac.pipeline import DepthSegementation, LiveSource
 
 
-def run_ransac_on_zed(cam_pos=None, serial_number=None):
+def run_ransac_on_zed(cam_pos: CameraPosition | None = None, serial_number: int | None = None) -> None:
     if cam_pos is None:
         cam_pos = CameraPosition()
     init = sl.InitParameters()

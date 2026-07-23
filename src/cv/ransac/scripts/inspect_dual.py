@@ -7,8 +7,9 @@ from ransac.common import CameraPosition, GridConfiguration
 from ransac.pipeline import DepthSegementation, HDF5Source
 
 
-def main():
-    file = h5py.File("res/dual_camera_calibration.hdf5", "r")
+def main() -> None:
+    filepath = input("File to open: ")
+    file = h5py.File(filepath, "r")
     left = HDF5Source(file, 0)
     right = HDF5Source(file, 1)
 
