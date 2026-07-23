@@ -8,7 +8,7 @@ from ransac.pipeline import DepthSegementation, HDF5Source
 
 
 def main() -> None:
-    filepath = input("File to open: ")
+    filepath = input("Filename of recording (*.hdf5): ")
     file = h5py.File(filepath, "r")
     left = HDF5Source(file, 0)
     right = HDF5Source(file, 1)

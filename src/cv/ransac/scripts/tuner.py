@@ -239,7 +239,8 @@ def tune_live() -> None:
 
 
 def tune_offline() -> None:
-    file = h5py.File("res/dual_camera_calibration.hdf5", "r")
+    filepath = input("Filename of recording (*.hdf5): ")
+    file = h5py.File(filepath, "r")
     left = HDF5Source(file, 0)
     right = HDF5Source(file, 1)
 
