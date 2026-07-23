@@ -49,7 +49,7 @@ Competition waypoints are handed out in packed DMS format: store them verbatim i
 - Lube the gearbox with dry lube outside if it is not smooth.
 - Wipe the wheels down with isopropyl alcohol before running to ensure consistent wheel friction.
 - Make sure the wheel shield isn't scraping the wheel. If the wheel is caving, check whether the gearbox plate is bent.
-- The payload is 25 pounds of gym weights mounted on the bottom of the robot. <img src="images/payload.jpg" alt="Payload weights mounted under the deck" width="600">
+- The payload is 25 pounds of gym weights mounted on the bottom of the robot. ![Payload weights mounted under the deck](images/payload.jpg)
 - Run the robot in the same configuration as it runs at comp, including wiring, payload, and weight. After any physical change (cable management, remounting), test again before it counts. At IGVC 2026 we moved the USB hub cable right beside the GPS receiver cable without retesting. This impacted signal strength and took us 3 days to diagnose.
 - Before heading outside, make sure what you want to test is actually ready. Setup eats a ton of time, and warm testing weather is precious.
 
@@ -57,13 +57,13 @@ Competition waypoints are handed out in packed DMS format: store them verbatim i
 
 - There are two sources of power: the LiPO batteries for the motors, and the Anker / Jackery power bank for the laptop (which powers all the USB devices).
 - The Anker lasts longer and charges faster than the Jackery, so prioritize the Anker, but make sure the other is charging while you use one.
-- The motor power system has a breaker, an e-stop, and a power switch. The power switch needs to be on and the breaker engaged. <img src="images/power_system.jpg" alt="Breaker, power switch, and e-stop locations" width="600">
+- The motor power system has a breaker, an e-stop, and a power switch. The power switch needs to be on and the breaker engaged. ![Breaker, power switch, and e-stop locations](images/power_system.jpg)
 - The LiPO should generally never run out of battery given it has 500+ hours of battery life. Download "LiFePO4 Power" on your phone to monitor the current battery percentage.
 - Everything on the robot, especially wiring, should be labeled such that when facing forward, the left (port) side is red and the right (starboard) side is green.
 
 ## Remote e-stop
 
-- The remote e-stop is connected to a power bank. The cable has a power switch on the back. <img src="images/remote_estop.jpg" alt="Remote e-stop power bank and cable power switch" width="400">
+- The remote e-stop is connected to a power bank. The cable has a power switch on the back. ![Remote e-stop power bank and cable power switch](images/remote_estop.jpg)
 - To turn on: make sure the power switch is on, then turn on the power bank.
 - To turn off: turn off the power switch on the back.
 
@@ -76,7 +76,7 @@ Competition waypoints are handed out in packed DMS format: store them verbatim i
 
 ## VN300
 
-- The antenna cables should point in the same direction when mounted or the attitude reading may not converge. <img src="images/vn300_antennas.jpg" alt="Antenna cables pointing in the same direction, with the folding ruler measuring the antenna offset" width="400">
+- The antenna cables should point in the same direction when mounted or the attitude reading may not converge. ![Antenna cables pointing in the same direction, with the folding ruler measuring the antenna offset](images/vn300_antennas.jpg)
 - The antennas are screwed onto the ground plane using plastic screws in the electrical box.
 - Use the Milwaukee folding ruler to measure the offsets between the sensors. The measured offsets go into the URDF as the sensor offset constants (base->IMU, IMU->GNSS A, GNSS A->GNSS B) in [maverick_description/urdf/constants.xacro](../src/description/maverick_description/urdf/constants.xacro); at startup the [vectornav driver](../src/hardware/vectornav_driver/README.md) reads the resulting TF and writes the offsets to the sensor.
 - Documentation PDFs are on Dropbox.
