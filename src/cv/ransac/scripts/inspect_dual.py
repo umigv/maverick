@@ -9,7 +9,11 @@ from ransac.pipeline import DepthSegementation, HDF5Source
 
 def main() -> None:
     filepath = input("Filename of recording (*.hdf5): ")
-    file = h5py.File(filepath, "r")
+    try:
+        file = h5py.File(filepath, "r")
+    except FileNotFoundError:
+        print(f'[err] There is no .hdf5 recording at path "{filepath}"')
+        return
     left = HDF5Source(file, 0)
     right = HDF5Source(file, 1)
 
