@@ -3,7 +3,7 @@
 <package format="3">
   <name>ransac</name>
   <version>0.1.0</version>
-  <description>TODO: Package description</description>
+  <description>Provides a pipeline to extract the driveable area from RGB-D images given by the ZED camera</description>
   <maintainer email="41810559+the2nake@users.noreply.github.com">the2nake</maintainer>
   <license>Apache-2.0</license>
 

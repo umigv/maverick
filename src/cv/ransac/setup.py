@@ -15,12 +15,7 @@ setup(
     zip_safe=True,
     maintainer="the2nake",
     maintainer_email="41810559+the2nake@users.noreply.github.com",
-    description="TODO: Package description",
+    description="Provides a pipeline to extract the driveable area from RGB-D images given by the ZED camera",
     license="Apache-2.0",
     extras_require={"test": ["pytest"]},
-    entry_points={
-        "console_scripts": [
-            "ransac = ransac.ransac:main",
-        ],
-    },
 )

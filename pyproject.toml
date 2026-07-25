@@ -14,8 +14,10 @@ python = "3.14*"
 
 # Workspace dependencies
 geographiclib-cpp = "*"
+h5py = "*"
 matplotlib-base = "*"
 numpy = "*"
+opencv = "*"
 pyproj = "*"
 pyserial = "*"
 # ROS 2 launch_testing's pytest plugin uses the pre-8.0 pytest_pycollect_makemodule(path, ...)
@@ -171,6 +173,8 @@ module = [
     "pyubx2",
     "tf2_geometry_msgs.*",
     "tf2_ros.*",
+    "pyzed.*",
+    "h5py",
 ]
 ignore_missing_imports = true
 disable_error_code = ["attr-defined"]
