@@ -64,19 +64,17 @@ class RightTurn:
         if self.debug:
             print(f"Yellow contours (count): {len(cnts)}")
 
-        if len(cnts) == 0:
-            return True
-        return False
+        return len(cnts) == 0
 
     def update_mask(self):
         # defining the ranges for HSV values
         self.hsv_obj.set_YOLO_barrels(self.look_for_barrels and (not self.debug))
-        self.final, dict = self.hsv_obj.get_mask(self.image)
+        self.final, masks_dict = self.hsv_obj.get_mask(self.image)
 
         # print(dict)
 
-        self.white_mask = dict["white"]
-        self.yellow_mask = dict["yellow"]
+        self.white_mask = masks_dict["white"]
+        self.yellow_mask = masks_dict["yellow"]
 
         # final_bgr = cv2.cvtColor(self.final, cv2.COLOR_GRAY2BGR)
         # combined = np.hstack((self.image, final_bgr))
@@ -96,7 +94,7 @@ class RightTurn:
 
         status = self.past_stop_line()
         self.draw_trapezoid()
-        if status == True:
+        if status:
             self.state_1_done = True
             self.state_2()
             return
@@ -210,15 +208,15 @@ class RightTurn:
         if self.hsv_obj.barrel_boxes is not None:
             for segment in self.hsv_obj.barrel_boxes:
                 x_min, y_min, x_max, y_max = segment.cpu().numpy().tolist()
-                vertices = np.array(
-                    [
-                        [x_min * self.width, y_min * self.height],  # top left
-                        [x_max * self.width, y_min * self.height],  # top right
-                        [x_max * self.width, y_max * self.height],  # bottom right
-                        [x_min * self.width, y_max * self.height],  # bottom left
-                    ],
-                    dtype=np.int32,
-                )
+                # vertices = np.array(
+                #     [
+                #         [x_min * self.width, y_min * self.height],  # top left
+                #         [x_max * self.width, y_min * self.height],  # top right
+                #         [x_max * self.width, y_max * self.height],  # bottom right
+                #         [x_min * self.width, y_max * self.height],  # bottom left
+                #     ],
+                #     dtype=np.int32,
+                # )
 
                 if y_min * self.height > self.height // 2:
                     # this might be a cone that is close to us so see if its in the middle

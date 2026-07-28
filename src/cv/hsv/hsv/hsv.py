@@ -148,7 +148,7 @@ class hsv:
         else:
             print("No HSV values file found.")
 
-    def get_barrels_YOLO(self):
+    def get_barrels_yolo(self):
         if self.barrel_mode == "YOLO":
             results = self.barrel_model.predict(self.image, conf=0.7)[0]
             self.barrel_mask = np.zeros((self.image.shape[0], self.image.shape[1]), dtype=np.uint8)
@@ -412,7 +412,7 @@ class hsv:
             self.image = frame
             self.adjust_gamma()
             self.hsv_image = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
-            mask, dict_masks = self.update_mask()
+            _, dict_masks = self.update_mask()
 
             cv2.imshow("Video", frame)
             cv2.imshow("Mask", dict_masks[filter_name])
@@ -429,7 +429,7 @@ class hsv:
         cv2.destroyAllWindows()
         self.save_hsv_values()
 
-    def get_lane_lines_YOLO(self):
+    def get_lane_lines_yolo(self):
         results = self.lane_model.predict(self.image, conf=0.7)[0]
         laneline_mask = np.zeros((self.image.shape[0], self.image.shape[1]), dtype=np.uint8)
         if results.masks is not None:
@@ -460,18 +460,15 @@ class hsv:
                     cv2.drawContours(final, [cnt], -1, 255, thickness=cv2.FILLED)
 
             if filter_name == "white" and self.YOLO_lanes:
-                lane_line_mask = self.get_lane_lines_YOLO()
+                lane_line_mask = self.get_lane_lines_yolo()
                 final = cv2.bitwise_or(final, lane_line_mask)
 
-            if combined_mask is None:
-                combined_mask = final
-            else:
-                combined_mask = cv2.bitwise_or(combined_mask, final)
+            combined_mask = final if (combined_mask is None) else cv2.bitwise_or(combined_mask, final)
 
             masks[filter_name] = final
 
         if self.YOLO_barrels:
-            barrels = self.get_barrels_YOLO()
+            barrels = self.get_barrels_yolo()
             combined_mask = cv2.bitwise_or(combined_mask, barrels)
 
         return combined_mask, masks
@@ -484,12 +481,12 @@ class hsv:
         self.hsv_image = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
         return self.update_mask()
 
-    def set_YOLO_lanes(self, val: bool) -> None:
+    def set_yolo_lanes(self, val: bool) -> None:
         self.YOLO_lanes = val
 
-    def set_YOLO_barrels(self, val: bool) -> None:
+    def set_yolo_barrels(self, val: bool) -> None:
         self.YOLO_barrels = val
 
     def __call__(self, frame: np.ndarray) -> np.ndarray:  # MaskMethod functor
-        combined, dict = self.get_mask(frame)
-        return dict["white"]
+        _, mask_dict = self.get_mask(frame)
+        return mask_dict["white"]

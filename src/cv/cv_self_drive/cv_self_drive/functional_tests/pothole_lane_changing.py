@@ -239,8 +239,8 @@ class ReallyGoodStateMachine(FunctionalTest):
 
     def find_waypoint_right(self, y_in, img, prev_x):
         height, width = img.shape
-        SENTINEL = -100
-        x = SENTINEL
+        sentinel = -100
+        x = sentinel
         spacing = 10
         img_slice = img[y_in - spacing : y_in + spacing, :]
 
@@ -251,7 +251,7 @@ class ReallyGoodStateMachine(FunctionalTest):
                 x = np.max(x_values)
                 return int(x - (width * 2 / 8))
 
-        if x == SENTINEL and not self.exited_sentinel:
+        if x == sentinel and not self.exited_sentinel:
             self.entered_sentinel = True
             x = int(width * (0.75))
             return x
@@ -264,12 +264,12 @@ class ReallyGoodStateMachine(FunctionalTest):
 
     def find_waypoint_left(self, y_in, img, prev_x):
         height, width = img.shape
-        SENTINEL = -100
-        x = SENTINEL
+        sentinel = -100
+        x = sentinel
         spacing = 10
         img_slice = img[y_in - spacing : y_in + spacing, :]
 
-        y_values, x_values = np.where(img_slice == 255)
+        _, x_values = np.where(img_slice == 255)
 
         if x_values.size > 0:
             if np.min(x_values) < int(width * 2 / 3):
@@ -281,7 +281,7 @@ class ReallyGoodStateMachine(FunctionalTest):
                 self.exited_sentinel = False
 
         # Mirror: If nothing found, default to the left-side equivalent (30%)
-        if x == SENTINEL and not self.exited_sentinel:
+        if x == sentinel and not self.exited_sentinel:
             self.entered_sentinel = True
             x = int(width * 0.25)
             return x
@@ -303,8 +303,8 @@ class ReallyGoodStateMachine(FunctionalTest):
     #     width = width / 2 # Test use    #change before pub
 
     #     # Sentinel as hard-coded steer to continue lane change without visibility
-    #     SENTINEL = -100
-    #     x = SENTINEL
+    #     sentinel = -100
+    #     x = sentinel
     #     spacing = 15 # Originally 10, take a larger slice to look at
 
     #     img_slice = img[max(0, y_in - spacing) : min(height, y_in + spacing), :]
@@ -330,8 +330,8 @@ class ReallyGoodStateMachine(FunctionalTest):
     #     height, width = img.shape
     #     width = width / 2 # Test use
     #     # Sentinel as hard-coded steer to continue lane change without visibility
-    #     SENTINEL = -100
-    #     x = SENTINEL
+    #     sentinel = -100
+    #     x = sentinel
     #     spacing = 15 # Originally 10, take a larger slice to look at
 
     #     img_slice = img[max(0, y_in - spacing) : min(height, y_in + spacing), :]
@@ -356,7 +356,7 @@ class ReallyGoodStateMachine(FunctionalTest):
 
     def run_frame(self, img):
         print("runframe image shape: ", img.shape)
-        height, width = img.shape[:2]
+        _, width = img.shape[:2]
         # img = img[:, int(width/2) : width]
         # height, width = img.shape[:2]
 
@@ -406,7 +406,7 @@ class ReallyGoodStateMachine(FunctionalTest):
         if self.state == self.state_3:
             self.atBarrel, mask, [self.x_waypoint, self.y_waypoint] = self.at_barrel(self.cap, img)
             if self.atBarrel:
-                running = False
+                # running = False
                 print("AT BARREL")
 
             return mask, [self.x_waypoint, self.y_waypoint]
@@ -419,7 +419,7 @@ class ReallyGoodStateMachine(FunctionalTest):
             if not ret:
                 break
 
-            mask, waypoint = self.run_frame(img)
+            mask, _ = self.run_frame(img)
 
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 self.cap.release()

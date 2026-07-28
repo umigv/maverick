@@ -264,7 +264,7 @@ def main(turn_type="right"):
         exit(1)
 
     runtime = sl.RuntimeParameters()
-    frames_recorded = 0
+    # frames_recorded = 0
 
     resolution = cam.get_camera_information().camera_configuration.resolution
     w = min(720, resolution.width)
