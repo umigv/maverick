@@ -113,6 +113,8 @@ class SelfDriveNode(Node):
     def __init__(self, gw_mm: int, gh_mm: int, cw_mm: int):
         super().__init__("self_drive_node")
 
+        self.cam = sl.Camera()
+
         self.declare_parameter("function_type", "right")
         self.function_type = self.get_parameter("function_type").get_parameter_value().string_value
 

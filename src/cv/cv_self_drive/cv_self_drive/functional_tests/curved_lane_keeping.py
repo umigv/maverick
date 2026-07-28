@@ -3,7 +3,7 @@ import os
 import cv2
 import numpy as np
 from cv_self_drive.functional_tests.functional_test_parent import FunctionalTest
-from hsv import hsv
+from hsv import HSV
 
 
 class CurvedLanekeeping(FunctionalTest):
@@ -154,7 +154,7 @@ class CurvedLanekeeping(FunctionalTest):
         base_dir = os.path.dirname(os.path.abspath(__file__))
 
         cap = cv2.VideoCapture(str(os.path.join(base_dir, "../data/left_curved_road.MOV")))
-        self.hsv_obj = hsv(str(os.path.join(base_dir, "../data/left_curved_road.MOV")), barrel_mode=self.barrel_mode)
+        self.hsv_obj = HSV(str(os.path.join(base_dir, "../data/left_curved_road.MOV")), barrel_mode=self.barrel_mode)
 
         # self.hsv_obj.tune("white")
         # self.hsv_obj.tune("yellow")
@@ -194,7 +194,7 @@ class CurvedLanekeeping(FunctionalTest):
 
     def run_frame(self, hsv_indentifier, frame):
         if self.hsv_obj is None:
-            self.hsv_obj = hsv(hsv_indentifier)
+            self.hsv_obj = HSV(hsv_indentifier)
 
         self.image = frame
         self.height, self.width, _ = self.image.shape

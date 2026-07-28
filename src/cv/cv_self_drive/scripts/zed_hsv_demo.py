@@ -1,5 +1,5 @@
 import json
-import os
+from pathlib import Path
 
 import cv2
 import pyzed.sl as sl
@@ -17,8 +17,10 @@ class ZEDDemo:
 
         self.zed_settings = None
 
-        if os.path.exists(json_path):
-            with open(json_path) as file:
+        json_path_obj = Path(json_path)
+
+        if json_path_obj.exists():
+            with Path.open(json_path_obj) as file:
                 all_json_keys = json.load(file)
                 json_dict = all_json_keys.get(str(json_key), {})
 

@@ -2,7 +2,7 @@ import os
 
 import cv2
 import numpy as np
-from cv_self_drive.hsv import hsv
+from hsv import HSV
 
 
 class RightTurn:
@@ -299,7 +299,7 @@ class RightTurn:
         base_dir = os.path.dirname(os.path.abspath(__file__))
 
         cap = cv2.VideoCapture(str(base_dir, "../data/right_turn_cropped.mp4"))
-        self.hsv_obj = hsv(str(base_dir, "../data/right_turn_cropped.mp4"))
+        self.hsv_obj = HSV(str(base_dir, "../data/right_turn_cropped.mp4"))
 
         # "white": {
         #     "h_upper": 179,
@@ -352,7 +352,7 @@ class RightTurn:
     # >>> change: run_frame now runs full pipeline (HSV + state machine) and returns results
     def run_frame(self, hsv_indentifier, frame):
         if self.hsv_obj is None:
-            self.hsv_obj = hsv(hsv_indentifier)
+            self.hsv_obj = HSV(hsv_indentifier)
 
         self.image = frame
         self.height, self.width, _ = self.image.shape

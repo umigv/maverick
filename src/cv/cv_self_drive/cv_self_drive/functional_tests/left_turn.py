@@ -2,7 +2,7 @@ import os
 
 import cv2
 import numpy as np
-from cv_self_drive.hsv import hsv
+from hsv import HSV
 
 # Left turn algorithm updated from testing at comp, !!NOT TESTED!!
 
@@ -374,7 +374,7 @@ class LeftTurn:
         cap = cv2.VideoCapture(
             str(os.path.join(base_dir, "../data/left_turn.mp4"))
         )  # Specify an integer for webcam or other camera
-        self.hsv_obj = hsv(
+        self.hsv_obj = HSV(
             str(os.path.join(base_dir, "../data/left_turn.mp4"))
         )  # , barrel_model_path='data/obstacles.pt', lane_model_path='data/lane_lines.pt'
 
@@ -393,7 +393,7 @@ class LeftTurn:
 
     def run_frame(self, hsv_indentifier, frame):
         if self.hsv_obj is None:
-            self.hsv_obj = hsv(hsv_indentifier)
+            self.hsv_obj = HSV(hsv_indentifier)
 
         self.image = frame
         self.height, self.width, _ = self.image.shape
