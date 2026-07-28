@@ -1,27 +1,21 @@
-import sys
-import pyzed.sl as sl
+import json
+import math
 import os
 import time
+
 import cv2
 import numpy as np
-import math
-import json
-
-sys.path.append(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                 "cv-depth-segmentation",
-                 "src")
-)
-
+import pyzed.sl as sl
+import ransac
 import rclpy
-from rclpy.node import Node
-from nav_msgs.msg import OccupancyGrid, MapMetaData
-from geometry_msgs.msg import PointStamped, Pose, Quaternion, Point
-
-from cv_self_drive.functional_tests.right_turn import RightTurn
+from cv_self_drive.functional_tests.curved_lane_keeping import CurvedLanekeeping
 from cv_self_drive.functional_tests.left_turn import LeftTurn
 from cv_self_drive.functional_tests.pedestrian_lane_changing import ReallyGoodStateMachine
-from cv_self_drive.functional_tests.curved_lane_keeping import CurvedLanekeeping
+from cv_self_drive.functional_tests.right_turn import RightTurn
+from geometry_msgs.msg import Point, PointStamped, Pose, Quaternion
+from nav_msgs.msg import MapMetaData, OccupancyGrid
+from rclpy.node import Node
+
 
 def print_params(calibration_params: sl.CalibrationParameters):
     # LEFT CAMERA intrinsics
@@ -55,8 +49,8 @@ def print_params(calibration_params: sl.CalibrationParameters):
 
     print(f"Stereo Baseline (tx): {tx:.6f} meters")
 
-def pixel_waypoint_to_odom(centroid, depth_map, ransac_coeffs,
-                           real_coeffs, intrinsics):
+
+def pixel_waypoint_to_odom(centroid, depth_map, ransac_coeffs, real_coeffs, intrinsics):
     """Transform a pixel-space waypoint into odom-frame (meters).
 
     Pipeline:
@@ -109,34 +103,32 @@ def pixel_waypoint_to_odom(centroid, depth_map, ransac_coeffs,
     #   z_cam = depth        (forward +)
 
     # --- camera frame -> odom (REP 103: x-fwd, y-left, z-up), mm -> m ---
-    x_odom =  real_pt[0, 2] / 1000.0   # z_cam  -> forward
-    y_odom = -real_pt[0, 0] / 1000.0   # -x_cam -> left
-    z_odom =  0.0                       # ground-plane waypoint
+    x_odom = real_pt[0, 2] / 1000.0  # z_cam  -> forward
+    y_odom = -real_pt[0, 0] / 1000.0  # -x_cam -> left
+    z_odom = 0.0  # ground-plane waypoint
     return (x_odom, y_odom, z_odom)
 
 
 class SelfDriveNode(Node):
     def __init__(self, gw_mm: int, gh_mm: int, cw_mm: int):
-        super().__init__('self_drive_node')
+        super().__init__("self_drive_node")
 
         self.declare_parameter("function_type", "right")
-        self.function_type = self.get_parameter(
-            "function_type").get_parameter_value().string_value
-        
+        self.function_type = self.get_parameter("function_type").get_parameter_value().string_value
+
         self.declare_parameters("hsv_json_key", "1")
-        self.hsv_json_key = self.get_parameter(
-            "hsv_json_key").get_parameter_value().string_value
-        
+        self.hsv_json_key = self.get_parameter("hsv_json_key").get_parameter_value().string_value
+
         init = sl.InitParameters()
         init.depth_mode = sl.DEPTH_MODE.NEURAL
         init.async_image_retrieval = False
-        
+
         status = self.cam.open(init)
         if status != sl.ERROR_CODE.SUCCESS:
             raise RuntimeError(f"Camera open failed: {status}")
-        
+
         self.runtime = sl.RuntimeParameters()
-        
+
         cam_info = self.cam.get_camera_information()
         resolution = cam_info.camera_configuration.resolution
         self.w = min(720, resolution.width)
@@ -149,21 +141,19 @@ class SelfDriveNode(Node):
         sx = self.w / float(resolution.width)
         sy = self.h / float(resolution.height)
         self.low_res = sl.Resolution(self.w, self.h)
-        
 
         self.intrinsics = ransac.Intrinsics(
             calibration_params.left_cam.cx * sx,
             calibration_params.left_cam.cy * sy,
             calibration_params.left_cam.fx * sx,
-            calibration_params.left_cam.fy * sy
+            calibration_params.left_cam.fy * sy,
         )
 
-        drive_conf = ransac.GridConfiguration(5000, 5000, 50) # , thres=5
-        block_conf = ransac.GridConfiguration(5000, 5000, 50) # , thres=1
+        drive_conf = ransac.GridConfiguration(5000, 5000, 50)  # , thres=5
+        block_conf = ransac.GridConfiguration(5000, 5000, 50)  # , thres=1
 
-        self.occ_pub = self.create_publisher(
-            OccupancyGrid, 'occupancy_grid/raw', 10)
-        self.wp_pub = self.create_publisher(PointStamped, '/goal', 10)
+        self.occ_pub = self.create_publisher(OccupancyGrid, "occupancy_grid/raw", 10)
+        self.wp_pub = self.create_publisher(PointStamped, "/goal", 10)
 
         self.gw_mm = gw_mm
         self.gh_mm = gh_mm
@@ -173,7 +163,7 @@ class SelfDriveNode(Node):
         self.ros_height = gw_mm // cw_mm
 
         if self.function_type == "right":
-          self.function = RightTurn(debug=False)
+            self.function = RightTurn(debug=False)
         elif self.function_type == "left":
             self.function = LeftTurn(debug=True)
         elif self.function_type == "pedlanechange":
@@ -182,13 +172,13 @@ class SelfDriveNode(Node):
             self.function = CurvedLanekeeping(debug=False)
         else:
             raise ValueError(f"Invalid function_type: {self.function_type}")
-        
+
         self.image_mat = sl.Mat()
         self.depth_m = sl.Mat()
 
         base_dir = os.path.dirname(os.path.abspath(__file__))
 
-        with open(str(os.path.join(base_dir, "hsv_values.json")), "r") as file:
+        with open(str(os.path.join(base_dir, "hsv_values.json"))) as file:
             all_json_keys = json.load(file)
             json_dict = all_json_keys.get(self.hsv_json_key, {})
 
@@ -196,14 +186,7 @@ class SelfDriveNode(Node):
                 zed_settings = json_dict["__ZED_SETTINGS__"]
             else:
                 print("No ZED settings found in JSON, using defaults.")
-                zed_settings = {
-                    "BRIGHTNESS": 5,
-                    "CONTRAST": 5,
-                    "HUE": 5,
-                    "SATURATION": 5,
-                    "SHARPNESS": 5,
-                    "GAMMA": 6
-                }
+                zed_settings = {"BRIGHTNESS": 5, "CONTRAST": 5, "HUE": 5, "SATURATION": 5, "SHARPNESS": 5, "GAMMA": 6}
 
         self.cam.set_camera_settings(sl.VIDEO_SETTINGS.BRIGHTNESS, zed_settings["BRIGHTNESS"])
         self.cam.set_camera_settings(sl.VIDEO_SETTINGS.CONTRAST, zed_settings["CONTRAST"])
@@ -222,29 +205,25 @@ class SelfDriveNode(Node):
 
         msg = OccupancyGrid()
         msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = 'base_link'
+        msg.header.frame_id = "base_link"
 
         info = MapMetaData()
-        info.width      = self.ros_width
-        info.height     = self.ros_height
+        info.width = self.ros_width
+        info.height = self.ros_height
         info.resolution = self.resolution_m
 
         # Origin: where camera is roughly
         origin = Pose()
-        origin.position = Point(
-            x=0.0,
-            y=-(self.gw_mm / 2.0) / 1000.0,
-            z=0.0
-        )
+        origin.position = Point(x=0.0, y=-(self.gw_mm / 2.0) / 1000.0, z=0.0)
         origin.orientation = Quaternion(x=0.0, y=0.0, z=0.0, w=1.0)
         info.origin = origin
         msg.info = info
 
         # Convert internal 0/127/255 encoding -> ROS 0/-1/100
-        flat = ros_grid.astype('uint8')
+        flat = ros_grid.astype("uint8")
         ros = np.full(flat.shape, -1, dtype=np.int8)
-        ros[flat == 0]   = 100  # occupied
-        ros[flat == 255] = 0    # free
+        ros[flat == 0] = 100  # occupied
+        ros[flat == 255] = 0  # free
 
         msg.data = ros.flatten().tolist()
         self.occ_pub.publish(msg)
@@ -256,7 +235,7 @@ class SelfDriveNode(Node):
 
         msg = PointStamped()
         msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = 'base_link'
+        msg.header.frame_id = "base_link"
         msg.point.x = odom_xyz[0]
         msg.point.y = odom_xyz[1]
         msg.point.z = odom_xyz[2]
@@ -273,9 +252,8 @@ class SelfDriveNode(Node):
             if err <= sl.ERROR_CODE.SUCCESS:  # good to go
                 # FIXME pointing camera at only the ground causing a crash
                 self.cam.retrieve_image(self.image_mat, sl.VIEW.LEFT, sl.MEM.CPU, self.low_res)
-                self.cam.retrieve_measure(
-                    self.depth_m, sl.MEASURE.DEPTH, sl.MEM.CPU, self.low_res)
-                
+                self.cam.retrieve_measure(self.depth_m, sl.MEASURE.DEPTH, sl.MEM.CPU, self.low_res)
+
             image = self.image_mat.get_data()
             image = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
             depths = ransac.plane.clean_depths(self.depth_m.get_data())
@@ -283,7 +261,7 @@ class SelfDriveNode(Node):
             if time.time() - start < 5:
                 print("Warming up the camera...")
                 continue
-            
+
             turn_mask, turn_centroid = self.function.run_frame(self.hsv_json_key, image)
             print(f"done, centroid: {turn_centroid}")
 
@@ -293,23 +271,24 @@ class SelfDriveNode(Node):
             real_coeffs = ransac.plane.real_coeffs(pixel_coeffs, self.intrinsics)
 
             rad = ransac.plane.real_angle(real_coeffs)
-            full_occ = ransac.occu.occ_grid(lane_mask, real_coeffs, self.intrinsics, self.drive_conf, ransac.CameraPosition(0, 0, 0))
+            full_occ = ransac.occu.occ_grid(
+                lane_mask, real_coeffs, self.intrinsics, self.drive_conf, ransac.CameraPosition(0, 0, 0)
+            )
 
             self.publish_occ_grid(full_occ)
             self.publish_occ_grid(full_occ)
             now = self.get_clock().now()
-            if last_publish is None or (now - last_publish).nanoseconds >= 2.0 * 1e9:     
-                # print(f"Last publish {last_publish}, now {now}")           
+            if last_publish is None or (now - last_publish).nanoseconds >= 2.0 * 1e9:
+                # print(f"Last publish {last_publish}, now {now}")
                 odom_waypoint = pixel_waypoint_to_odom(
-                    turn_centroid, depths, pixel_coeffs, real_coeffs, self.intrinsics)
+                    turn_centroid, depths, pixel_coeffs, real_coeffs, self.intrinsics
+                )
                 print(f"Publishing waypoint at odom coords: {odom_waypoint}")
                 self.publish_waypoint(odom_waypoint)
                 last_publish = now
 
             full_occ_vis = cv2.cvtColor(full_occ, cv2.COLOR_GRAY2BGR)
-            full_occ_vis = cv2.resize(
-                full_occ_vis, (600, 600), interpolation=cv2.INTER_NEAREST_EXACT
-            )
+            full_occ_vis = cv2.resize(full_occ_vis, (600, 600), interpolation=cv2.INTER_NEAREST_EXACT)
             cv2.imshow("occupancy grid", full_occ_vis)
 
             print(f"angle: {math.degrees(rad): .3f} deg")
@@ -320,6 +299,7 @@ class SelfDriveNode(Node):
 
         self.cam.close()
         cv2.destroyAllWindows()
+
 
 def main(args=None):
     rclpy.init(args=args)
