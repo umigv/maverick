@@ -1,5 +1,7 @@
-from cv_self_drive.functional_tests.functional_test_parent import FunctionalTest
 import os
+
+from cv_self_drive.functional_tests.functional_test_parent import FunctionalTest
+
 
 class ObstructedPedestrianDetection(FunctionalTest):
     def __init__(self):
@@ -28,18 +30,15 @@ class ObstructedPedestrianDetection(FunctionalTest):
                 px1, py1, px2, py2 = map(int, box)
                 if class_id == 0 and confidence > 0.7:
                     height, width = img.shape[:2]
-                    range = int(width/100)
-                    size_person = (px2-px1)/width
+                    range = int(width / 100)
+                    size_person = (px2 - px1) / width
                     cv2.rectangle(img, (px1, py1), (px2, py2), (0, 255, 0), 2)
-                    cv2.waitKey(1)    
+                    cv2.waitKey(1)
                     if size_person > 0.12:
                         # print("person within range")
                         return True, (py2 + range), px1
-                    else:
-                        return False, (py2 + range), px1
-                    
+                    return False, (py2 + range), px1
 
-                
         return False, py2, px1
 
     def calculate_waypoint(self, left_line, right_line):
@@ -69,8 +68,8 @@ class ObstructedPedestrianDetection(FunctionalTest):
     def update_mask(self):
         mask = np.zeros((self.height, self.width), dtype=np.uint8)
         mask, dict = self.hsv_obj.get_mask(self.image, mask)
-        self.white_mask = dict['white_mask']
-        self.yellow_mask = dict['yellow_mask']
+        self.white_mask = dict["white_mask"]
+        self.yellow_mask = dict["yellow_mask"]
         self.final_mask = mask
 
     def main(self):
@@ -83,12 +82,12 @@ class ObstructedPedestrianDetection(FunctionalTest):
             ret, self.image = cap.read()
             if ret:
                 self.height, self.width, _ = self.image.shape
-                
+
                 self.update_mask()
                 self.state_machine()
 
                 cv2.imshow("Obstructed Pedestrian Detection", self.final_mask)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
+                if cv2.waitKey(1) & 0xFF == ord("q"):
                     break
             else:
                 break
@@ -98,14 +97,13 @@ class ObstructedPedestrianDetection(FunctionalTest):
     def run_frame(self, hsv_indentifier, frame):
         if self.hsv_obj is None:
             self.hsv_obj = hsv(hsv_indentifier)
-        
+
         self.image = frame
         self.height, self.width, _ = self.image.shape
-    
+
         self.update_mask()
         self.state_machine()
 
         cv2.imshow("Obstructed Pedestrian Detection", self.final_mask)
 
         return self.final_mask, self.waypoint
-        

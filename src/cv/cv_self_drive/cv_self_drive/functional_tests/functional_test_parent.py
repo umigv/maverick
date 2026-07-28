@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class FunctionalTest(ABC):
     def __init__(self):
         """Initialize the final mask and waypoint."""
@@ -9,7 +10,6 @@ class FunctionalTest(ABC):
     @abstractmethod
     def run_frame(self, hsv_identifier="1", frame=None):
         """Run the functional test on a single frame. Should return final mask and waypoint."""
-        pass
 
 
 """

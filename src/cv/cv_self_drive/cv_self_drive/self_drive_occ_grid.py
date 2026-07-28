@@ -18,33 +18,32 @@
 #
 ########################################################################
 
-import sys
-import pyzed.sl as sl
-from signal import signal, SIGINT
-import argparse
 import os
-import cv2
-sys.path.append(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                 "cv-depth-segmentation",
-                 "src")
-)
+import sys
+from signal import SIGINT, signal
 
-import ransac.plane
-import ransac.occu
-import numpy as np
+import cv2
+import pyzed.sl as sl
+
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "cv-depth-segmentation", "src"))
+
 import math
+
+import numpy as np
+import ransac.occu
+import ransac.plane
 
 # >>> ros2 change
 import rclpy
-from rclpy.node import Node
-from nav_msgs.msg import OccupancyGrid, MapMetaData
-# <<< ros2 end of change
+from functional_tests.left_turn import LeftTurn
 
+# <<< ros2 end of change
 # >>> change: import RightTurn and message types for waypoint publishing
 from functional_tests.right_turn import RightTurn
-from functional_tests.left_turn import LeftTurn
-from geometry_msgs.msg import PointStamped, Pose, Quaternion, Point
+from geometry_msgs.msg import Point, PointStamped, Pose, Quaternion
+from nav_msgs.msg import MapMetaData, OccupancyGrid
+from rclpy.node import Node
+
 # <<< end of change
 
 
@@ -71,10 +70,10 @@ class SelfDriveNode(Node):
     """
 
     def __init__(self, gw_mm: int, gh_mm: int, cw_mm: int):
-        super().__init__('self_drive_node')
+        super().__init__("self_drive_node")
 
         # --- occupancy grid publisher ---
-        self.occ_pub = self.create_publisher(OccupancyGrid, 'occupancy_grid/raw', 10)
+        self.occ_pub = self.create_publisher(OccupancyGrid, "occupancy_grid/raw", 10)
 
         self.gw_mm = gw_mm
         self.gh_mm = gh_mm
@@ -84,11 +83,11 @@ class SelfDriveNode(Node):
         # After the transpose the ROS grid dimensions swap:
         #   ros_width  (columns, forward) = original H = gh / cw
         #   ros_height (rows,    lateral) = original W = gw / cw
-        self.ros_width  = gh_mm // cw_mm
+        self.ros_width = gh_mm // cw_mm
         self.ros_height = gw_mm // cw_mm
 
         # --- waypoint publisher ---
-        self.wp_pub = self.create_publisher(PointStamped, '/goal', 10)
+        self.wp_pub = self.create_publisher(PointStamped, "/goal", 10)
 
     def publish_occ_grid(self, grid_np):
         # ---- coordinate transform to REP 103 ----
@@ -100,29 +99,25 @@ class SelfDriveNode(Node):
 
         msg = OccupancyGrid()
         msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = 'base_link'
+        msg.header.frame_id = "base_link"
 
         info = MapMetaData()
-        info.width      = self.ros_width
-        info.height     = self.ros_height
+        info.width = self.ros_width
+        info.height = self.ros_height
         info.resolution = self.resolution_m
 
         # Origin: where camera is roughly
         origin = Pose()
-        origin.position = Point(
-            x=0.0,
-            y=-(self.gw_mm / 2.0) / 1000.0,
-            z=0.0
-        )
+        origin.position = Point(x=0.0, y=-(self.gw_mm / 2.0) / 1000.0, z=0.0)
         origin.orientation = Quaternion(x=0.0, y=0.0, z=0.0, w=1.0)
         info.origin = origin
         msg.info = info
 
         # Convert internal 0/127/255 encoding -> ROS 0/-1/100
-        flat = ros_grid.astype('uint8')
+        flat = ros_grid.astype("uint8")
         ros = np.full(flat.shape, -1, dtype=np.int8)
-        ros[flat == 0]   = 100  # occupied
-        ros[flat == 255] = 0    # free
+        ros[flat == 0] = 100  # occupied
+        ros[flat == 255] = 0  # free
 
         msg.data = ros.flatten().tolist()
         self.occ_pub.publish(msg)
@@ -134,18 +129,19 @@ class SelfDriveNode(Node):
 
         msg = PointStamped()
         msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = 'base_link'
+        msg.header.frame_id = "base_link"
         msg.point.x = odom_xyz[0]
         msg.point.y = odom_xyz[1]
         msg.point.z = odom_xyz[2]
 
         self.wp_pub.publish(msg)
+
+
 # <<< end of change
 
 
 # >>> change: convert pixel waypoint to odom-frame meters using intrinsics + RANSAC
-def pixel_waypoint_to_odom(centroid, depth_map, ransac_coeffs,
-                           real_coeffs, intrinsics):
+def pixel_waypoint_to_odom(centroid, depth_map, ransac_coeffs, real_coeffs, intrinsics):
     """Transform a pixel-space waypoint into odom-frame (meters).
 
     Pipeline:
@@ -198,10 +194,12 @@ def pixel_waypoint_to_odom(centroid, depth_map, ransac_coeffs,
     #   z_cam = depth        (forward +)
 
     # --- camera frame -> odom (REP 103: x-fwd, y-left, z-up), mm -> m ---
-    x_odom =  real_pt[0, 2] / 1000.0   # z_cam  -> forward
-    y_odom = -real_pt[0, 0] / 1000.0   # -x_cam -> left
-    z_odom =  0.0                       # ground-plane waypoint
+    x_odom = real_pt[0, 2] / 1000.0  # z_cam  -> forward
+    y_odom = -real_pt[0, 0] / 1000.0  # -x_cam -> left
+    z_odom = 0.0  # ground-plane waypoint
     return (x_odom, y_odom, z_odom)
+
+
 # <<< end of change
 
 
@@ -246,6 +244,7 @@ def print_params(calibration_params: sl.CalibrationParameters):
     print(f"  cy = {cy_right:.3f}\n")
 
     print(f"Stereo Baseline (tx): {tx:.6f} meters")
+
 
 # turn_type can be "right" or "left"
 def main(turn_type="right"):
@@ -297,18 +296,17 @@ def main(turn_type="right"):
     intrinsics = ransac.Intrinsics(cx_scaled, cy_scaled, fx_scaled, fy_scaled)
     # <<< end of change
 
-    drive_conf = ransac.GridConfiguration(5000, 5000, 50) # , thres=5
-    block_conf = ransac.GridConfiguration(5000, 5000, 50) # , thres=1
+    drive_conf = ransac.GridConfiguration(5000, 5000, 50)  # , thres=5
+    block_conf = ransac.GridConfiguration(5000, 5000, 50)  # , thres=1
 
     # >>> change: single node for both occ grid and waypoint
-    node = SelfDriveNode(
-        gw_mm=drive_conf.gw, gh_mm=drive_conf.gh, cw_mm=drive_conf.cw)
+    node = SelfDriveNode(gw_mm=drive_conf.gw, gh_mm=drive_conf.gh, cw_mm=drive_conf.cw)
     # <<< end of change
 
     turn = None
-    if(turn_type == "right"):
+    if turn_type == "right":
         turn = RightTurn(debug=False)
-    elif(turn_type == "left"):
+    elif turn_type == "left":
         turn = LeftTurn(debug=False)
     else:
         print(f"Invalid turn type: {turn_type}. Must be 'right' or 'left'.")
@@ -328,8 +326,7 @@ def main(turn_type="right"):
         if err <= sl.ERROR_CODE.SUCCESS:  # good to go
             # FIXME pointing camera at only the ground causing a crash
             cam.retrieve_image(image_mat, sl.VIEW.LEFT, sl.MEM.CPU, low_res)
-            cam.retrieve_measure(
-                depth_m, sl.MEASURE.DEPTH, sl.MEM.CPU, low_res)
+            cam.retrieve_measure(depth_m, sl.MEASURE.DEPTH, sl.MEM.CPU, low_res)
 
             image = image_mat.get_data()
             depths = ransac.plane.clean_depths(depth_m.get_data())
@@ -343,20 +340,19 @@ def main(turn_type="right"):
             lane_mask = ransac.plane.merge_masks(ground_mask, turn_mask)
             real_coeffs = ransac.plane.real_coeffs(pixel_coeffs, intrinsics)
             rad = ransac.plane.real_angle(real_coeffs)
-            full_occ = ransac.occu.occ_grid(lane_mask, real_coeffs, intrinsics, drive_conf, ransac.CameraPosition(0, 0, 0))
+            full_occ = ransac.occu.occ_grid(
+                lane_mask, real_coeffs, intrinsics, drive_conf, ransac.CameraPosition(0, 0, 0)
+            )
 
             # >>> change: publish occ grid and waypoint from single node
             node.publish_occ_grid(full_occ)
 
-            odom_waypoint = pixel_waypoint_to_odom(
-                turn_centroid, depths, pixel_coeffs, real_coeffs, intrinsics)
+            odom_waypoint = pixel_waypoint_to_odom(turn_centroid, depths, pixel_coeffs, real_coeffs, intrinsics)
             node.publish_waypoint(odom_waypoint)
             # <<< end of change
 
             full_occ_vis = cv2.cvtColor(full_occ, cv2.COLOR_GRAY2BGR)
-            full_occ_vis = cv2.resize(
-                full_occ_vis, (600, 600), interpolation=cv2.INTER_NEAREST_EXACT
-            )
+            full_occ_vis = cv2.resize(full_occ_vis, (600, 600), interpolation=cv2.INTER_NEAREST_EXACT)
             cv2.imshow("occupancy grid", full_occ_vis)
 
             print(f"angle: {math.degrees(rad): .3f} deg")
@@ -381,5 +377,5 @@ if __name__ == "__main__":
     turn_type = "right"
     if len(sys.argv) > 1:
         turn_type = sys.argv[1].lower()
-    
+
     main(turn_type=turn_type)
