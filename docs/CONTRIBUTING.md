@@ -2,7 +2,8 @@
 
 How changes get into `main`: [issues](#issues), [branches](#branches), [pull requests](#pull-requests), [reviews](#reviews), and [CI](#ci).
 
-> [!WARNING] This document assumes basic knowledge of Git and GitHub. If you find yourself confused at some of the terminology, feel free to pause and look up definitions. If you still find yourself lost, reach out to your subteam lead.
+> [!WARNING]
+> This document assumes basic knowledge of Git and GitHub. If you find yourself confused at some of the terminology, feel free to pause and look up definitions. If you still find yourself lost, reach out to your subteam lead.
 
 ## Issues
 

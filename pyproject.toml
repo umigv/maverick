@@ -80,6 +80,10 @@ mdformat-gfm = "*"
 # Pin to version matching what Ubuntu ships with the ROS distro we use
 clang-format = "22.*"
 
+[tool.pixi.feature.tooling.pypi-dependencies]
+# Keeps mdformat from reflowing GitHub [!WARNING]-style alerts; not on conda-forge
+mdformat-gfm-alerts = "*"
+
 [tool.pixi.environments]
 default = { features = ["ros", "tooling"], solve-group = "default" }
 

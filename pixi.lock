@@ -718,6 +718,7 @@ environments:
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-zstd-cmake-module-0.33.3-np2py314hb48eaa3_22.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-distro-mutex-0.18.0-lyrical_22.conda
       - pypi: https://files.pythonhosted.org/packages/05/7f/798705f5296a58ca505d600456748d1be48078eac8a7050d8a98bc9edb89/decorator-5.3.1-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/17/b7/df953bacca701b498a616bd12be66876c9dac17fe0a44f9fed65a5b53f04/mdformat_gfm_alerts-2.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1e/5e/d4e9f1a599fb8e573b7b87160658329fbf28d19eac2718f51fc3def3aa5a/idna-3.18-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/22/a6/858897256d0deac81a172289110f31629fc4cee19b6f01283303e18c8db3/ptyprocess-0.7.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2b/76/7f1bfd6afff4c5e38e36a3c6d68eb5f4b7311ea80baf693db78d95b603c4/propcache-0.5.2-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
@@ -1427,6 +1428,7 @@ environments:
       - conda: https://prefix.dev/robostack-lyrical/linux-aarch64/ros2-distro-mutex-0.18.0-lyrical_22.conda
       - pypi: https://files.pythonhosted.org/packages/02/a7/45baabfff76829264e623b185cff0c340d7e11bf3e1cd9ea37e7d17934bd/yarl-1.24.2-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl
       - pypi: https://files.pythonhosted.org/packages/05/7f/798705f5296a58ca505d600456748d1be48078eac8a7050d8a98bc9edb89/decorator-5.3.1-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/17/b7/df953bacca701b498a616bd12be66876c9dac17fe0a44f9fed65a5b53f04/mdformat_gfm_alerts-2.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1e/5e/d4e9f1a599fb8e573b7b87160658329fbf28d19eac2718f51fc3def3aa5a/idna-3.18-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/22/a6/858897256d0deac81a172289110f31629fc4cee19b6f01283303e18c8db3/ptyprocess-0.7.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/25/22/f2721ae985a5c2a3434434ab448e13737dee1bc0edbee8212944f40d04c9/odrive-0.6.11.post0-py37-none-manylinux_2_28_aarch64.whl
@@ -2085,6 +2087,7 @@ environments:
       - conda: https://prefix.dev/robostack-lyrical/osx-arm64/ros-lyrical-zstd-cmake-module-0.33.3-np2py314h1e5664e_22.conda
       - conda: https://prefix.dev/robostack-lyrical/osx-arm64/ros2-distro-mutex-0.18.0-lyrical_22.conda
       - pypi: https://files.pythonhosted.org/packages/05/7f/798705f5296a58ca505d600456748d1be48078eac8a7050d8a98bc9edb89/decorator-5.3.1-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/17/b7/df953bacca701b498a616bd12be66876c9dac17fe0a44f9fed65a5b53f04/mdformat_gfm_alerts-2.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1e/5e/d4e9f1a599fb8e573b7b87160658329fbf28d19eac2718f51fc3def3aa5a/idna-3.18-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/22/a6/858897256d0deac81a172289110f31629fc4cee19b6f01283303e18c8db3/ptyprocess-0.7.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2d/8a/4293c0526d926073c0ef3922226c42810cce6b7a52111b08d11ef7462ab5/odrive-0.6.11.post0-py37-none-macosx_12_0_arm64.whl
@@ -34993,6 +34996,18 @@ packages:
   version: 5.3.1
   sha256: f47fe6fdbd2edd623ecfe36875d37aba411624e2670dd395dddae1358689bb3c
   requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/17/b7/df953bacca701b498a616bd12be66876c9dac17fe0a44f9fed65a5b53f04/mdformat_gfm_alerts-2.1.0-py3-none-any.whl
+  name: mdformat-gfm-alerts
+  version: 2.1.0
+  sha256: 81f63efa9b2e6e343e63cdc2cede9f29c3f4c242ebc6a4d9cffeaa1b58d2a170
+  requires_dist:
+  - mdformat>=0.7.19
+  - mdit-py-plugins>=0.4.1
+  - hypothesis>=6.100.0 ; extra == 'test'
+  - pytest>=9.0.1 ; extra == 'test'
+  - pytest-beartype>=0.2.0 ; extra == 'test'
+  - pytest-cov>=7.0.0 ; extra == 'test'
+  requires_python: '>=3.10.0'
 - pypi: https://files.pythonhosted.org/packages/1e/5e/d4e9f1a599fb8e573b7b87160658329fbf28d19eac2718f51fc3def3aa5a/idna-3.18-py3-none-any.whl
   name: idna
   version: '3.18'
