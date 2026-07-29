@@ -1,5 +1,3 @@
-import os
-
 import cv2
 import numpy as np
 from hsv.hsv import HSV
@@ -43,14 +41,14 @@ class CurvedLanekeeping(FunctionalTest):
 
     def update_mask(self):
         # defining the ranges for HSV values
-        self.final_mask, dict = self.hsv_obj.get_mask(self.image, yolo_barrels=self.look_for_barrels)
+        self.final_mask, dict_ = self.hsv_obj.get_mask(self.image, yolo_barrels=self.look_for_barrels)
 
         # print(dict)
 
-        self.white_mask = dict["white"]
-        self.yellow_mask = dict["yellow"]
+        self.white_mask = dict_["white"]
+        self.yellow_mask = dict_["yellow"]
         if self.barrel_mode != "YOLO":
-            self.barrel_color_mask = dict["orange"]
+            self.barrel_color_mask = dict_["orange"]
 
         # final_bgr = cv2.cvtColor(self.final_mask, cv2.COLOR_GRAY2BGR)
         # combined = np.hstack((self.image, final_bgr))
@@ -108,15 +106,13 @@ class CurvedLanekeeping(FunctionalTest):
 
                 valid_right_point = x < right_max and x > right_min and y > vert_min and y < vert_max
 
-                if valid_left_point:
-                    if y < min_left_y:
-                        min_left_y = y
-                        best_left_point = (x, y)
+                if valid_left_point and y < min_left_y:
+                    min_left_y = y
+                    best_left_point = (x, y)
 
-                if valid_right_point:
-                    if y < min_right_y:
-                        min_right_y = y
-                        best_right_point = (x, y)
+                if valid_right_point and y < min_right_y:
+                    min_right_y = y
+                    best_right_point = (x, y)
 
         if best_left_point is not None and best_right_point is not None:
             self.waypoint = (
@@ -151,10 +147,8 @@ class CurvedLanekeeping(FunctionalTest):
         cv2.line(self.final_mask, (right_min, vert_max), (right_max, vert_max), color, 10)
 
     def run(self):
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-
-        cap = cv2.VideoCapture(str(os.path.join(base_dir, "../data/left_curved_road.MOV")))
-        self.hsv_obj = HSV(str(os.path.join(base_dir, "../data/left_curved_road.MOV")), barrel_mode=self.barrel_mode)
+        cap = cv2.VideoCapture("../data/left_curved_road.MOV")
+        self.hsv_obj = HSV("../data/left_curved_road.MOV", barrel_mode=self.barrel_mode)
 
         # self.hsv_obj.tune("white")
         # self.hsv_obj.tune("yellow")

@@ -1,24 +1,20 @@
-import os
-
 import cv2
 import numpy as np
-from cv_self_drive.functional_tests.functional_test_parent import FunctionalTest
+from self_drive.functional_tests.functional_test_parent import FunctionalTest
 from ultralytics import YOLO
 
 
 class ReallyGoodStateMachine(FunctionalTest):
     def __init__(self):
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-
         # All models are from ARV DropBox
-        self.pothole_model = YOLO(str(os.path.join(base_dir, "../data/bestpotholemodel.pt")))
-        self.lines_model = YOLO(str(os.path.join(base_dir, "../data/best_yolov11_lane_lines.pt")))
-        self.barrel_model = YOLO(str(os.path.join(base_dir, "../data/obstacles.pt")))
+        self.pothole_model = YOLO("../data/bestpotholemodel.pt")
+        self.lines_model = YOLO("../data/best_yolov11_lane_lines.pt")
+        self.barrel_model = YOLO("../data/obstacles.pt")
 
         # these two captures are 1 : from the google drive #9,
         # and the other is the mirrored version of the same video
         # self.cap = cv2.VideoCapture("data/pothole.mp4")
-        self.cap = cv2.VideoCapture(str(os.path.join(base_dir, "../data/11trim.mp4")))
+        self.cap = cv2.VideoCapture("../data/11trim.mp4")
         #
         self.y_waypoint = 0
         self.x_waypoint = 0
@@ -58,7 +54,7 @@ class ReallyGoodStateMachine(FunctionalTest):
 
         img = self.initial_frame
         print("right to left lane change - img.shape: ", img.shape)
-        height, width = img.shape[:2]
+        _height, width = img.shape[:2]
 
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         lower_yellow = np.array([28, 221, 63])
@@ -159,7 +155,7 @@ class ReallyGoodStateMachine(FunctionalTest):
         done_ = False
 
         width = img.shape[1]
-        height, width = img.shape[:2]
+        _height, width = img.shape[:2]
         # width = width // 2
         if (x > int(width * (0.8))) and (x < (width - 150)):
             # Look for barrel being big enough = at barrel
@@ -259,6 +255,8 @@ class ReallyGoodStateMachine(FunctionalTest):
         if self.exited_sentinel:
             return int(prev_x)
         # - (width/3)
+
+        return None
 
     def find_waypoint_left(self, y_in, img, prev_x):
         _height, width = img.shape
@@ -406,6 +404,8 @@ class ReallyGoodStateMachine(FunctionalTest):
                 print("AT BARREL")
 
             return mask, [self.x_waypoint, self.y_waypoint]
+
+        return None
 
     def run(self):
 

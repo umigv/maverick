@@ -3,7 +3,7 @@ import cv2
 
 def list_available_cameras(max_index_to_check=10):
     """
-    Checks for available camera indices by attempting to open each one.
+    Check for available camera indices by attempting to open each one.
 
     Returns:
     A list of indices for available cameras.

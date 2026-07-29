@@ -16,7 +16,7 @@ except ImportError:
 class HSV:
     def __init__(self, video_path: str | int, barrel_mode: str = "YOLO"):
         self.base_dir = Path(__file__).resolve().parent
-        self.hsv_file = self.base_dir / "hsv_values.json"
+        self.hsv_file = Path("~/hsv_values.json")
 
         self.hsv_image = None
         self.hsv_filters = {}  # Map of filter names to HSV bounds
@@ -29,8 +29,8 @@ class HSV:
         self.barrel_boxes = None
         self.YOLO_lanes = False
         self.YOLO_barrels = False
-        self.barrel_model = YOLO(self.base_dir.parent / "data" / "obstacles.pt")
-        self.lane_model = YOLO(self.base_dir.parent / "data" / "laneswithcontrast.pt")
+        self.barrel_model = YOLO("../data/obstacles.pt")
+        self.lane_model = YOLO("../data/laneswithcontrast.pt")
 
         self.barrel_mode = barrel_mode  # "YOLO" or "[filter name]"
         self.load_hsv_values()

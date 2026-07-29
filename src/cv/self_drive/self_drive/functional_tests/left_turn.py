@@ -1,5 +1,3 @@
-import os
-
 import cv2
 import numpy as np
 from hsv.hsv import HSV
@@ -41,7 +39,7 @@ class LeftTurn:
         return self.diff_x, self.diff_y
 
     def past_stop_line(self):
-        min_area = 50
+        _min_area = 50
         cnts, _ = cv2.findContours(self.yellow_mask[:, : self.width // 2], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         # print(f"Number of contours found in yellow mask: {len(cnts)}")
         # post_filter_cnts = []
@@ -50,9 +48,7 @@ class LeftTurn:
         #     if area > min_area:  # Adjust this threshold based on your needs
         #         post_filter_cnts.append(cnt)
         # print(f"Number of contours after filtering by area, min area is {min_area}: {len(post_filter_cnts)}")
-        if len(cnts) == 0:
-            return True
-        return False
+        return len(cnts) == 0
 
     def draw_trapazoid(self):
         # top_width_start = self.width // 4  # Narrower top
@@ -89,10 +85,10 @@ class LeftTurn:
 
     def update_mask(self):
         # defining the ranges for HSV values
-        self.final, dict = self.hsv_obj.get_mask(self.image)  # , yolo_barrels=True, yolo_lanes=True
+        self.final, dict_ = self.hsv_obj.get_mask(self.image)  # , yolo_barrels=True, yolo_lanes=True
 
-        self.white_mask = dict["white"]
-        self.yellow_mask = dict["yellow"]
+        self.white_mask = dict_["white"]
+        self.yellow_mask = dict_["yellow"]
 
         # self.past_stop_line()
         self.last_diff_y = self.state_machine()
@@ -101,7 +97,7 @@ class LeftTurn:
         # cv2.circle(self.final, self.centroid, 10, 255, -1)
         cv2.imshow("mask", self.final)
         # cv2.imshow("mask", self.yellow_mask)
-        final_bgr = cv2.cvtColor(self.final, cv2.COLOR_GRAY2BGR)
+        # final_bgr = cv2.cvtColor(self.final, cv2.COLOR_GRAY2BGR)
         # combined = np.hstack((self.image, final_bgr))
         # cv2.imshow("mask", combined)
         # cv2.imshow("original", self.image)
@@ -157,7 +153,7 @@ class LeftTurn:
         # Induce forward trajetory
         # This is a will be for the initial straightaway before we cross the stopping line
         status = self.past_stop_line()
-        if status == True:
+        if status:
             self.state_1_done = True
             self.state_2()
             return
@@ -190,18 +186,18 @@ class LeftTurn:
 
         # MAKE SURE TO CHECK FOR CONE IN FRONT
         # If cone in front and close enough go to state 4
-        if self.barrel_boxes != None:
+        if self.barrel_boxes is not None:
             for segment in self.barrel_boxes:
-                x_min, y_min, x_max, y_max = segment
-                vertices = np.array(
-                    [
-                        [x_min * self.width, y_min * self.height],  # top-left
-                        [x_max * self.width, y_min * self.height],  # top right
-                        [x_max * self.width, y_max * self.height],  # bottom-right
-                        [x_min * self.width, y_max * self.height],  # bottom left
-                    ],
-                    dtype=np.int32,
-                )
+                x_min, y_min, x_max, _y_max = segment
+                # vertices = np.array(
+                #     [
+                #         [x_min * self.width, y_min * self.height],  # top-left
+                #         [x_max * self.width, y_min * self.height],  # top right
+                #         [x_max * self.width, _y_max * self.height],  # bottom-right
+                #         [x_min * self.width, _y_max * self.height],  # bottom left
+                #     ],
+                #     dtype=np.int32,
+                # )
 
                 if y_min * self.height > self.height // 2:
                     # this might be a cone that is close to us so see if its in the midele
@@ -369,13 +365,9 @@ class LeftTurn:
         self.state_3(best_cnt)
 
     def run(self):
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-
-        cap = cv2.VideoCapture(
-            str(os.path.join(base_dir, "../data/left_turn.mp4"))
-        )  # Specify an integer for webcam or other camera
+        cap = cv2.VideoCapture("../data/left_turn.mp4")  # Specify an integer for webcam or other camera
         self.hsv_obj = HSV(
-            str(os.path.join(base_dir, "../data/left_turn.mp4"))
+            "../data/left_turn.mp4"
         )  # , barrel_model_path='data/obstacles.pt', lane_model_path='data/lane_lines.pt'
 
         while cap.isOpened():

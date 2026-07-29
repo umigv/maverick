@@ -1,31 +1,25 @@
-import os
-
 import cv2
 import numpy as np
-from cv_self_drive.functional_tests.functional_test_parent import FunctionalTest
+from self_drive.functional_tests.functional_test_parent import FunctionalTest
 from ultralytics import YOLO
 
 
 class ReallyGoodStateMachine(FunctionalTest):
     def __init__(self):
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-
         # All models are from ARV DropBox
-        self.person_model = YOLO(str(os.path.join(base_dir, "../data/yolov8n.pt")))
-        self.lines_model = YOLO(str(os.path.join(base_dir, "../data/best_yolov11_lane_lines.pt")))
-        self.barrel_model = YOLO(str(os.path.join(base_dir, "../data/obstacles.pt")))
+        self.person_model = YOLO("../data/yolov8n.pt")
+        self.lines_model = YOLO("../data/best_yolov11_lane_lines.pt")
+        self.barrel_model = YOLO("../data/obstacles.pt")
 
         # these two captures are 1 : from the google drive #9,
         # and the other is the mirrored version of the same video
-        self.cap_ = cv2.VideoCapture(
-            str(os.path.join(base_dir, "../data/9 function test pedestrian detection lane change & barrel stop.MP4"))
-        )
-        self.cap_1 = cv2.VideoCapture(str(os.path.join(base_dir, "../data/mirrored_9.mp4")))
-        self.cap_5 = cv2.VideoCapture(str(os.path.join(base_dir, "../data/20260322_172804.mp4")))
-        self.cap_ = cv2.VideoCapture(str(os.path.join(base_dir, "../data/20260322_172726.mp4")))
+        self.cap_ = cv2.VideoCapture("../data/9 function test pedestrian detection lane change & barrel stop.MP4")
+        self.cap_1 = cv2.VideoCapture("../data/mirrored_9.mp4")
+        self.cap_5 = cv2.VideoCapture("../data/20260322_172804.mp4")
+        self.cap_ = cv2.VideoCapture("../data/20260322_172726.mp4")
         # self.cap = cv2.VideoCapture("data/HD2K_SN36466710_18-50-10.mp4")
-        self.cap = cv2.VideoCapture(str(os.path.join(base_dir, "../data/right_lane_change.mp4")))
-        self.cap__ = cv2.VideoCapture(str(os.path.join(base_dir, "../data/HD2K_SN36466710_18-51-17.mp4")))
+        self.cap = cv2.VideoCapture("../data/right_lane_change.mp4")
+        self.cap__ = cv2.VideoCapture("../data/HD2K_SN36466710_18-51-17.mp4")
         #
         self.y_waypoint = 0
         self.x_waypoint = 0
@@ -65,7 +59,7 @@ class ReallyGoodStateMachine(FunctionalTest):
         # ret, img = self.cap.read()
         img = self.initial_frame
         print("right to left lane change - img.shape: ", img.shape)
-        height, width = img.shape[:2]
+        _height, width = img.shape[:2]
         # img = img[:, int(width/2) : width ]
         # height, width = img.shape[:2]
         # img = img[:int(height * 1/4), :]
@@ -140,12 +134,12 @@ class ReallyGoodStateMachine(FunctionalTest):
         if mode == "person":
             results = self.person_model(img)
             py2 = 0
-            for results in results:
-                boxes = results.boxes.xyxy.tolist()
-                confidences = results.boxes.conf.tolist()
-                class_ids = results.boxes.cls.tolist()
+            for result in results:
+                boxes = result.boxes.xyxy.tolist()
+                confidences = result.boxes.conf.tolist()
+                class_ids = result.boxes.cls.tolist()
 
-                for box, confidence, class_id in zip(boxes, confidences, class_ids):
+                for box, _confidence, _class_id in zip(boxes, confidences, class_ids, strict=True):
                     # class 0 is person (built in) and adjust confidence as needed
                     px1, py1, px2, py2 = map(int, box)
                     m[py1:py2, px1:px2] = 255
@@ -154,11 +148,11 @@ class ReallyGoodStateMachine(FunctionalTest):
 
         if result.masks is not None:
             # Loop through each detected object
-            for mask, cls in zip(result.masks.data, result.boxes.cls):
+            for mask, cls in zip(result.masks.data, result.boxes.cls, strict=True):
                 if int(cls) == 0:
                     # result.masks.data is usually lower resolution,
                     # we convert to numpy and resize to match original image
-                    l = cls.cpu().numpy()
+                    l_ = cls.cpu().numpy()
                     m1 = cv2.resize(mask.cpu().numpy(), (img.shape[1], img.shape[0]))
                     # print(m.shape)
                     # print(m1.shape)
@@ -166,7 +160,7 @@ class ReallyGoodStateMachine(FunctionalTest):
                     # print(type(m1))
                     # m = cv2.bitwise_or(m, m1)
                     m = m + m1
-                    label = cv2.bitwise_or(label, l)
+                    label = cv2.bitwise_or(label, l_)
 
             return m, label
         return m, label
@@ -174,9 +168,9 @@ class ReallyGoodStateMachine(FunctionalTest):
     # Changes Lanes
     def change_lanes(self, img, y_in, prev_x):
 
-        full_mask1, lines_label = self.get_mask(self.lines_model, img, mode="lines")
-        full_mask2, barrel_label = self.get_mask(self.barrel_model, img, mode="barrel")
-        full_mask3, person_label = self.get_mask(self.person_model, img, mode="person")
+        full_mask1, _lines_label = self.get_mask(self.lines_model, img, mode="lines")
+        full_mask2, _barrel_label = self.get_mask(self.barrel_model, img, mode="barrel")
+        full_mask3, _person_label = self.get_mask(self.person_model, img, mode="person")
 
         # full_mask = cv2.bitwise_or(full_mask1, full_mask2)
         # full_mask = cv2.bitwise_or(full_mask, full_mask3)
@@ -200,7 +194,7 @@ class ReallyGoodStateMachine(FunctionalTest):
         done_ = False
 
         width = img.shape[1]
-        height, width = img.shape[:2]
+        _height, width = img.shape[:2]
         if (x > int(width * (0.8))) and (x < (width - 150)):
             # Look for barrel being big enough = at barrel
             barrel_results = full_mask2
@@ -209,13 +203,13 @@ class ReallyGoodStateMachine(FunctionalTest):
                 confidences = result.boxes.conf.tolist()
                 class_ids = result.boxes.cls.tolist()
 
-                for box, confidence, class_id in zip(boxes, confidences, class_ids):
-                    BARREL_ID = 0
+                for box, confidence, class_id in zip(boxes, confidences, class_ids, strict=True):
+                    barrel_id = 0
                     px1, py1, px2, py2 = map(int, box)
                     # cv2.rectangle(img, )
-                    if class_id == BARREL_ID and confidence > 0.7:
+                    if class_id == barrel_id and confidence > 0.7:
                         print("BARREL")
-                        height, width = img.shape[:2]
+                        _height, width = img.shape[:2]
                         size_barrel = (px2 - px1) / (width / 3)
                         cv2.rectangle(img, (px1, py1), (px2, py2), (0, 255, 0), 2)
                         if size_barrel > 0.1:
@@ -234,24 +228,24 @@ class ReallyGoodStateMachine(FunctionalTest):
 
         mask = np.zeros(img.shape[:2], dtype=np.uint8)
 
-        for results in results:
-            boxes = results.boxes.xyxy.tolist()
-            confidences = results.boxes.conf.tolist()
-            class_ids = results.boxes.cls.tolist()
+        for result in results:
+            boxes = result.boxes.xyxy.tolist()
+            confidences = result.boxes.conf.tolist()
+            class_ids = result.boxes.cls.tolist()
 
-            for box, confidence, class_id in zip(boxes, confidences, class_ids):
+            for box, confidence, class_id in zip(boxes, confidences, class_ids, strict=True):
                 # class 0 is person (built in) and adjust confidence as needed
                 px1, py1, px2, py2 = map(int, box)
                 if class_id == 0 and confidence > 0.7:
-                    height, width = img.shape[:2]
-                    range = int(width / 100)
+                    _height, width = img.shape[:2]
+                    range_ = int(width / 100)
                     size_person = (px2 - px1) / width
                     cv2.rectangle(img, (px1, py1), (px2, py2), (0, 255, 0), 2)
                     cv2.waitKey(1)
                     if size_person > 0.1:  # 0.12 was the initial value
                         print("person within range")
-                        return True, (py2 + range), px1, mask
-                    return False, (py2 + range), px1, mask
+                        return True, (py2 + range_), px1, mask
+                    return False, (py2 + range_), px1, mask
 
         return False, py2, px1, mask
 
@@ -260,8 +254,8 @@ class ReallyGoodStateMachine(FunctionalTest):
         height, width = img.shape[:2]
         x = int(width / 2)
         y = int(height / 10)
-        full_mask1, lines_label = self.get_mask(self.lines_model, img, mode="lines")
-        full_mask2, barrel_label = self.get_mask(self.barrel_model, img, mode="barrel")
+        full_mask1, _lines_label = self.get_mask(self.lines_model, img, mode="lines")
+        full_mask2, _barrel_label = self.get_mask(self.barrel_model, img, mode="barrel")
 
         full_mask = cv2.bitwise_or(full_mask1, full_mask2)
 
@@ -275,23 +269,21 @@ class ReallyGoodStateMachine(FunctionalTest):
         cv2.imshow("waypoint", img)
 
     def find_waypoint_right(self, y_in, img, prev_x):
-        height, width = img.shape
-        SENTINEL = -100
-        x = SENTINEL
+        _height, width = img.shape
+        sentinel = -100
+        x = sentinel
         spacing = 10
         img_slice = img[y_in - spacing : y_in + spacing, :]
 
-        y_values, x_values = np.where(img_slice == 255)
+        _y_values, x_values = np.where(img_slice == 255)
 
-        if x_values.size > 0:
-            if np.max(x_values) > int(width / 3):
-                x = np.max(x_values)
-                return int(x - (width * 2 / 8))
+        if x_values.size > 0 and np.max(x_values) > int(width / 3):
+            x = np.max(x_values)
+            return int(x - (width * 2 / 8))
 
-        if x == SENTINEL and not self.exited_sentinel:
+        if x == sentinel and not self.exited_sentinel:
             self.entered_sentinel = True
-            x = int(width * (0.75))
-            return x
+            return int(width * (0.75))
 
         if self.entered_sentinel:
             self.exited_sentinel = True
@@ -299,29 +291,29 @@ class ReallyGoodStateMachine(FunctionalTest):
             return int(prev_x)
         # - (width/3)
 
+        return None
+
     def find_waypoint_left(self, y_in, img, prev_x):
-        height, width = img.shape
-        SENTINEL = -100
-        x = SENTINEL
+        _height, width = img.shape
+        sentinel = -100
+        x = sentinel
         spacing = 10
         img_slice = img[y_in - spacing : y_in + spacing, :]
 
-        y_values, x_values = np.where(img_slice == 255)
+        _y_values, x_values = np.where(img_slice == 255)
 
-        if x_values.size > 0:
-            if np.min(x_values) < int(width * 2 / 3):
-                x = np.min(x_values)
-                if self.entered_sentinel:
-                    self.exited_sentinel = True
-                if x < int(width / 2):
-                    return int(x + (width * 2 / 8))
-                self.exited_sentinel = False
+        if x_values.size > 0 and np.min(x_values) < int(width * 2 / 3):
+            x = np.min(x_values)
+            if self.entered_sentinel:
+                self.exited_sentinel = True
+            if x < int(width / 2):
+                return int(x + (width * 2 / 8))
+            self.exited_sentinel = False
 
         # Mirror: If nothing found, default to the left-side equivalent (30%)
-        if x == SENTINEL and not self.exited_sentinel:
+        if x == sentinel and not self.exited_sentinel:
             self.entered_sentinel = True
-            x = int(width * 0.25)
-            return x
+            return int(width * 0.25)
 
         # Mirror: Instead of subtracting 600 (moving left),
         # add 600 to move right toward the center
@@ -335,7 +327,7 @@ class ReallyGoodStateMachine(FunctionalTest):
 
     def run_frame(self, img):
         print("runframe image shape: ", img.shape)
-        height, width = img.shape[:2]
+        _height, width = img.shape[:2]
         # img = img[:, int(width/2) : width]
         # height, width = img.shape[:2]
 
@@ -375,10 +367,12 @@ class ReallyGoodStateMachine(FunctionalTest):
         if self.state == self.state_3:
             self.atBarrel, mask, [self.x_waypoint, self.y_waypoint] = self.at_barrel(self.cap, img)
             if self.atBarrel:
-                running = False
+                # running = False
                 print("AT BARREL")
 
             return mask, [self.x_waypoint, self.y_waypoint]
+
+        return None
 
     def run(self):
 
@@ -388,7 +382,7 @@ class ReallyGoodStateMachine(FunctionalTest):
             if not ret:
                 break
 
-            mask, waypoint = self.run_frame(img)
+            _mask, _waypoint = self.run_frame(img)
 
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 self.cap.release()

@@ -1,5 +1,3 @@
-import os
-
 import cv2
 import numpy as np
 from hsv.hsv import HSV
@@ -207,13 +205,13 @@ class RightTurn:
         # look for barrel
         if self.hsv_obj.barrel_boxes is not None:
             for segment in self.hsv_obj.barrel_boxes:
-                x_min, y_min, x_max, y_max = segment.cpu().numpy().tolist()
+                x_min, y_min, x_max, _y_max = segment.cpu().numpy().tolist()
                 # vertices = np.array(
                 #     [
                 #         [x_min * self.width, y_min * self.height],  # top left
                 #         [x_max * self.width, y_min * self.height],  # top right
-                #         [x_max * self.width, y_max * self.height],  # bottom right
-                #         [x_min * self.width, y_max * self.height],  # bottom left
+                #         [x_max * self.width, _y_max * self.height],  # bottom right
+                #         [x_min * self.width, _y_max * self.height],  # bottom left
                 #     ],
                 #     dtype=np.int32,
                 # )
@@ -296,10 +294,8 @@ class RightTurn:
             self.state_4(contours)
 
     def run(self):
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-
-        cap = cv2.VideoCapture(str(base_dir, "../data/right_turn_cropped.mp4"))
-        self.hsv_obj = HSV(str(base_dir, "../data/right_turn_cropped.mp4"))
+        cap = cv2.VideoCapture("../data/right_turn_cropped.mp4")
+        self.hsv_obj = HSV("../data/right_turn_cropped.mp4")
 
         # "white": {
         #     "h_upper": 179,

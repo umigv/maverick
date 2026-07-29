@@ -1,7 +1,7 @@
 import json
 import math
-import os
 import time
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -118,8 +118,10 @@ class SelfDriveNode(Node):
         self.declare_parameter("function_type", "right")
         self.function_type = self.get_parameter("function_type").get_parameter_value().string_value
 
-        self.declare_parameters("hsv_json_key", "1")
+        self.declare_parameter("hsv_json_key", "1")
         self.hsv_json_key = self.get_parameter("hsv_json_key").get_parameter_value().string_value
+
+        self.hsv_file = Path("~/hsv_values.json")
 
         init = sl.InitParameters()
         init.depth_mode = sl.DEPTH_MODE.NEURAL
@@ -178,9 +180,7 @@ class SelfDriveNode(Node):
         self.image_mat = sl.Mat()
         self.depth_m = sl.Mat()
 
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-
-        with open(str(os.path.join(base_dir, "hsv_values.json"))) as file:
+        with Path.open(self.hsv_file) as file:
             all_json_keys = json.load(file)
             json_dict = all_json_keys.get(self.hsv_json_key, {})
 

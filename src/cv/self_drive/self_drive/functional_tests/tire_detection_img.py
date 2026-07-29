@@ -1,5 +1,3 @@
-import os
-
 import cv2
 import numpy as np
 from ultralytics import YOLO
@@ -8,9 +6,7 @@ model = YOLO("./data/tires.pt")
 
 
 def run_tire_test():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-
-    cap_img = cv2.imread(str(base_dir, "../data/tireImg1.png"))  # add data path here if testing on video
+    cap_img = cv2.imread("../data/tireImg1.png")  # add data path here if testing on video
     test_started = False
 
     print("Test ready.")
