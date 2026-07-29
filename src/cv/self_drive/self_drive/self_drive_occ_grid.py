@@ -18,18 +18,13 @@
 #
 ########################################################################
 
-import os
+import math
 import sys
 from signal import SIGINT, signal
 
 import cv2
-import pyzed.sl as sl
-
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "cv-depth-segmentation", "src"))
-
-import math
-
 import numpy as np
+import pyzed.sl as sl
 import ransac.occu
 import ransac.plane
 
@@ -52,8 +47,9 @@ cam = sl.Camera()
 
 # >>> change: merged OccGridPublisher + WaypointPublisher into one node
 class SelfDriveNode(Node):
-    """Single ROS2 node that publishes both the occupancy grid and the
-    navigation waypoint.  Everything is in the 'odom' frame using
+    """Single ROS2 node that publishes both the occupancy grid and the navigation waypoint.
+
+    Everything is in the 'odom' frame using
     REP 103 conventions (x-forward, y-left, z-up).
 
     Occupancy grid layout
@@ -297,7 +293,7 @@ def main(turn_type="right"):
     # <<< end of change
 
     drive_conf = ransac.GridConfiguration(5000, 5000, 50)  # , thres=5
-    block_conf = ransac.GridConfiguration(5000, 5000, 50)  # , thres=1
+    # block_conf = ransac.GridConfiguration(5000, 5000, 50)  # , thres=1
 
     # >>> change: single node for both occ grid and waypoint
     node = SelfDriveNode(gw_mm=drive_conf.gw, gh_mm=drive_conf.gh, cw_mm=drive_conf.cw)

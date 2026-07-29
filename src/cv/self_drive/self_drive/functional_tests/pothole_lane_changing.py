@@ -99,12 +99,12 @@ class ReallyGoodStateMachine(FunctionalTest):
         if mode == "pothole":
             results = self.pothole_model(img)
             py2 = 0
-            for results in results:
-                boxes = results.boxes.xyxy.tolist()
-                confidences = results.boxes.conf.tolist()
-                class_ids = results.boxes.cls.tolist()
+            for result in results:
+                boxes = result.boxes.xyxy.tolist()
+                confidences = result.boxes.conf.tolist()
+                class_ids = result.boxes.cls.tolist()
 
-                for box, confidence, class_id in zip(boxes, confidences, class_ids):
+                for box, _confidence, _class_id in zip(boxes, confidences, class_ids, strict=True):
                     # class 0 is barrel and adjust confidence as needed
                     px1, py1, px2, py2 = map(int, box)
                     m[py1:py2, px1:px2] = 255
@@ -113,11 +113,11 @@ class ReallyGoodStateMachine(FunctionalTest):
 
         if result.masks is not None:
             # Loop through each detected object
-            for mask, cls in zip(result.masks.data, result.boxes.cls):
+            for mask, cls in zip(result.masks.data, result.boxes.cls, strict=True):
                 if int(cls) == 0:
                     # result.masks.data is usually lower resolution,
                     # we convert to numpy and resize to match original image
-                    l = cls.cpu().numpy()
+                    l_ = cls.cpu().numpy()
                     m1 = cv2.resize(mask.cpu().numpy(), (img.shape[1], img.shape[0]))
                     # print(m.shape)
                     # print(m1.shape)
@@ -125,7 +125,7 @@ class ReallyGoodStateMachine(FunctionalTest):
                     # print(type(m1))
                     # m = cv2.bitwise_or(m, m1)
                     m = m + m1
-                    label = cv2.bitwise_or(label, l)
+                    label = cv2.bitwise_or(label, l_)
 
             return m, label
         return m, label
@@ -133,9 +133,9 @@ class ReallyGoodStateMachine(FunctionalTest):
     # Changes Lanes
     def change_lanes(self, img, y_in, prev_x):
 
-        full_mask1, lines_label = self.get_mask(self.lines_model, img, mode="lines")
-        full_mask2, barrel_label = self.get_mask(self.barrel_model, img, mode="barrel")
-        full_mask3, pothole_label = self.get_mask(self.pothole_model, img, mode="pothole")
+        full_mask1, _lines_label = self.get_mask(self.lines_model, img, mode="lines")
+        full_mask2, _barrel_label = self.get_mask(self.barrel_model, img, mode="barrel")
+        full_mask3, _pothole_label = self.get_mask(self.pothole_model, img, mode="pothole")
 
         # full_mask = cv2.bitwise_or(full_mask1, full_mask2)
         # full_mask = cv2.bitwise_or(full_mask, full_mask3)
@@ -169,13 +169,13 @@ class ReallyGoodStateMachine(FunctionalTest):
                 confidences = result.boxes.conf.tolist()
                 class_ids = result.boxes.cls.tolist()
 
-                for box, confidence, class_id in zip(boxes, confidences, class_ids):
-                    BARREL_ID = 0
+                for box, confidence, class_id in zip(boxes, confidences, class_ids, strict=True):
+                    barrel_id = 0
                     px1, py1, px2, py2 = map(int, box)
                     # cv2.rectangle(img, )
-                    if class_id == BARREL_ID and confidence > 0.7:
+                    if class_id == barrel_id and confidence > 0.7:
                         print("BARREL")
-                        height, width = img.shape[:2]
+                        _height, width = img.shape[:2]
                         size_barrel = (px2 - px1) / (width / 3)
                         cv2.rectangle(img, (px1, py1), (px2, py2), (0, 255, 0), 2)
                         if size_barrel > 0.1:
@@ -194,18 +194,18 @@ class ReallyGoodStateMachine(FunctionalTest):
 
         mask = np.zeros(img.shape[:2], dtype=np.uint8)
 
-        for results in results:
-            boxes = results.boxes.xyxy.tolist()
-            confidences = results.boxes.conf.tolist()
-            class_ids = results.boxes.cls.tolist()
+        for result in results:
+            boxes = result.boxes.xyxy.tolist()
+            confidences = result.boxes.conf.tolist()
+            class_ids = result.boxes.cls.tolist()
 
-            for box, confidence, class_id in zip(boxes, confidences, class_ids):
+            for box, confidence, class_id in zip(boxes, confidences, class_ids, strict=True):
                 # class 0 is barrel and adjust confidence as needed
                 px1, py1, px2, py2 = map(int, box)
                 if class_id == 0 and confidence > 0.7:
                     height, width = img.shape[:2]
-                    range = int(width / 100)
-                    size_pothole = (px2 - px1) / width
+                    range_ = int(width / 100)
+                    _size_pothole = (px2 - px1) / width
                     cv2.rectangle(img, (px1, py1), (px2, py2), (0, 255, 0), 2)
                     cv2.waitKey(1)
                     # if size_pothole > 0.1: #0.12 was the initial value
@@ -213,8 +213,8 @@ class ReallyGoodStateMachine(FunctionalTest):
                     # print(height)
                     if ((height - py2) / height) < 0.4:  # adjust as necessary based on camera angle
                         print("pothole within range")
-                        return True, (py2 + range), px1, mask
-                    return False, (py2 + range), px1, mask
+                        return True, (py2 + range_), px1, mask
+                    return False, (py2 + range_), px1, mask
 
         return False, py2, px1, mask
 
@@ -223,8 +223,8 @@ class ReallyGoodStateMachine(FunctionalTest):
         height, width = img.shape[:2]
         x = int(width / 2)
         y = int(height / 10)
-        full_mask1, lines_label = self.get_mask(self.lines_model, img, mode="lines")
-        full_mask2, barrel_label = self.get_mask(self.barrel_model, img, mode="barrel")
+        full_mask1, _lines_label = self.get_mask(self.lines_model, img, mode="lines")
+        full_mask2, _barrel_label = self.get_mask(self.barrel_model, img, mode="barrel")
 
         full_mask = cv2.bitwise_or(full_mask1, full_mask2)
 
@@ -238,23 +238,21 @@ class ReallyGoodStateMachine(FunctionalTest):
         cv2.imshow("waypoint", img)
 
     def find_waypoint_right(self, y_in, img, prev_x):
-        height, width = img.shape
+        _height, width = img.shape
         sentinel = -100
         x = sentinel
         spacing = 10
         img_slice = img[y_in - spacing : y_in + spacing, :]
 
-        y_values, x_values = np.where(img_slice == 255)
+        _y_values, x_values = np.where(img_slice == 255)
 
-        if x_values.size > 0:
-            if np.max(x_values) > int(width / 3):
-                x = np.max(x_values)
-                return int(x - (width * 2 / 8))
+        if x_values.size > 0 and np.max(x_values) > int(width / 3):
+            x = np.max(x_values)
+            return int(x - (width * 2 / 8))
 
         if x == sentinel and not self.exited_sentinel:
             self.entered_sentinel = True
-            x = int(width * (0.75))
-            return x
+            return int(width * (0.75))
 
         if self.entered_sentinel:
             self.exited_sentinel = True
@@ -263,7 +261,7 @@ class ReallyGoodStateMachine(FunctionalTest):
         # - (width/3)
 
     def find_waypoint_left(self, y_in, img, prev_x):
-        height, width = img.shape
+        _height, width = img.shape
         sentinel = -100
         x = sentinel
         spacing = 10
@@ -271,20 +269,18 @@ class ReallyGoodStateMachine(FunctionalTest):
 
         _, x_values = np.where(img_slice == 255)
 
-        if x_values.size > 0:
-            if np.min(x_values) < int(width * 2 / 3):
-                x = np.min(x_values)
-                if self.entered_sentinel:
-                    self.exited_sentinel = True
-                if x < int(width / 2):
-                    return int(x + (width * 2 / 8))
-                self.exited_sentinel = False
+        if x_values.size > 0 and np.min(x_values) < int(width * 2 / 3):
+            x = np.min(x_values)
+            if self.entered_sentinel:
+                self.exited_sentinel = True
+            if x < int(width / 2):
+                return int(x + (width * 2 / 8))
+            self.exited_sentinel = False
 
         # Mirror: If nothing found, default to the left-side equivalent (30%)
         if x == sentinel and not self.exited_sentinel:
             self.entered_sentinel = True
-            x = int(width * 0.25)
-            return x
+            return int(width * 0.25)
 
         # Mirror: Instead of subtracting 600 (moving left),
         # add 600 to move right toward the center
@@ -419,7 +415,7 @@ class ReallyGoodStateMachine(FunctionalTest):
             if not ret:
                 break
 
-            mask, _ = self.run_frame(img)
+            _mask, _waypoint = self.run_frame(img)
 
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 self.cap.release()

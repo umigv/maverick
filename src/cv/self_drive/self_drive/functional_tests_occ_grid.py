@@ -151,8 +151,8 @@ class SelfDriveNode(Node):
             calibration_params.left_cam.fy * sy,
         )
 
-        drive_conf = ransac.GridConfiguration(5000, 5000, 50)  # , thres=5
-        block_conf = ransac.GridConfiguration(5000, 5000, 50)  # , thres=1
+        # drive_conf = ransac.GridConfiguration(5000, 5000, 50)  # , thres=5
+        # block_conf = ransac.GridConfiguration(5000, 5000, 50)  # , thres=1
 
         self.occ_pub = self.create_publisher(OccupancyGrid, "occupancy_grid/raw", 10)
         self.wp_pub = self.create_publisher(PointStamped, "/goal", 10)
