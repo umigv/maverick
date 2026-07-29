@@ -2,7 +2,7 @@ import os
 
 import cv2
 import numpy as np
-from hsv import HSV
+from hsv.hsv import HSV
 
 
 class RightTurn:

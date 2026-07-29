@@ -2,8 +2,8 @@ import os
 
 import cv2
 import numpy as np
-from cv_self_drive.functional_tests.functional_test_parent import FunctionalTest
-from hsv import HSV
+from hsv.hsv import HSV
+from self_drive.functional_tests.functional_test_parent import FunctionalTest
 
 
 class CurvedLanekeeping(FunctionalTest):

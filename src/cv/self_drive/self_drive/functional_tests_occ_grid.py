@@ -8,13 +8,13 @@ import numpy as np
 import pyzed.sl as sl
 import ransac
 import rclpy
-from cv_self_drive.functional_tests.curved_lane_keeping import CurvedLanekeeping
-from cv_self_drive.functional_tests.left_turn import LeftTurn
-from cv_self_drive.functional_tests.pedestrian_lane_changing import ReallyGoodStateMachine
-from cv_self_drive.functional_tests.right_turn import RightTurn
 from geometry_msgs.msg import Point, PointStamped, Pose, Quaternion
 from nav_msgs.msg import MapMetaData, OccupancyGrid
 from rclpy.node import Node
+from self_drive.functional_tests.curved_lane_keeping import CurvedLanekeeping
+from self_drive.functional_tests.left_turn import LeftTurn
+from self_drive.functional_tests.pedestrian_lane_changing import ReallyGoodStateMachine
+from self_drive.functional_tests.right_turn import RightTurn
 
 
 def print_params(calibration_params: sl.CalibrationParameters):
