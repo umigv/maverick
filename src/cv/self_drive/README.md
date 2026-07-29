@@ -14,7 +14,7 @@ Where `<function_type>` is:
 
 # Launching `self_drive_node`
 
-From `~/ros2ws` (?), run `colcon build --packages-up-to cv_self_drive` to build the node. Run `ros 2 launch cv_self_drive cv_self_drive.launch.py` to start up the node.
+From `~/ros2ws` (?), run `colcon build --packages-up-to self_drive` to build the node. Run `ros 2 launch self_drive self_drive.launch.py` to start up the node.
 
 The `"function_type"` parameter is:
 

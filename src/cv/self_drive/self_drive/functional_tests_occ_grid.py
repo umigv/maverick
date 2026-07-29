@@ -12,12 +12,13 @@ from geometry_msgs.msg import Point, PointStamped, Pose, Quaternion
 from nav_msgs.msg import MapMetaData, OccupancyGrid
 from rclpy.node import Node
 from self_drive.functional_tests.curved_lane_keeping import CurvedLanekeeping
+from self_drive.functional_tests.functional_test_parent import FunctionalTest
 from self_drive.functional_tests.left_turn import LeftTurn
 from self_drive.functional_tests.pedestrian_lane_changing import ReallyGoodStateMachine
 from self_drive.functional_tests.right_turn import RightTurn
 
 
-def print_params(calibration_params: sl.CalibrationParameters):
+def print_params(calibration_params: sl.CalibrationParameters) -> None:
     # LEFT CAMERA intrinsics
     fx_left = calibration_params.left_cam.fx
     fy_left = calibration_params.left_cam.fy
@@ -50,7 +51,13 @@ def print_params(calibration_params: sl.CalibrationParameters):
     print(f"Stereo Baseline (tx): {tx:.6f} meters")
 
 
-def pixel_waypoint_to_odom(centroid, depth_map, ransac_coeffs, real_coeffs, intrinsics):
+def pixel_waypoint_to_odom(
+    centroid: tuple[float | None, float | None],
+    depth_map: np.ndarray,
+    ransac_coeffs: tuple[float, float, float],
+    real_coeffs: np.ndarray,
+    intrinsics: ransac.common.Intrinsics,
+) -> tuple[float, float, float] | None:
     """Transform a pixel-space waypoint into odom-frame (meters).
 
     Pipeline:
@@ -153,8 +160,8 @@ class SelfDriveNode(Node):
             calibration_params.left_cam.fy * sy,
         )
 
-        # drive_conf = ransac.GridConfiguration(5000, 5000, 50)  # , thres=5
-        # block_conf = ransac.GridConfiguration(5000, 5000, 50)  # , thres=1
+        self.drive_conf = ransac.GridConfiguration(5000, 5000, 50)  # , thres=5
+        self.block_conf = ransac.GridConfiguration(5000, 5000, 50)  # , thres=1
 
         self.occ_pub = self.create_publisher(OccupancyGrid, "occupancy_grid/raw", 10)
         self.wp_pub = self.create_publisher(PointStamped, "/goal", 10)
@@ -165,6 +172,8 @@ class SelfDriveNode(Node):
         self.resolution_m = cw_mm / 1000.0
         self.ros_width = gh_mm // cw_mm
         self.ros_height = gw_mm // cw_mm
+
+        self.function: FunctionalTest = RightTurn()
 
         if self.function_type == "right":
             self.function = RightTurn(debug=False)
@@ -197,7 +206,7 @@ class SelfDriveNode(Node):
         self.cam.set_camera_settings(sl.VIDEO_SETTINGS.SHARPNESS, zed_settings["SHARPNESS"])
         self.cam.set_camera_settings(sl.VIDEO_SETTINGS.GAMMA, zed_settings["GAMMA"])
 
-    def publish_occ_grid(self, grid_np):
+    def publish_occ_grid(self, grid_np: np.ndarray) -> None:
         # ---- coordinate transform to REP 103 ----
         # 1. flipud  -> row 0 becomes nearest to camera
         # 2. fliplr  -> col 0 becomes rightmost
@@ -230,7 +239,7 @@ class SelfDriveNode(Node):
         msg.data = ros.flatten().tolist()
         self.occ_pub.publish(msg)
 
-    def publish_waypoint(self, odom_xyz):
+    def publish_waypoint(self, odom_xyz: tuple[float, float, float] | None) -> None:
         """odom_xyz: (x, y, z) in meters, odom frame, or None."""
         if odom_xyz is None:
             return
@@ -244,7 +253,7 @@ class SelfDriveNode(Node):
 
         self.wp_pub.publish(msg)
 
-    def run(self):
+    def run(self) -> None:
         last_publish = None
         key = 0
         start = time.time()
@@ -303,7 +312,7 @@ class SelfDriveNode(Node):
         cv2.destroyAllWindows()
 
 
-def main(args=None):
+def main(args: list[str] | None = None) -> None:
     rclpy.init(args=args)
 
     node = SelfDriveNode(5000, 5000, 50)

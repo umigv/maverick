@@ -1,9 +1,10 @@
 import cv2
 import numpy as np
 from hsv.hsv import HSV
+from self_drive.functional_tests.functional_test_parent import FunctionalTest
 
 
-class RightTurn:
+class RightTurn(FunctionalTest):
     def __init__(self, debug=False):
         self.image = None
         self.hsv_image = None
