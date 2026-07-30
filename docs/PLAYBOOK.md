@@ -16,7 +16,7 @@ How to operate the physical robot on a test or competition day. Everything runs 
 
 ## What to bring
 
-- LiPO batteries
+- LiFePO4 batteries
 - Laptop and chargers
 - Power banks and chargers
 - Remote e-stop
@@ -66,10 +66,10 @@ At a new site:
 
 ## Power system and wiring
 
-- There are two sources of power: the LiPO batteries for the motors, and the Anker / Jackery power bank for the laptop (which powers all the USB devices).
+- There are two sources of power: the LiFePO4 batteries for the motors, and the Anker / Jackery power bank for the laptop (which powers all the USB devices).
 - The Anker lasts longer and charges faster than the Jackery, so prioritize the Anker, but make sure the other is charging while you use one.
 - The motor power system has a breaker, an e-stop, and a power switch. The power switch needs to be on and the breaker engaged. <img src="images/power_system.jpg" alt="Breaker, power switch, and e-stop locations" width="600">
-- The LiPO should generally never run out of battery given it has 500+ hours of battery life. Download "LiFePO4 Power" ([iOS](https://apps.apple.com/us/app/lifepo4-power/id1582607413), [Android](https://play.google.com/store/apps/details?id=com.dy.leadyo&hl=en_US)) on your phone to monitor the current battery percentage.
+- The LiFePO4 should generally never run out of battery given it has 500+ hours of battery life. Download "LiFePO4 Power" ([iOS](https://apps.apple.com/us/app/lifepo4-power/id1582607413), [Android](https://play.google.com/store/apps/details?id=com.dy.leadyo&hl=en_US)) on your phone to monitor the current battery percentage.
 - Everything on the robot, especially wiring, should be labeled such that when facing forward, the left side is red and the right side is green.
 
 ## Remote e-stop
@@ -122,7 +122,7 @@ The alias is a udev rule keyed to the device's USB vendor/product/serial, so it 
 
 ## Post-run
 
-- Turn off the motor power switch so the LiPO doesn't drain. Put both power banks on charge.
+- Turn off the motor power switch so the LiFePO4 doesn't drain. Put both power banks on charge.
 - Upload rosbags to Dropbox at the end of the day. Name them so people can tell what they are. Delete useless rosbags, and don't commit them to the repo.
 - File a GitHub issue for anything that broke or acted weird while it's fresh (see [CONTRIBUTING.md](CONTRIBUTING.md#issues)).
 

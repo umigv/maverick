@@ -2,7 +2,7 @@
 
 ![Maverick](docs/images/maverick.jpg)
 
-Maverick is UMARV's autonomous ground robot for the 2025-2026 competition season. This repository contains its ROS2 code: hardware drivers, localization, navigation, and simulation, launched through a single set of entry points with interchangeable real and simulated sensors.
+Maverick is UMARV's autonomous ground robot for the 2025-2026 competition season. This repository contains its ROS2 code: hardware drivers, computer vision, localization, navigation, and simulation, launched through a single set of entry points with interchangeable real and simulated sensors.
 
 ## Quick Start
 

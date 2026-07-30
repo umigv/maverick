@@ -51,4 +51,4 @@ Request a review from the lead or assistant lead of the subteam that owns the co
 
 ## CI
 
-Every PR must pass the lint and test workflows, which run `just lint`, `just build`, and `just test` on Linux (x64 and arm64) and macOS.
+Every PR must pass the lint and test workflows, which run `just lint`, `just build`, and `just test` on Linux (x64 and arm64) and MacOS.
