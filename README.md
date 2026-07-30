@@ -2,11 +2,15 @@
 
 ![Maverick](docs/images/maverick.jpg)
 
-Maverick is UMARV's autonomous ground robot for the 2025-2026 competition season. This repository is its full ROS 2 stack: hardware drivers, localization, navigation, and simulation, launched through a single set of entry points with interchangeable real and simulated sensors.
+Maverick is UMARV's autonomous ground robot for the 2025-2026 competition season. This repository contains its ROS2 code: hardware drivers, localization, navigation, and simulation, launched through a single set of entry points with interchangeable real and simulated sensors.
 
 ## Quick Start
 
-For the first time, [set up the environment](docs/DEVELOPMENT.md#environment-setup).
+### Environment Setup
+
+If it's your first time working with ARV, [set up the environment](docs/DEVELOPMENT.md#environment-setup).
+
+### Starting the Robot
 
 Build the workspace:
 
@@ -14,7 +18,7 @@ Build the workspace:
 just build
 ```
 
-Then run the stack, each command in its own terminal. `simulation:=true` runs without hardware:
+Run the stack, each command in its own terminal. `simulation:=true` runs without hardware:
 
 ```bash
 ros2 launch bringup base.launch.py mode:=<mode> [simulation:=true] [course:=<course>]
