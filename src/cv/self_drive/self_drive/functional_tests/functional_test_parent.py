@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
 
 import cv2
 import cv2.typing
@@ -13,8 +12,8 @@ class FunctionalTest(ABC):
 
     @abstractmethod
     def run_frame(
-        self, hsv_identifier="1", frame: cv2.typing.MatLike | None = None
-    ) -> tuple[cv2.typing.MatLike, Sequence[int]]:
+        self, hsv_identifier: str = "1", frame: cv2.typing.MatLike | None = None
+    ) -> tuple[cv2.typing.MatLike, tuple[int, int]]:
         """Run the functional test on a single frame. Should return final mask and waypoint."""
 
 

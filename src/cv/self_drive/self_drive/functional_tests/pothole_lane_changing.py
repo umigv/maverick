@@ -1,4 +1,7 @@
+from typing import Any
+
 import cv2
+import cv2.typing
 import numpy as np
 from self_drive.functional_tests.functional_test_parent import FunctionalTest
 from ultralytics import YOLO
@@ -16,8 +19,8 @@ class ReallyGoodStateMachine(FunctionalTest):
         # self.cap = cv2.VideoCapture("data/pothole.mp4")
         self.cap = cv2.VideoCapture("../data/11trim.mp4")
         #
-        self.y_waypoint = 0
-        self.x_waypoint = 0
+        self.y_waypoint: int = 0
+        self.x_waypoint: int = 0
 
         self.atBarrel = False
         self.running = True
@@ -148,6 +151,8 @@ class ReallyGoodStateMachine(FunctionalTest):
         lanes_img = np.zeros(img.shape[:2], dtype=np.uint8)
         lanes_img[lanes_mask > 0.5] = 255
 
+        x: int = 0
+
         if self.right_to_left:
             x = self.find_waypoint_left(y_in, lanes_img, prev_x)
         else:
@@ -182,7 +187,7 @@ class ReallyGoodStateMachine(FunctionalTest):
 
     # Finds pothole in lane and plots the pothole box as well as returning whether they are in range
     #
-    def sees_pothole_in_lane(self, img):
+    def sees_pothole_in_lane(self, img: cv2.typing.MatLike) -> tuple[bool, int, int, cv2.typing.MatLike]:
 
         results = self.pothole_model(img)
         py2 = 0
@@ -214,7 +219,7 @@ class ReallyGoodStateMachine(FunctionalTest):
 
         return False, py2, px1, mask
 
-    def at_barrel(self, capture, img):
+    def at_barrel(self, capture: Any, img: cv2.typing.MatLike) -> tuple[bool, cv2.typing.MatLike, list[int]]:
         # Placeholder logic
         height, width = img.shape[:2]
         x = int(width / 2)
@@ -226,14 +231,14 @@ class ReallyGoodStateMachine(FunctionalTest):
 
         return False, full_mask, [x, y]
 
-    def add_waypoint(self, y, img, x):
+    def add_waypoint(self, y: int, img: cv2.typing.MatLike, x: int) -> None:
         center = (x, y)
         radius = 25
         color = [255, 100, 0]
         cv2.circle(img, center, radius, color, thickness=3, lineType=8, shift=0)
         cv2.imshow("waypoint", img)
 
-    def find_waypoint_right(self, y_in, img, prev_x):
+    def find_waypoint_right(self, y_in: int, img: cv2.typing.MatLike, prev_x: int) -> int:
         _height, width = img.shape
         sentinel = -100
         x = sentinel
@@ -256,19 +261,19 @@ class ReallyGoodStateMachine(FunctionalTest):
             return int(prev_x)
         # - (width/3)
 
-        return None
+        return 0
 
-    def find_waypoint_left(self, y_in, img, prev_x):
+    def find_waypoint_left(self, y_in: int, img: cv2.typing.MatLike, prev_x: int) -> int:
         _height, width = img.shape
         sentinel = -100
-        x = sentinel
+        x: int = sentinel
         spacing = 10
         img_slice = img[y_in - spacing : y_in + spacing, :]
 
         _, x_values = np.where(img_slice == 255)
 
         if x_values.size > 0 and np.min(x_values) < int(width * 2 / 3):
-            x = np.min(x_values)
+            x = int(np.min(x_values))
             if self.entered_sentinel:
                 self.exited_sentinel = True
             if x < int(width / 2):
@@ -348,66 +353,69 @@ class ReallyGoodStateMachine(FunctionalTest):
 
     #     return int(width)
 
-    def run_frame(self, img):
-        print("runframe image shape: ", img.shape)
-        _, width = img.shape[:2]
-        # img = img[:, int(width/2) : width]
-        # height, width = img.shape[:2]
+    def run_frame(
+        self, hsv_identifier: str = "1", frame: cv2.typing.MatLike | None = None
+    ) -> tuple[cv2.typing.MatLike, tuple[int, int]]:
+        if frame is not None:
+            print("runframe image shape: ", frame.shape)
+            _height, width = frame.shape[:2]
+            # img = img[:, int(width/2) : width]
+            # height, width = img.shape[:2]
 
-        if not self.initial_frame_read:
-            self.initial_frame = img
-            self.initial_frame_read = True
-            self.right_to_left = self.set_right_to_left()
+            if not self.initial_frame_read:
+                self.initial_frame = frame
+                self.initial_frame_read = True
+                self.right_to_left = self.set_right_to_left()
 
-        prev_x = int(width / 2)
-        self.frame_count += 1
+            prev_x = int(width / 2)
+            self.frame_count += 1
 
-        # State Logic
-        if self.state == self.state_1:
-            see_pothole, self.y_waypoint, self.x_waypoint, mask = self.sees_pothole_in_lane(img)
-            self.add_waypoint(self.y_waypoint, img, self.x_waypoint)
-            if see_pothole:
-                print("POTHOLE DETECTED")
-                self.state = self.state_2
-                print(self.state)
-            return mask, [self.x_waypoint, self.y_waypoint]
+            # State Logic
+            if self.state == self.state_1:
+                see_pothole, self.y_waypoint, self.x_waypoint, mask = self.sees_pothole_in_lane(frame)
+                self.add_waypoint(self.y_waypoint, frame, self.x_waypoint)
+                if see_pothole:
+                    print("POTHOLE DETECTED")
+                    self.state = self.state_2
+                    print(self.state)
+                return mask, (self.x_waypoint, self.y_waypoint)
 
-        if self.state == self.state_2:
-            ## attempt at sentinel rewrite (see above commented functions) using an actual prev_x value which is currently set to a fixed value
-            # # Actually update prev_x
-            # done, new_x, full_mask = self.change_lanes( img, self.y_waypoint,self.x_waypoint)
+            if self.state == self.state_2:
+                ## attempt at sentinel rewrite (see above commented functions) using an actual prev_x value which is currently set to a fixed value
+                # # Actually update prev_x
+                # done, new_x, full_mask = self.change_lanes( img, self.y_waypoint,self.x_waypoint)
 
-            # self.x_waypoint = new_x
+                # self.x_waypoint = new_x
 
-            # self.add_waypoint(self.y_waypoint,img, self.x_waypoint)
+                # self.add_waypoint(self.y_waypoint,img, self.x_waypoint)
 
-            if not self.one_waypoint_placed:
-                self.add_waypoint(self.y_waypoint, img, self.x_waypoint)
-                self.one_waypoint_placed = True
-            done, self.x_waypoint, full_mask = self.change_lanes(img, self.y_waypoint, prev_x)
-            self.add_waypoint(self.y_waypoint, img, self.x_waypoint)
+                if not self.one_waypoint_placed:
+                    self.add_waypoint(self.y_waypoint, frame, self.x_waypoint)
+                    self.one_waypoint_placed = True
+                done, self.x_waypoint, full_mask = self.change_lanes(frame, self.y_waypoint, prev_x)
+                self.add_waypoint(self.y_waypoint, frame, self.x_waypoint)
 
-            print(f"self.x_waypoint : {self.x_waypoint}")
-            prev_x = self.x_waypoint
-            cv2.imshow("withwaypoint", full_mask)
+                print(f"self.x_waypoint : {self.x_waypoint}")
+                prev_x = self.x_waypoint
+                cv2.imshow("withwaypoint", full_mask)
 
-            if done:
-                print("state 3")
-                self.state = 3
+                if done:
+                    print("state 3")
+                    self.state = 3
 
-            return full_mask, [self.x_waypoint, self.y_waypoint]
+                return full_mask, (self.x_waypoint, self.y_waypoint)
 
-        if self.state == self.state_3:
-            self.atBarrel, mask, [self.x_waypoint, self.y_waypoint] = self.at_barrel(self.cap, img)
-            if self.atBarrel:
-                # running = False
-                print("AT BARREL")
+            if self.state == self.state_3:
+                self.atBarrel, mask, [self.x_waypoint, self.y_waypoint] = self.at_barrel(self.cap, frame)
+                if self.atBarrel:
+                    # running = False
+                    print("AT BARREL")
 
-            return mask, [self.x_waypoint, self.y_waypoint]
+                return mask, (self.x_waypoint, self.y_waypoint)
 
-        return None
+        return (np.ndarray([]), (0, 0))
 
-    def run(self):
+    def run(self) -> None:
 
         while self.running and self.cap.isOpened():
             # read frames
@@ -415,7 +423,7 @@ class ReallyGoodStateMachine(FunctionalTest):
             if not ret:
                 break
 
-            _mask, _waypoint = self.run_frame(img)
+            _mask, _waypoint = self.run_frame("1", img)
 
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 self.cap.release()

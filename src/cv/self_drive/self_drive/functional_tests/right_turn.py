@@ -8,7 +8,7 @@ from self_drive.functional_tests.functional_test_parent import FunctionalTest
 
 
 class RightTurn(FunctionalTest):
-    def __init__(self, debug=False):
+    def __init__(self, debug=False) -> None:
         self.image: cv2.typing.MatLike = np.ndarray([])
         self.hsv_image: cv2.typing.MatLike = np.ndarray([])
 
@@ -17,9 +17,9 @@ class RightTurn(FunctionalTest):
 
         self.final: cv2.typing.MatLike = np.ndarray([])
 
-        self.hsv_obj: HSV = HSV("")
+        self.hsv_obj: HSV | None = None
 
-        self.centroid: Sequence[int] = [0, 0]
+        self.centroid: tuple[int, int] = (0, 0)
 
         self.width: int = 0
         self.height: int = 0
@@ -36,7 +36,7 @@ class RightTurn(FunctionalTest):
 
         self.current_state = None
 
-    def draw_trapezoid(self):
+    def draw_trapezoid(self) -> None:
         top_width_start = self.width // 6  # Narrower top
         top_width_end = self.width - (self.width // 6)
         bottom_width_start = self.width // 5  # Wider base
@@ -60,7 +60,7 @@ class RightTurn(FunctionalTest):
         cv2.fillPoly(self.final, [pts], 0)
         cv2.bitwise_or(self.final, self.yellow_mask, self.final)  # add yellow back in
 
-    def past_stop_line(self):
+    def past_stop_line(self) -> bool:
         cnts, _ = cv2.findContours(self.yellow_mask[:, : self.width // 2], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         if self.debug:
@@ -68,10 +68,13 @@ class RightTurn(FunctionalTest):
 
         return len(cnts) == 0
 
-    def update_mask(self):
+    def update_mask(self) -> None:
         # defining the ranges for HSV values
-        self.hsv_obj.set_yolo_barrels(self.look_for_barrels and (not self.debug))
-        self.final, masks_dict = self.hsv_obj.get_mask(self.image)
+        masks_dict: dict[str, cv2.typing.MatLike] = {}
+
+        if self.hsv_obj is not None:
+            self.hsv_obj.set_yolo_barrels(self.look_for_barrels and (not self.debug))
+            self.final, masks_dict = self.hsv_obj.get_mask(self.image)
 
         # print(dict)
 
@@ -83,10 +86,7 @@ class RightTurn(FunctionalTest):
         # cv2.namedWindow("Combined Image", cv2.WINDOW_NORMAL)
         # cv2.imshow("Combined Image", self.final)
 
-    def find_center_of_lane(self):
-        pass
-
-    def state_1(self):
+    def state_1(self) -> None:
         # Induce forward trajectory
         # This is a will be for the initial straightaway before we cross the stopping line
         if self.debug:
@@ -100,11 +100,11 @@ class RightTurn(FunctionalTest):
             self.state_1_done = True
             self.state_2()
             return
-        self.centroid = [self.width // 2, 40]
+        self.centroid = (self.width // 2, 40)
         # Block out the stop line with the trapazoid
         # set waypoint to directly in front of the robot
 
-    def state_2(self):
+    def state_2(self) -> None:
         # state2: in the case we can't see yellow dashed line but past stop line
         # start right movement
         if self.debug:
@@ -129,7 +129,7 @@ class RightTurn(FunctionalTest):
 
         self.centroid = ((self.width // 5) * 3, int((self.height // 8) * 2.5))
 
-    def state_3(self, best_cnt):
+    def state_3(self, best_cnt: cv2.typing.MatLike | None) -> None:
         # state3: the case where we're mid-turn and can see the yellow dashed line
         if self.debug:
             print("state 3")
@@ -204,10 +204,10 @@ class RightTurn(FunctionalTest):
                 self.centroid = (self.width // 2, 40)
                 self.state_3_done = True
 
-    def state_4(self, yellow_cnts):
+    def state_4(self, yellow_cnts: Sequence[cv2.typing.MatLike]) -> None:
         self.current_state = 4
         # look for barrel
-        if self.hsv_obj.barrel_boxes is not None:
+        if self.hsv_obj is not None and self.hsv_obj.barrel_boxes is not None:
             for segment in self.hsv_obj.barrel_boxes:
                 x_min, y_min, x_max, _y_max = segment.cpu().numpy().tolist()
                 # vertices = np.array(
@@ -266,7 +266,7 @@ class RightTurn(FunctionalTest):
 
         self.centroid = (avg_x, avg_y)
 
-    def state_machine(self):
+    def state_machine(self) -> None:
         if not self.state_1_done:
             # still in state 1, but once we are out of state 1 there is no way back
             self.state_1()
@@ -297,7 +297,7 @@ class RightTurn(FunctionalTest):
             self.look_for_barrels = True
             self.state_4(contours)
 
-    def run(self):
+    def run(self) -> None:
         cap = cv2.VideoCapture("../data/right_turn_cropped.mp4")
         self.hsv_obj = HSV("../data/right_turn_cropped.mp4")
 
@@ -351,8 +351,8 @@ class RightTurn(FunctionalTest):
 
     # >>> change: run_frame now runs full pipeline (HSV + state machine) and returns results
     def run_frame(
-        self, hsv_identifier="1", frame: cv2.typing.MatLike | None = None
-    ) -> tuple[cv2.typing.MatLike, Sequence[int]]:
+        self, hsv_identifier: str = "1", frame: cv2.typing.MatLike | None = None
+    ) -> tuple[cv2.typing.MatLike, tuple[int, int]]:
         if self.hsv_obj is None:
             self.hsv_obj = HSV(hsv_identifier)
 

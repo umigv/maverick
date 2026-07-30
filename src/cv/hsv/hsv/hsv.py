@@ -27,7 +27,7 @@ class HSV:
         self.barrel = False
         self.video_path = video_path
         self.barrel_mask = None
-        self.barrel_boxes = None
+        self.barrel_boxes: np.ndarray | None = None
         self.YOLO_lanes = False
         self.YOLO_barrels = False
         self.barrel_model = YOLO("../data/obstacles.pt")
@@ -178,8 +178,8 @@ class HSV:
         upper_bound = np.array([barrel_filter["h_upper"], barrel_filter["s_upper"], barrel_filter["v_upper"]])
 
         mask = cv2.inRange(self.hsv_image, lower_bound, upper_bound)
-        mask = cv2.erode(mask, None, iterations=2)
-        mask = cv2.dilate(mask, None, iterations=4)
+        mask = cv2.erode(mask, np.ones((5, 5), np.uint8), iterations=2)
+        mask = cv2.dilate(mask, np.ones((5, 5), np.uint8), iterations=4)
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         barrel_boxes = []
@@ -222,7 +222,7 @@ class HSV:
             # print(f"0 contours found")
             # print()
             return self.barrel_mask
-        self.barrel_boxes = barrel_boxes
+        self.barrel_boxes = np.ndarray(barrel_boxes)
         # print(f"barrel_mode filter: {self.barrel_mode}")
         # print(f"{len(self.barrel_boxes)} contours found")
         # print()
@@ -438,8 +438,8 @@ class HSV:
                 cv2.fillPoly(laneline_mask, [segment_array], color=(255, 0, 0))
         return laneline_mask
 
-    def update_mask(self):
-        combined_mask = None
+    def update_mask(self) -> tuple[cv2.typing.MatLike, dict[str, cv2.typing.MatLike]]:
+        combined_mask: cv2.typing.MatLike | None = None
         masks = {}
 
         for filter_name, bounds in self.hsv_filters.items():
@@ -449,8 +449,8 @@ class HSV:
             lower_bound = np.array([bounds["h_lower"], bounds["s_lower"], bounds["v_lower"]])
             upper_bound = np.array([bounds["h_upper"], bounds["s_upper"], bounds["v_upper"]])
             mask = cv2.inRange(self.hsv_image, lower_bound, upper_bound)
-            mask = cv2.erode(mask, None, iterations=2)
-            mask = cv2.dilate(mask, None, iterations=4)
+            mask = cv2.erode(mask, np.ones((5, 5), np.uint8), iterations=2)
+            mask = cv2.dilate(mask, np.ones((5, 5), np.uint8), iterations=4)
             contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             min_area = 200
             final = np.zeros_like(mask)
@@ -468,9 +468,13 @@ class HSV:
 
         if self.YOLO_barrels:
             barrels = self.get_barrels_yolo()
-            combined_mask = cv2.bitwise_or(combined_mask, barrels)
+            if combined_mask is not None:
+                combined_mask = cv2.bitwise_or(combined_mask, barrels)
 
-        return combined_mask, masks
+        if combined_mask is not None:
+            return combined_mask, masks
+
+        return np.ndarray([]), masks
 
     def get_mask(self, frame: np.ndarray) -> tuple[np.ndarray, dict[str, np.ndarray]]:
         # self.YOLO_lanes = yolo_lanes
