@@ -1,14 +1,13 @@
 from typing import Any
 
 import cv2
-import cv2.typing
 import numpy as np
 from self_drive.functional_tests.functional_test_parent import FunctionalTest
 from ultralytics import YOLO
 
 
 class ReallyGoodStateMachine(FunctionalTest):
-    def __init__(self):
+    def __init__(self) -> None:
         # All models are from ARV DropBox
         self.pothole_model = YOLO("../data/bestpotholemodel.pt")
         self.lines_model = YOLO("../data/best_yolov11_lane_lines.pt")
@@ -46,14 +45,14 @@ class ReallyGoodStateMachine(FunctionalTest):
         self.entered_sentinel = False
         self.exited_sentinel = False
         self.initial_frame_read = False
-        self.initial_frame = None
+        self.initial_frame: cv2.typing.MatLike = np.ndarray([])
 
     # Determines whether a lane change should be from Left->Right or Right->Left
     # Determines this through count of white pixels
     # More white pixels on side x means leaving side x to go to lane on other side of the screen
     # ex: (less white on right side : lane change Right->Left)
     # True means right to left lane change
-    def set_right_to_left(self):
+    def set_right_to_left(self) -> bool:
 
         img = self.initial_frame
         print("right to left lane change - img.shape: ", img.shape)
@@ -90,7 +89,9 @@ class ReallyGoodStateMachine(FunctionalTest):
         print("Right to left= False")
         return False
 
-    def get_mask(self, model, img, mode="pothole"):
+    def get_mask(
+        self, model: Any, img: cv2.typing.MatLike, mode: str = "pothole"
+    ) -> tuple[cv2.typing.MatLike, cv2.typing.MatLike]:
         results = model(img, classes=0)
         result = results[0]
         m = np.zeros(img.shape[:2], dtype=np.uint8)
@@ -130,7 +131,7 @@ class ReallyGoodStateMachine(FunctionalTest):
         return m, label
 
     # Changes Lanes
-    def change_lanes(self, img, y_in, prev_x):
+    def change_lanes(self, img: cv2.typing.MatLike, y_in: int, prev_x: int) -> tuple[bool, int, cv2.typing.MatLike]:
 
         full_mask1, _lines_label = self.get_mask(self.lines_model, img, mode="lines")
         full_mask2, _barrel_label = self.get_mask(self.barrel_model, img, mode="barrel")
@@ -416,7 +417,6 @@ class ReallyGoodStateMachine(FunctionalTest):
         return (np.ndarray([]), (0, 0))
 
     def run(self) -> None:
-
         while self.running and self.cap.isOpened():
             # read frames
             ret, img = self.cap.read()

@@ -1,3 +1,5 @@
+from typing import Any
+
 import cv2
 import numpy as np
 from hsv.hsv import HSV
@@ -5,18 +7,18 @@ from self_drive.functional_tests.functional_test_parent import FunctionalTest
 
 
 class ObstructedPedestrianDetection(FunctionalTest):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.image = None
-        self.height = 0
-        self.width = 0
-        self.hsv_obj = None
-        self.pedestrian_model = None
+        self.image: cv2.typing.MatLike = np.ndarray([])
+        self.height: int = 0
+        self.width: int = 0
+        self.hsv_obj: HSV | None = None
+        self.pedestrian_model: Any = None
         self.state = 1  # Start in lane keeping state
-        self.white_mask = None
-        self.yellow_mask = None
+        self.white_mask: cv2.typing.MatLike = np.ndarray([])
+        self.yellow_mask: cv2.typing.MatLike = np.ndarray([])
 
-    def detect_pedestrian(self):
+    def detect_pedestrian(self) -> tuple[bool, int, int]:
         results = self.pedestrian_model(self.image)
         py2 = 0
         px1 = 0
@@ -42,13 +44,15 @@ class ObstructedPedestrianDetection(FunctionalTest):
 
         return False, py2, px1
 
-    def calculate_waypoint(self, left_line, right_line):
-        pass
+    # def calculate_waypoint(self, left_line, right_line):
+    #     pass
 
-    def state_machine(self):
+    def state_machine(self) -> None:
         # State 1: lane keeping + pedestrian search
         # State 2: pedestrian detection + stopping condition + free lane detection
         # State 3: lane keeping
+
+        self.waypoint: tuple[int, int] = (0, 0)
 
         if self.state == 1:
             self.waypoint = (self.width // 2, 40)
@@ -66,14 +70,16 @@ class ObstructedPedestrianDetection(FunctionalTest):
 
         self.update_mask()
 
-    def update_mask(self):
+    def update_mask(self) -> None:
         mask = np.zeros((self.height, self.width), dtype=np.uint8)
-        mask, dict_ = self.hsv_obj.get_mask(self.image, mask)
+        dict_: dict[str, cv2.typing.MatLike] = {}
+        if self.hsv_obj is not None:
+            mask, dict_ = self.hsv_obj.get_mask(self.image)
         self.white_mask = dict_["white_mask"]
         self.yellow_mask = dict_["yellow_mask"]
-        self.final_mask = mask
+        self.final_mask: cv2.typing.MatLike = mask
 
-    def main(self):
+    def main(self) -> None:
         cap = cv2.VideoCapture("../data/obstructed_pedestrian.mp4")
         self.hsv_obj = HSV("../data/obstructed_pedestrian.mp4")
 
@@ -93,11 +99,14 @@ class ObstructedPedestrianDetection(FunctionalTest):
         cap.release()
         cv2.destroyAllWindows()
 
-    def run_frame(self, hsv_indentifier, frame):
+    def run_frame(
+        self, hsv_identifier: str = "1", frame: cv2.typing.MatLike | None = None
+    ) -> tuple[cv2.typing.MatLike, tuple[int, int]]:
         if self.hsv_obj is None:
-            self.hsv_obj = HSV(hsv_indentifier)
+            self.hsv_obj = HSV(hsv_identifier)
 
-        self.image = frame
+        if frame is not None:
+            self.image = frame
         self.height, self.width, _ = self.image.shape
 
         self.update_mask()

@@ -8,7 +8,7 @@ from self_drive.functional_tests.functional_test_parent import FunctionalTest
 
 
 class RightTurn(FunctionalTest):
-    def __init__(self, debug=False) -> None:
+    def __init__(self, debug: bool = False) -> None:
         self.image: cv2.typing.MatLike = np.ndarray([])
         self.hsv_image: cv2.typing.MatLike = np.ndarray([])
 
@@ -34,7 +34,7 @@ class RightTurn(FunctionalTest):
 
         self.debug = debug
 
-        self.current_state = None
+        self.current_state: int | None = None
 
     def draw_trapezoid(self) -> None:
         top_width_start = self.width // 6  # Narrower top
@@ -356,7 +356,8 @@ class RightTurn(FunctionalTest):
         if self.hsv_obj is None:
             self.hsv_obj = HSV(hsv_identifier)
 
-        self.image = frame if frame is not None else np.ndarray([])
+        if frame is not None:
+            self.image = frame
         self.height, self.width, _ = self.image.shape
 
         self.update_mask()

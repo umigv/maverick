@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
 
 import cv2
-import cv2.typing
+import numpy as np
 
 
 class FunctionalTest(ABC):
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the final mask and waypoint."""
-        self.final_mask = None
-        self.waypoint = None
+        self.final_mask: cv2.typing.MatLike = np.ndarray([])
+        self.waypoint: tuple[int, int] = (0, 0)
 
     @abstractmethod
     def run_frame(

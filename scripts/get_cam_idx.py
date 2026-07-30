@@ -1,7 +1,7 @@
 import cv2
 
 
-def list_available_cameras(max_index_to_check=10):
+def list_available_cameras(max_index_to_check: int = 10) -> list[int]:
     """
     Check for available camera indices by attempting to open each one.
 
@@ -14,7 +14,7 @@ def list_available_cameras(max_index_to_check=10):
         cap = cv2.VideoCapture(i)
 
         # Check if the camera was opened successfully
-        if cap is not None and cap.isOpened():
+        if cap.isOpened():
             print(f"Camera index {i:02d} is available.")
             available_cameras.append(i)
             # You can add platform-specific backend flags here if needed (e.g., cv2.CAP_DSHOW for Windows)

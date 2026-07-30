@@ -1,3 +1,5 @@
+from collections.abc import Sequence
+
 import cv2
 import numpy as np
 from hsv.hsv import HSV
@@ -15,20 +17,20 @@ class CurvedLanekeeping(FunctionalTest):
         right_bounds: tuple[float, float] = (0.55, 0.85),
         vertical_bounds: tuple[float, float] = (0.2, 0.8),
     ):
-        self.image = None
-        self.hsv_image = None
+        self.image: cv2.typing.MatLike = np.ndarray([])
+        self.hsv_image: cv2.typing.MatLike = np.ndarray([])
 
-        self.white_mask = None
-        self.yellow_mask = None
+        self.white_mask: cv2.typing.MatLike = np.ndarray([])
+        self.yellow_mask: cv2.typing.MatLike = np.ndarray([])
 
-        self.final_mask = None
+        self.final_mask: cv2.typing.MatLike = np.ndarray([])
 
-        self.hsv_obj = None
+        self.hsv_obj: HSV | None = None
 
-        self.waypoint = (None, None)
+        self.waypoint: tuple[int, int] = (0, 0)
 
-        self.width = None
-        self.height = None
+        self.width: int = 0
+        self.height: int = 0
 
         self.look_for_barrels = barrels
         self.barrel_mode = barrel_mode
@@ -39,9 +41,13 @@ class CurvedLanekeeping(FunctionalTest):
 
         self.debug = debug
 
-    def update_mask(self):
+    def update_mask(self) -> None:
         # defining the ranges for HSV values
-        self.final_mask, dict_ = self.hsv_obj.get_mask(self.image, yolo_barrels=self.look_for_barrels)
+        dict_: dict[str, cv2.typing.MatLike] = {}
+
+        if self.hsv_obj is not None:
+            self.final_mask, dict_ = self.hsv_obj.get_mask(self.image)
+            self.hsv_obj.set_yolo_barrels(self.look_for_barrels)
 
         # print(dict)
 
@@ -55,9 +61,9 @@ class CurvedLanekeeping(FunctionalTest):
         # cv2.namedWindow("Combined Image", cv2.WINDOW_NORMAL)
         # cv2.imshow("Combined Image", self.final_mask)
 
-    def state_machine(self):
+    def state_machine(self) -> None:
         # looking for barrel
-        if self.hsv_obj.barrel_boxes is not None:
+        if self.hsv_obj is not None and self.hsv_obj.barrel_boxes is not None:
             for segment in self.hsv_obj.barrel_boxes:
                 x_min, y_min, x_max, y_max = segment
                 vertices = np.array(
@@ -90,9 +96,9 @@ class CurvedLanekeeping(FunctionalTest):
         vert_min = int(self.vertical_bounds[0] * self.height)
         vert_max = int(self.vertical_bounds[1] * self.height)
 
-        best_left_point = None
+        best_left_point: Sequence[int] | None = None
         min_left_y = vert_max
-        best_right_point = None
+        best_right_point: Sequence[int] | None = None
         min_right_y = vert_max
 
         cnts, _ = cv2.findContours(self.white_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -122,7 +128,7 @@ class CurvedLanekeeping(FunctionalTest):
         else:  # fallback
             self.waypoint = (self.width // 2, self.height // 2)
 
-        if self.debug:
+        if self.debug and best_left_point is not None and best_right_point is not None:
             cv2.circle(self.final_mask, best_left_point, 10, 128, -1)
             cv2.circle(self.final_mask, best_right_point, 10, 128, -1)
 
@@ -146,7 +152,7 @@ class CurvedLanekeeping(FunctionalTest):
         cv2.line(self.final_mask, (right_min, vert_min), (right_max, vert_min), color, 10)
         cv2.line(self.final_mask, (right_min, vert_max), (right_max, vert_max), color, 10)
 
-    def run(self):
+    def run(self) -> None:
         cap = cv2.VideoCapture("../data/left_curved_road.MOV")
         self.hsv_obj = HSV("../data/left_curved_road.MOV", barrel_mode=self.barrel_mode)
 
@@ -186,11 +192,14 @@ class CurvedLanekeeping(FunctionalTest):
         cap.release()
         cv2.destroyAllWindows()
 
-    def run_frame(self, hsv_indentifier, frame):
+    def run_frame(
+        self, hsv_identifier: str = "1", frame: cv2.typing.MatLike | None = None
+    ) -> tuple[cv2.typing.MatLike, tuple[int, int]]:
         if self.hsv_obj is None:
-            self.hsv_obj = HSV(hsv_indentifier)
+            self.hsv_obj = HSV(hsv_identifier)
 
-        self.image = frame
+        if frame is not None:
+            self.image = frame
         self.height, self.width, _ = self.image.shape
 
         self.update_mask()

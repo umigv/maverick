@@ -5,7 +5,7 @@ from ultralytics import YOLO
 model = YOLO("./data/tires.pt")
 
 
-def run_tire_test():
+def run_tire_test() -> None:
     cap_img = cv2.imread("../data/tireImg1.png")  # add data path here if testing on video
     test_started = False
 
@@ -17,7 +17,9 @@ def run_tire_test():
     #      if not ret:
     #         break
 
-    display_frame = cap_img.copy()
+    display_frame: cv2.typing.MatLike = np.ndarray([])
+    if cap_img is not None:
+        display_frame = cap_img.copy()
 
     # UI Overlay: Status Indicator
     status_text = "STATUS: ACTIVE" if test_started else "STATUS: STATIONARY - WAIT"
@@ -26,7 +28,7 @@ def run_tire_test():
 
     test_started = True
 
-    if test_started:
+    if test_started and cap_img is not None:
         # 2. Run Inference
         results = model(cap_img)
 

@@ -1,10 +1,13 @@
 import json
 from pathlib import Path
+from typing import Any
 
 import cv2
 import cv2.typing
 import numpy as np
 from ultralytics import YOLO
+
+# sl: Any = 0
 
 try:
     import pyzed.sl as sl
@@ -20,14 +23,14 @@ class HSV:
         self.hsv_file = Path("~/hsv_values.json")
 
         self.hsv_image: cv2.typing.MatLike = np.ndarray([])
-        self.hsv_filters = {}  # Map of filter names to HSV bounds
+        self.hsv_filters: dict[str, dict[str, int]] = {}  # Map of filter names to HSV bounds
         self.setup = False
         self.image: cv2.typing.MatLike = np.ndarray([])
         self.final: cv2.typing.MatLike = np.ndarray([])
         self.barrel = False
         self.video_path = video_path
-        self.barrel_mask = None
-        self.barrel_boxes: np.ndarray | None = None
+        self.barrel_mask: cv2.typing.MatLike = np.ndarray([])
+        self.barrel_boxes: list[Any] | None = None
         self.YOLO_lanes = False
         self.YOLO_barrels = False
         self.barrel_model = YOLO("../data/obstacles.pt")
@@ -36,7 +39,7 @@ class HSV:
         self.barrel_mode = barrel_mode  # "YOLO" or "[filter name]"
         self.load_hsv_values()
 
-    def load_hsv_values(self):
+    def load_hsv_values(self) -> None:
         hsv_file = self.base_dir / "hsv_values.json"
 
         if hsv_file.exists():
@@ -64,7 +67,7 @@ class HSV:
             }
             print("No __ZED_SETTINGS__ key found, using default values")
 
-    def save_hsv_values(self):
+    def save_hsv_values(self) -> None:
         all_hsv_values = {}
         if self.hsv_file.exists():
             with Path.open(self.hsv_file) as file:
@@ -73,59 +76,59 @@ class HSV:
         with Path.open(self.hsv_file, "w") as file:
             json.dump(all_hsv_values, file, indent=4)
 
-    def h_upper_callback(self, value):
+    def h_upper_callback(self, value: int) -> None:
         self.h_upper = value
         if self.h_upper < self.h_lower:
             self.h_upper = self.h_lower
         self.update_mask()
         cv2.imshow("Mask", self.final)
 
-    def h_lower_callback(self, value):
+    def h_lower_callback(self, value: int) -> None:
         self.h_lower = value
         if self.h_lower > self.h_upper:
             self.h_lower = self.h_upper
         self.update_mask()
         cv2.imshow("Mask", self.final)
 
-    def s_upper_callback(self, value):
+    def s_upper_callback(self, value: int) -> None:
         self.s_upper = value
         if self.s_upper < self.s_lower:
             self.s_upper = self.s_lower
         self.update_mask()
         cv2.imshow("Mask", self.final)
 
-    def s_lower_callback(self, value):
+    def s_lower_callback(self, value: int) -> None:
         self.s_lower = value
         if self.s_lower > self.s_upper:
             self.s_lower = self.s_upper
         self.update_mask()
         cv2.imshow("Mask", self.final)
 
-    def v_upper_callback(self, value):
+    def v_upper_callback(self, value: int) -> None:
         self.v_upper = value
         if self.v_upper < self.v_lower:
             self.v_upper = self.v_lower
         self.update_mask()
         cv2.imshow("Mask", self.final)
 
-    def v_lower_callback(self, value):
+    def v_lower_callback(self, value: int) -> None:
         self.v_lower = value
         if self.v_lower > self.v_upper:
             self.v_lower = self.v_upper
         self.update_mask()
         cv2.imshow("Mask", self.final)
 
-    def on_button_click(self, value):
+    def on_button_click(self, value: int) -> None:
         if value == 1:
             self.setup = False
 
-    def __update_filter(self, filter_name, key, value):
+    def __update_filter(self, filter_name: str, key: str, value: int) -> None:
         self.hsv_filters[filter_name][key] = value
         if filter_name != "__ZED_SETTINGS__":
             _, filters = self.update_mask()
             cv2.imshow("Mask", filters[filter_name])
 
-    def clear_filter(self, filter_name):
+    def clear_filter(self, filter_name: str) -> None:
         if self.hsv_file.exists():
             with Path.open(self.hsv_file) as file:
                 all_hsv_values = json.load(file)
@@ -147,7 +150,7 @@ class HSV:
         else:
             print("No HSV values file found.")
 
-    def get_barrels_yolo(self):
+    def get_barrels_yolo(self) -> cv2.typing.MatLike:
         if self.barrel_mode == "YOLO":
             results = self.barrel_model.predict(self.image, conf=0.7)[0]
             self.barrel_mask = np.zeros((self.image.shape[0], self.image.shape[1]), dtype=np.uint8)
@@ -222,18 +225,23 @@ class HSV:
             # print(f"0 contours found")
             # print()
             return self.barrel_mask
-        self.barrel_boxes = np.ndarray(barrel_boxes)
+        self.barrel_boxes = barrel_boxes
         # print(f"barrel_mode filter: {self.barrel_mode}")
         # print(f"{len(self.barrel_boxes)} contours found")
         # print()
         return self.barrel_mask
 
-    def adjust_gamma(self, gamma=0.4):
+    def adjust_gamma(self, gamma: float = 0.4) -> None:
         inv_gamma = 1.0 / gamma
         table = np.array([((i / 255.0) ** inv_gamma) * 255 for i in np.arange(0, 256)]).astype("uint8")
         self.image = cv2.LUT(self.image, table)
 
     def tune(self, filter_name: str, use_zed: bool = False) -> None:
+        zed: Any = None
+        zed_params: dict[str, int] = {}
+        image_zed: sl.Mat = np.ndarray([])
+        cap: Any = None
+
         if filter_name == "__ZED_SETTINGS__":
             print("To tune ZED settings, enter any of your filter names.")
 
@@ -428,7 +436,7 @@ class HSV:
         cv2.destroyAllWindows()
         self.save_hsv_values()
 
-    def get_lane_lines_yolo(self):
+    def get_lane_lines_yolo(self) -> cv2.typing.MatLike:
         results = self.lane_model.predict(self.image, conf=0.7)[0]
         laneline_mask = np.zeros((self.image.shape[0], self.image.shape[1]), dtype=np.uint8)
         if results.masks is not None:
