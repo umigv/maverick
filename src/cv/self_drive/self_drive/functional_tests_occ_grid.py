@@ -54,7 +54,7 @@ def print_params(calibration_params: sl.CalibrationParameters) -> None:
 def pixel_waypoint_to_odom(
     centroid: tuple[float | None, float | None],
     depth_map: np.ndarray,
-    ransac_coeffs: tuple[float, float, float],
+    ransac_coeffs: np.ndarray,
     real_coeffs: np.ndarray,
     intrinsics: ransac.common.Intrinsics,
 ) -> tuple[float, float, float] | None:
@@ -153,15 +153,15 @@ class SelfDriveNode(Node):
         sy = self.h / float(resolution.height)
         self.low_res = sl.Resolution(self.w, self.h)
 
-        self.intrinsics = ransac.Intrinsics(
+        self.intrinsics = ransac.common.Intrinsics(
             calibration_params.left_cam.cx * sx,
             calibration_params.left_cam.cy * sy,
             calibration_params.left_cam.fx * sx,
             calibration_params.left_cam.fy * sy,
         )
 
-        self.drive_conf = ransac.GridConfiguration(5000, 5000, 50)  # , thres=5
-        self.block_conf = ransac.GridConfiguration(5000, 5000, 50)  # , thres=1
+        self.drive_conf = ransac.common.GridConfiguration(5000, 5000, 50)  # , thres=5
+        self.block_conf = ransac.common.GridConfiguration(5000, 5000, 50)  # , thres=1
 
         self.occ_pub = self.create_publisher(OccupancyGrid, "occupancy_grid/raw", 10)
         self.wp_pub = self.create_publisher(PointStamped, "/goal", 10)
@@ -267,7 +267,7 @@ class SelfDriveNode(Node):
 
             image = self.image_mat.get_data()
             image = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
-            depths = ransac.plane.clean_depths(self.depth_m.get_data())
+            depths = ransac.plane._clean_depths(self.depth_m.get_data())
 
             if time.time() - start < 5:
                 print("Warming up the camera...")
@@ -277,13 +277,17 @@ class SelfDriveNode(Node):
             print(f"done, centroid: {turn_centroid}")
 
             ground_mask, pixel_coeffs = ransac.plane.ground_plane(depths)
-            lane_mask = ransac.plane.merge_masks(ground_mask, turn_mask)
 
-            real_coeffs = ransac.plane.real_coeffs(pixel_coeffs, self.intrinsics)
+            real_coeffs = np.ndarray([])
+            lane_mask = np.ndarray([])
+
+            if ground_mask is not None and pixel_coeffs is not None:
+                lane_mask = ransac.plane.merge_masks(ground_mask, turn_mask)
+                real_coeffs = ransac.plane.real_coeffs(pixel_coeffs, self.intrinsics)
 
             rad = ransac.plane.real_angle(real_coeffs)
             full_occ = ransac.occu.occ_grid(
-                lane_mask, real_coeffs, self.intrinsics, self.drive_conf, ransac.CameraPosition(0, 0, 0)
+                lane_mask, real_coeffs, self.intrinsics, self.drive_conf, ransac.common.CameraPosition(0, 0, 0)
             )
 
             self.publish_occ_grid(full_occ)
@@ -291,9 +295,11 @@ class SelfDriveNode(Node):
             now = self.get_clock().now()
             if last_publish is None or (now - last_publish).nanoseconds >= 2.0 * 1e9:
                 # print(f"Last publish {last_publish}, now {now}")
-                odom_waypoint = pixel_waypoint_to_odom(
-                    turn_centroid, depths, pixel_coeffs, real_coeffs, self.intrinsics
-                )
+                odom_waypoint: tuple[float, float, float] | None = (0.0, 0.0, 0.0)
+                if pixel_coeffs is not None:
+                    odom_waypoint = pixel_waypoint_to_odom(
+                        turn_centroid, depths, pixel_coeffs, real_coeffs, self.intrinsics
+                    )
                 print(f"Publishing waypoint at odom coords: {odom_waypoint}")
                 self.publish_waypoint(odom_waypoint)
                 last_publish = now
