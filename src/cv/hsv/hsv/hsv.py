@@ -237,7 +237,7 @@ class HSV:
         self.image = cv2.LUT(self.image, table)
 
     def tune(self, filter_name: str, use_zed: bool = False) -> None:
-        zed: Any = None
+        zed: sl.Camera = None
         zed_params: dict[str, int] = {}
         image_zed: sl.Mat = np.ndarray([])
         cap: Any = None
