@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import cv2
+import cv2.typing
 import numpy as np
 from ultralytics import YOLO
 
@@ -18,11 +19,11 @@ class HSV:
         self.base_dir = Path(__file__).resolve().parent
         self.hsv_file = Path("~/hsv_values.json")
 
-        self.hsv_image = None
+        self.hsv_image: cv2.typing.MatLike = np.ndarray([])
         self.hsv_filters = {}  # Map of filter names to HSV bounds
         self.setup = False
-        self.image = None
-        self.final = None
+        self.image: cv2.typing.MatLike = np.ndarray([])
+        self.final: cv2.typing.MatLike = np.ndarray([])
         self.barrel = False
         self.video_path = video_path
         self.barrel_mask = None

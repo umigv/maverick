@@ -1,4 +1,7 @@
+from collections.abc import Sequence
+
 import cv2
+import cv2.typing
 import numpy as np
 from hsv.hsv import HSV
 from self_drive.functional_tests.functional_test_parent import FunctionalTest
@@ -6,20 +9,20 @@ from self_drive.functional_tests.functional_test_parent import FunctionalTest
 
 class RightTurn(FunctionalTest):
     def __init__(self, debug=False):
-        self.image = None
-        self.hsv_image = None
+        self.image: cv2.typing.MatLike = np.ndarray([])
+        self.hsv_image: cv2.typing.MatLike = np.ndarray([])
 
-        self.white_mask = None
-        self.yellow_mask = None
+        self.white_mask: cv2.typing.MatLike = np.ndarray([])
+        self.yellow_mask: cv2.typing.MatLike = np.ndarray([])
 
-        self.final = None
+        self.final: cv2.typing.MatLike = np.ndarray([])
 
-        self.hsv_obj = None
+        self.hsv_obj: HSV = HSV("")
 
-        self.centroid = (None, None)
+        self.centroid: Sequence[int] = [0, 0]
 
-        self.width = None
-        self.height = None
+        self.width: int = 0
+        self.height: int = 0
 
         self.state_1_done = False
         self.state_2_done = False
@@ -67,7 +70,7 @@ class RightTurn(FunctionalTest):
 
     def update_mask(self):
         # defining the ranges for HSV values
-        self.hsv_obj.set_YOLO_barrels(self.look_for_barrels and (not self.debug))
+        self.hsv_obj.set_yolo_barrels(self.look_for_barrels and (not self.debug))
         self.final, masks_dict = self.hsv_obj.get_mask(self.image)
 
         # print(dict)
@@ -97,7 +100,7 @@ class RightTurn(FunctionalTest):
             self.state_1_done = True
             self.state_2()
             return
-        self.centroid = (self.width // 2, 40)
+        self.centroid = [self.width // 2, 40]
         # Block out the stop line with the trapazoid
         # set waypoint to directly in front of the robot
 
@@ -347,11 +350,13 @@ class RightTurn(FunctionalTest):
         cv2.destroyAllWindows()
 
     # >>> change: run_frame now runs full pipeline (HSV + state machine) and returns results
-    def run_frame(self, hsv_indentifier, frame):
+    def run_frame(
+        self, hsv_identifier="1", frame: cv2.typing.MatLike | None = None
+    ) -> tuple[cv2.typing.MatLike, Sequence[int]]:
         if self.hsv_obj is None:
-            self.hsv_obj = HSV(hsv_indentifier)
+            self.hsv_obj = HSV(hsv_identifier)
 
-        self.image = frame
+        self.image = frame if frame is not None else np.ndarray([])
         self.height, self.width, _ = self.image.shape
 
         self.update_mask()
@@ -365,7 +370,7 @@ class RightTurn(FunctionalTest):
     # <<< end of change
 
 
-def main():
+def main() -> None:
     obj = RightTurn(debug=False)
     obj.run()
 

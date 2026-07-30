@@ -1,4 +1,8 @@
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
+
+import cv2
+import cv2.typing
 
 
 class FunctionalTest(ABC):
@@ -8,7 +12,9 @@ class FunctionalTest(ABC):
         self.waypoint = None
 
     @abstractmethod
-    def run_frame(self, hsv_identifier="1", frame=None):
+    def run_frame(
+        self, hsv_identifier="1", frame: cv2.typing.MatLike | None = None
+    ) -> tuple[cv2.typing.MatLike, Sequence[int]]:
         """Run the functional test on a single frame. Should return final mask and waypoint."""
 
 
@@ -19,11 +25,11 @@ class PedestrianLaneChange(FunctionalTest):
     def __init__(self):
         super().__init__()
         # Initialize any additional attributes specific to this test
-    
+
     def state_machine(self):
         # Implement the state machine logic for pedestrian lane change
 
-    
+
     def update_mask(self):
         # Update the final mask based on the current state and frame
 
