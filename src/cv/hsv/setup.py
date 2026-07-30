@@ -15,4 +15,6 @@ setup(
     maintainer="UMARV",
     description="HSV library",
     entry_points={"console_scripts": []},
+    license="Apache-2.0",
+    extras_require={"test": ["pytest"]},
 )

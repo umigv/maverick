@@ -15,4 +15,6 @@ setup(
     maintainer="UMARV",
     description="CV selfdrive stack",
     entry_points={"console_scripts": ["func_tests_occ_grid = cv_self_drive.functional_tests_occ_grid:main"]},
+    license="Apache-2.0",
+    extras_require={"test": ["pytest"]},
 )
