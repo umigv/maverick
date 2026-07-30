@@ -19,6 +19,7 @@ matplotlib-base = "*"
 numpy = "*"
 opencv = "*"
 pyproj = "*"
+pytorch ="*"
 pyserial = "*"
 # ROS 2 launch_testing's pytest plugin uses the pre-8.0 pytest_pycollect_makemodule(path, ...)
 # hook signature; pytest 8 removed the `path` arg, breaking pytest collection entirely.
@@ -40,6 +41,7 @@ ros-lyrical-twist-mux = "*"
 ros-lyrical-urdf-launch = "*"
 ros-lyrical-xacro = "*"
 types-pyyaml = "*"
+ultralytics = "*"
 
 [tool.pixi.feature.ros.pypi-dependencies]
 odrive = "*"
