@@ -1,9 +1,10 @@
-from typing import Any
+from typing import Any, cast
 
 import cv2
 import numpy as np
 from self_drive.functional_tests.functional_test_parent import FunctionalTest
 from ultralytics import YOLO
+from ultralytics.engine.results import Results
 
 
 class ReallyGoodStateMachine(FunctionalTest):
@@ -139,6 +140,10 @@ class ReallyGoodStateMachine(FunctionalTest):
             results = self.person_model(img)
             py2 = 0
             for result in results:
+                result = cast(Results, result)
+                if result.boxes is None:
+                    continue
+
                 boxes = result.boxes.xyxy.tolist()
                 confidences = result.boxes.conf.tolist()
                 class_ids = result.boxes.cls.tolist()
@@ -233,6 +238,10 @@ class ReallyGoodStateMachine(FunctionalTest):
         mask = np.zeros(img.shape[:2], dtype=np.uint8)
 
         for result in results:
+            result = cast(Results, result)
+            if result.boxes is None:
+                continue
+
             boxes = result.boxes.xyxy.tolist()
             confidences = result.boxes.conf.tolist()
             class_ids = result.boxes.cls.tolist()

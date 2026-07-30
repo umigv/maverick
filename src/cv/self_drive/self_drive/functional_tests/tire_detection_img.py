@@ -1,6 +1,9 @@
+from typing import cast
+
 import cv2
 import numpy as np
 from ultralytics import YOLO
+from ultralytics.engine.results import Results
 
 model = YOLO("./data/tires.pt")
 
@@ -31,14 +34,15 @@ def run_tire_test() -> None:
     if test_started and cap_img is not None:
         # 2. Run Inference
         results = model(cap_img)
+        result = cast(Results, next(iter(results)))
 
         # Create a black mask for 'Extracted Shape' requirement
         extracted_tire_layer = np.zeros_like(cap_img)
 
         # get the boxes
-        boxes = results[0].boxes
+        boxes = result.boxes
         # Check if any tire is detected
-        if len(results[0].boxes) > 0:
+        if boxes is not None and len(boxes) > 0:
             for box in boxes:
                 # Get coordinates
                 x1, y1, x2, y2 = map(int, box.xyxy[0])
