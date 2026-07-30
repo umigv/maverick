@@ -55,6 +55,7 @@ just clean                # Delete build/install/log
 | ------------------- | --------------------------------------------------------------------------------------- |
 | `src/bringup`       | Launch files, mode/course configs, and the top-level entry points for running the stack |
 | `src/core`          | Shared messages and library code used across packages                                   |
+| `src/cv`            | Computer vision algorithms                                                              |
 | `src/description`   | URDFs and robot/world description packages                                              |
 | `src/hardware`      | Drivers for onboard hardware                                                            |
 | `src/localization`  | Odometry and coordinate-frame conversion packages                                       |
