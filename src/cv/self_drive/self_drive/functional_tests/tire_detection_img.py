@@ -43,10 +43,10 @@ def run_tire_test() -> None:
         boxes = result.boxes
         # Check if any tire is detected
         if boxes is not None and len(boxes) > 0:
-            for box in boxes:
+            for box, conf in zip(boxes.xyxy, boxes.conf, strict=True):
                 # Get coordinates
-                x1, y1, x2, y2 = map(int, box.xyxy[0])
-                conf = box.conf[0]
+                x1, y1, x2, y2 = map(int, box.tolist())
+                conf = float(conf)
 
                 if conf > 0.5:  # Confidence threshold
                     # Requirement: "Extracted shape of a tire MUST be present"
