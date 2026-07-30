@@ -1,13 +1,12 @@
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import cv2
 import cv2.typing
 import numpy as np
 from ultralytics import YOLO
-
-# sl: Any = 0
+from ultralytics.engine.results import Results
 
 try:
     import pyzed.sl as sl
@@ -33,8 +32,8 @@ class HSV:
         self.barrel_boxes: list[Any] | None = None
         self.YOLO_lanes = False
         self.YOLO_barrels = False
-        self.barrel_model = YOLO("../data/obstacles.pt")
-        self.lane_model = YOLO("../data/laneswithcontrast.pt")
+        self.barrel_model: YOLO = YOLO("../data/obstacles.pt")
+        self.lane_model: YOLO = YOLO("../data/laneswithcontrast.pt")
 
         self.barrel_mode = barrel_mode  # "YOLO" or "[filter name]"
         self.load_hsv_values()
@@ -152,10 +151,10 @@ class HSV:
 
     def get_barrels_yolo(self) -> cv2.typing.MatLike:
         if self.barrel_mode == "YOLO":
-            results = self.barrel_model.predict(self.image, conf=0.7)[0]
+            results = cast(Results, self.barrel_model.predict(self.image, conf=0.7))[0]
             self.barrel_mask = np.zeros((self.image.shape[0], self.image.shape[1]), dtype=np.uint8)
             if results.boxes is not None:
-                self.barrel_boxes = results.boxes.xyxyn
+                self.barrel_boxes = list(results.boxes.xyxyn)
             else:
                 self.barrel_boxes = None
             if results.masks is not None:
@@ -437,7 +436,7 @@ class HSV:
         self.save_hsv_values()
 
     def get_lane_lines_yolo(self) -> cv2.typing.MatLike:
-        results = self.lane_model.predict(self.image, conf=0.7)[0]
+        results = cast(Results, self.lane_model.predict(self.image, conf=0.7))[0]
         laneline_mask = np.zeros((self.image.shape[0], self.image.shape[1]), dtype=np.uint8)
         if results.masks is not None:
             for i in range(len(results.masks.xy)):
