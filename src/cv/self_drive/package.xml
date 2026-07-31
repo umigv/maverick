@@ -17,4 +17,5 @@
   </export>
 
   <exec_depend>ransac</exec_depend>
+  <exec_depend>hsv</exec_depend>
 </package>
