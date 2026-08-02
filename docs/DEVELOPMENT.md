@@ -6,7 +6,7 @@ How to work in this codebase: environment setup, the build/test loop, repo struc
 
 We offer first class support for:
 
-- System: Linux (x64/arm64), MacOS (Apple Silicon), and Windows (through WSL2)
+- System: Linux (x64/arm64), macOS (Apple Silicon), and Windows (through WSL2)
 - Shell: bash, zsh, fish
 - Editor: VSCode
 
