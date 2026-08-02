@@ -97,7 +97,7 @@ To mount or remount the antennas:
 
 Reference:
 
-- Documentation PDFs are on Dropbox.
+- [Documentation PDFs](https://www.dropbox.com/scl/fo/nmoe93a92kkug9jg4yjgl/AGFn25HFFZrdIWpzx5zTuLI?rlkey=gkhee7wdr551iaipuppoqoh7o&st=2b8ens5u&dl=0)
 - Support contact: support@vectornav.com or +1 (512) 772-3615
 
 ## Controller pairing
