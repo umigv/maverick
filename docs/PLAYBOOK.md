@@ -146,7 +146,7 @@ Lube the gearbox if unlubed for a while and retune `vel_gain` downward in [odriv
 
 Suspect wheel slip. Wheel slip is hard to diagnose and happens when the robot moves, accelerates, or turns too fast. Wipe the wheels with isopropyl and lower the speed. Consider how grippy the floor is when testing (asphalt > cement > marble).
 
-#### Robot doesn't follow paths precisely 
+#### Robot doesn't follow paths precisely
 
 Likely inertia. The path following controller may need retuning. Note that weight changes affect path tracking tuning, and gear ratio or wheel diameter changes affect odometry, so physical changes to the platform mean software retuning.
 
