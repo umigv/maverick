@@ -13,7 +13,7 @@ setup(
 
     entry_points={
         "console_scripts": [
-            "func_tests_occ_grid = cv_self_drive.functional_tests_occ_grid:main",
-        ],
-    },
+            "func_tests_occ_grid = cv_self_drive.functional_tests_occ_grid:main"
+        ]
+    }
 )

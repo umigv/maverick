@@ -1,11 +1,12 @@
-import cv2
-import numpy as np
-from cv_self_drive.hsv import hsv
-import os
 import json
-import pyzed.sl as sl
+import os
 
-class ZEDDemo():
+import cv2
+import pyzed.sl as sl
+from cv_self_drive.hsv import hsv
+
+
+class ZEDDemo:
     def __init__(self, json_path: str, json_key: str | int):
         self.image = None
 
@@ -17,7 +18,7 @@ class ZEDDemo():
         self.zed_settings = None
 
         if os.path.exists(json_path):
-            with open(json_path, "r") as file:
+            with open(json_path) as file:
                 all_json_keys = json.load(file)
                 json_dict = all_json_keys.get(str(json_key), {})
 
@@ -30,15 +31,15 @@ class ZEDDemo():
         zed = sl.Camera()
         init_params = sl.InitParameters()
 
-        if isinstance(self.video_path, str) and self.video_path.endswith('.svo'):
+        if isinstance(self.video_path, str) and self.video_path.endswith(".svo"):
             init_params.set_from_svo_file(self.video_path)
             init_params.svo_real_time_mode = False
-                
+
         err = zed.open(init_params)
         if err != sl.ERROR_CODE.SUCCESS:
             print(f"Error opening ZED Camera: {err}")
             return
-        
+
         print("Applying custom ZED video settings...")
         zed.set_camera_settings(sl.VIDEO_SETTINGS.BRIGHTNESS, self.zed_settings["BRIGHTNESS"])
         zed.set_camera_settings(sl.VIDEO_SETTINGS.CONTRAST, self.zed_settings["CONTRAST"])
@@ -60,7 +61,7 @@ class ZEDDemo():
                 continue
             else:
                 break
-            
+
             self.image = frame
             self.update_masks()
 
@@ -74,7 +75,7 @@ class ZEDDemo():
             key = cv2.waitKey(1) & 0xFF
             if key == 27:  # Press 'Esc' to exit the loop
                 break
-            
+
 
 if __name__ == "__main__":
     zed_demo = ZEDDemo("cv_self_drive/hsv_values.json", 0)

@@ -1,5 +1,6 @@
 import cv2
 
+
 def list_available_cameras(max_index_to_check=10):
     """
     Checks for available camera indices by attempting to open each one.
@@ -25,6 +26,7 @@ def list_available_cameras(max_index_to_check=10):
 
     return available_cameras
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     cameras = list_available_cameras()
     print(f"\nFound cameras at indices: {cameras}")
