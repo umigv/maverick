@@ -132,12 +132,32 @@ When things go wrong, suspect hardware more than you think (consider what is dif
 
 When investigating a regression, go through everything that changed since it last worked.
 
-Common issues:
+### Common issues
 
-- **ODrive says the e-stop is engaged but it isn't.** Check the wiring across the system, starting with the power connections. It's likely that a wire came loose.
-- **ODrive hits the current limit.** Lube the gearbox if unlubed for a while and retune `vel_gain` downward in [odrive_driver_config.py](../src/hardware/odrive_driver/odrive_driver/odrive_driver_config.py). A lower gain draws less current but tracks commanded velocity less aggressively, so the robot may undershoot its target speed.
-- **Odometry is off / robot goes crazy on a simple turn at high speed.** Suspect wheel slip. Wheel slip is hard to diagnose and happens when the robot moves, accelerates, or turns too fast. Wipe the wheels with isopropyl and lower the speed. Consider how grippy the floor is when testing (asphalt > cement > marble).
-- **Robot doesn't follow paths precisely.** Likely inertia. The path following controller may need retuning. Note that weight changes affect path tracking tuning, and gear ratio or wheel diameter changes affect odometry, so physical changes to the platform mean software retuning.
-- **GPS fix is bad or satellite count drops.** Run `just vectornav-monitor` to see the decoded INS and GNSS status. The VN300 antenna is sensitive to USB 3.0 EMI (TODO: fix EMI). Make sure nothing running USB 3.0 (ZED camera, USB hub) is close to the antenna cables; move them physically as far apart as possible. Elevating the receivers also improves signal.
-- **ZED camera initialization fails or frames are intermittent.** Check the cable's connection to the back of the camera. The screws need to be absolutely tight.
-- **ZED camera is inaccurate after self-calibration.** At every startup the ZED refines its factory stereo calibration against the scene it sees. If the scene has too little detail (too close to an object, facing empty space), the result can be worse than what it started with. Restart the camera facing a detailed scene.
+#### ODrive says the e-stop is engaged but it isn't
+
+Check the wiring across the system, starting with the power connections. It's likely that a wire came loose.
+
+#### ODrive hits the current limit
+
+Lube the gearbox if unlubed for a while and retune `vel_gain` downward in [odrive_driver_config.py](../src/hardware/odrive_driver/odrive_driver/odrive_driver_config.py). A lower gain draws less current but tracks commanded velocity less aggressively, so the robot may undershoot its target speed.
+
+#### Odometry is off / robot goes crazy on a simple turn at high speed
+
+Suspect wheel slip. Wheel slip is hard to diagnose and happens when the robot moves, accelerates, or turns too fast. Wipe the wheels with isopropyl and lower the speed. Consider how grippy the floor is when testing (asphalt > cement > marble).
+
+#### Robot doesn't follow paths precisely 
+
+Likely inertia. The path following controller may need retuning. Note that weight changes affect path tracking tuning, and gear ratio or wheel diameter changes affect odometry, so physical changes to the platform mean software retuning.
+
+#### GPS fix is bad or satellite count drops
+
+Run `just vectornav-monitor` to see the decoded INS and GNSS status. The VN300 antenna is sensitive to USB 3.0 EMI (TODO: fix EMI). Make sure nothing running USB 3.0 (ZED camera, USB hub) is close to the antenna cables; move them physically as far apart as possible. Elevating the receivers also improves signal.
+
+#### ZED camera initialization fails or frames are intermittent
+
+Check the cable's connection to the back of the camera. The screws need to be absolutely tight.
+
+#### ZED camera is inaccurate after self-calibration
+
+At every startup the ZED refines its factory stereo calibration against the scene it sees. If the scene has too little detail (too close to an object, facing empty space), the result can be worse than what it started with. Restart the camera facing a detailed scene.
