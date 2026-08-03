@@ -6,7 +6,7 @@ def generate_launch_description() -> LaunchDescription:
     return LaunchDescription(
         [
             Node(
-                package="cv_self_drive",
+                package="self_drive_perception",
                 executable="func_tests_occ_grid",
                 name="self_drive_node",
                 output="screen",

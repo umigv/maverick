@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>cv_self_drive</name>
+  <name>cv_self_drive_perception</name>
   <version>0.0.1</version>
-  <description>CV selfdrive stack</description>
+  <description>Self drive perception stack</description>
 
   <maintainer>UMARV</maintainer>
   <license>Apache-2.0</license>

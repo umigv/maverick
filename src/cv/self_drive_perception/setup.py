@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = "self_drive"
+package_name = "self_drive_perception"
 
 setup(
     name=package_name,
