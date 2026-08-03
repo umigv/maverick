@@ -11,11 +11,11 @@ import rclpy
 from geometry_msgs.msg import Point, PointStamped, Pose, Quaternion
 from nav_msgs.msg import MapMetaData, OccupancyGrid
 from rclpy.node import Node
-from self_drive.functional_tests.curved_lane_keeping import CurvedLanekeeping
-from self_drive.functional_tests.functional_test_parent import FunctionalTest
-from self_drive.functional_tests.left_turn import LeftTurn
-from self_drive.functional_tests.pedestrian_lane_changing import ReallyGoodStateMachine
-from self_drive.functional_tests.right_turn import RightTurn
+from self_drive_perception.functional_tests.curved_lane_keeping import CurvedLanekeeping
+from self_drive_perception.functional_tests.functional_test_parent import FunctionalTest
+from self_drive_perception.functional_tests.left_turn import LeftTurn
+from self_drive_perception.functional_tests.pedestrian_lane_changing import ReallyGoodStateMachine
+from self_drive_perception.functional_tests.right_turn import RightTurn
 
 
 def print_params(calibration_params: sl.CalibrationParameters) -> None:

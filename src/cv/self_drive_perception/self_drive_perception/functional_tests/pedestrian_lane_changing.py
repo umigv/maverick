@@ -2,7 +2,7 @@ from typing import Any, cast
 
 import cv2
 import numpy as np
-from self_drive.functional_tests.functional_test_parent import FunctionalTest
+from self_drive_perception.functional_tests.functional_test_parent import FunctionalTest
 from ultralytics import YOLO
 from ultralytics.engine.results import Results
 

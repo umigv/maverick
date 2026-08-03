@@ -3,7 +3,7 @@ from typing import Any
 import cv2
 import numpy as np
 from hsv.hsv import HSV
-from self_drive.functional_tests.functional_test_parent import FunctionalTest
+from self_drive_perception.functional_tests.functional_test_parent import FunctionalTest
 
 
 class ObstructedPedestrianDetection(FunctionalTest):
