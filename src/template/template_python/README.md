@@ -2,7 +2,11 @@
 
 TODO: One or two sentences on what the node does and how it fits into the system.
 
-<!-- Fill in the sections below and delete the ones that don't apply. Config parameters are documented in template_python_config.py, not here. Other sections used across the repo: Services, Service Clients, Read Files, Written Files, TF Broadcasts. Free-form sections explaining behavior/algorithms go above the I/O sections. -->
+<!-- Fill in the sections below and delete the ones that don't apply, keeping this order. -->
+
+## TODO: Behavior
+
+Free-form sections describing behavior/algorithms come first, before the interface sections. Add as many as needed.
 
 ## Subscribed Topics
 
@@ -11,3 +15,33 @@ TODO: One or two sentences on what the node does and how it fits into the system
 ## Published Topics
 
 - `topic` (`pkg/Msg`) - Description
+
+## Services
+
+- `service` (`pkg/Srv`) - Description
+
+## Service Clients
+
+- `service` (`pkg/Srv`) - Description
+
+## Read Files
+
+- `file_path_param` - What is read and when
+
+## Written Files
+
+- `file_path_param` - What is written and when
+
+## TF Broadcasts
+
+- `parent_frame` -> `child_frame` - Description
+
+## TF Requirements
+
+- `parent_frame` -> `child_frame` - Why the node needs it
+
+## Scripts
+
+### `scripts/script_name.py`
+
+What the script does and how to run it.
