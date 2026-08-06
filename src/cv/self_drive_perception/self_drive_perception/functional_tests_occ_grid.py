@@ -8,6 +8,7 @@ import numpy as np
 import pyzed.sl as sl
 import ransac
 import rclpy
+import utils.config
 from geometry_msgs.msg import Point, PointStamped, Pose, Quaternion
 from nav_msgs.msg import MapMetaData, OccupancyGrid
 from rclpy.node import Node
@@ -16,6 +17,8 @@ from self_drive_perception.functional_tests.functional_test_parent import Functi
 from self_drive_perception.functional_tests.left_turn import LeftTurn
 from self_drive_perception.functional_tests.pedestrian_lane_changing import ReallyGoodStateMachine
 from self_drive_perception.functional_tests.right_turn import RightTurn
+
+from .functional_tests_occ_grid_config import SelfDriveNodeConfig
 
 
 def print_params(calibration_params: sl.CalibrationParameters) -> None:
@@ -120,13 +123,13 @@ class SelfDriveNode(Node):
     def __init__(self, gw_mm: int, gh_mm: int, cw_mm: int):
         super().__init__("self_drive_node")
 
+        self.config: SelfDriveNodeConfig = utils.config.load(self, SelfDriveNodeConfig)
+
         self.cam = sl.Camera()
 
-        self.declare_parameter("function_type", "right")
-        self.function_type = self.get_parameter("function_type").get_parameter_value().string_value
+        self.function_type = self.config.function_type
 
-        self.declare_parameter("hsv_json_key", "1")
-        self.hsv_json_key = self.get_parameter("hsv_json_key").get_parameter_value().string_value
+        self.hsv_json_key = self.config.hsv_json_key
 
         self.hsv_file = Path("~/hsv_values.json")
 
