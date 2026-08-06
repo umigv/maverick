@@ -6,7 +6,7 @@ class SelfDrivePerceptionConfig:
     function_type: str
     hsv_json_key: str
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         modes: list[str] = ["right", "left", "pedlangechange", "curvedlanekeep"]
 
         if self.function_type not in modes:
