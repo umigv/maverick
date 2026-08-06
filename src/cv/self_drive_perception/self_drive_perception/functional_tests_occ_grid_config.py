@@ -11,5 +11,5 @@ class SelfDrivePerceptionConfig:
 
         if self.function_type not in modes:
             raise ValueError(
-                f"SelfDrivePerceptionConfig: {self.function_type} is not a functional test (must be one of: {modes})."
+                f"SelfDrivePerceptionConfig: {self.function_type} is not a functional test (must be one of these: {modes})."
             )
