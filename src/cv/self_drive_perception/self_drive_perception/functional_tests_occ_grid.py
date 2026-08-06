@@ -18,7 +18,7 @@ from self_drive_perception.functional_tests.left_turn import LeftTurn
 from self_drive_perception.functional_tests.pedestrian_lane_changing import ReallyGoodStateMachine
 from self_drive_perception.functional_tests.right_turn import RightTurn
 
-from .functional_tests_occ_grid_config import SelfDriveNodeConfig
+from .functional_tests_occ_grid_config import SelfDrivePerceptionConfig
 
 
 def print_params(calibration_params: sl.CalibrationParameters) -> None:
@@ -119,11 +119,11 @@ def pixel_waypoint_to_odom(
     return (x_odom, y_odom, z_odom)
 
 
-class SelfDriveNode(Node):
+class SelfDrivePerception(Node):
     def __init__(self, gw_mm: int, gh_mm: int, cw_mm: int):
         super().__init__("self_drive_node")
 
-        self.config: SelfDriveNodeConfig = utils.config.load(self, SelfDriveNodeConfig)
+        self.config: SelfDrivePerceptionConfig = utils.config.load(self, SelfDrivePerceptionConfig)
 
         self.cam = sl.Camera()
 
@@ -324,7 +324,7 @@ class SelfDriveNode(Node):
 def main(args: list[str] | None = None) -> None:
     rclpy.init(args=args)
 
-    node = SelfDriveNode(5000, 5000, 50)
+    node = SelfDrivePerception(5000, 5000, 50)
 
     try:
         node.run()

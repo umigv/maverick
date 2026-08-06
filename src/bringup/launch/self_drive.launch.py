@@ -8,7 +8,7 @@ def generate_launch_description() -> LaunchDescription:
             Node(
                 package="self_drive_perception",
                 executable="func_tests_occ_grid",
-                name="self_drive_node",
+                name="self_drive_perception_node",
                 output="screen",
                 parameters=[{"function_type": "right", "hsv_json_key": "1"}],
             )
