@@ -118,10 +118,15 @@ class OdriveDriver(Node):
     def is_robot_enabled(self) -> bool:
         try:
             with self.config.estop_file_path.open() as f:
-                return f.read().strip() != "1"  # only "1" stops the robot, everything else is enabled
-        except Exception:
-            self.get_logger().error("EStop file not found", throttle_duration_sec=30.0)
-            return True  # if the e-stop file doesn't exist / is corrupted we assume e-stop is off
+                return f.read().strip() == "0"  # only "0" enables the robot, everything else is disabled
+        except FileNotFoundError:
+            self.get_logger().error(
+                f"EStop file not found at {self.config.estop_file_path}", throttle_duration_sec=30.0
+            )
+            return False  # disable the robot
+        except Exception as e:
+            self.get_logger().error(f"Error reading EStop file: {e}", throttle_duration_sec=30.0)
+            return False
 
     def publish_debug_info(self) -> None:
         self.debug_publisher.publish(
