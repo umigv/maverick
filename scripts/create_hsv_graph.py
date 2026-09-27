@@ -6,7 +6,11 @@ import numpy as np
 import plotly.graph_objects as go
 
 
-def create_hsv_graph(frame: cv2.typing.MatLike) -> None:
+def create_hsv_graph(frame: cv2.typing.MatLike, num_points: int = 50000) -> None:
+    """Plot HSV data of an RGB image.
+
+    Randomly samples ```num_points``` images from the frame to plot in a 3D space. Each point is colored and placed according to its HSV coordinates. The plotly graph is outputted to ~/data/graph_test.html.
+    """
     hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     h_channel, s_channel, v_channel = cv2.split(hsv_frame)
@@ -14,8 +18,6 @@ def create_hsv_graph(frame: cv2.typing.MatLike) -> None:
     h = h_channel.flatten()
     s = s_channel.flatten()
     v = v_channel.flatten()
-
-    num_points = 10000
 
     if len(h) > num_points:
         indices = np.random.choice(len(h), num_points, replace=False)
