@@ -7,7 +7,7 @@ from .zed_publisher_config import ZedPublisherConfig
 
 
 class ZedPublisher(Node):
-    def __init__(self):
+    def __init__(self) -> None:
         self.node_name = "zed-publisher-node"
         super().__init__(self.node_name)
 
