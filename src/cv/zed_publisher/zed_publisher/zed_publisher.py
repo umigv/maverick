@@ -1,5 +1,6 @@
 import pyzed.sl as sl
 import utils.config
+from cv_bridge import CvBridge
 from rclpy.node import Node
 from sensor_msgs.msg import Image
 
@@ -8,8 +9,7 @@ from .zed_publisher_config import ZedPublisherConfig
 
 class ZedPublisher(Node):
     def __init__(self) -> None:
-        self.node_name = "zed-publisher-node"
-        super().__init__(self.node_name)
+        super().__init__("zed-publisher-node")
 
         self.config: ZedPublisherConfig = utils.config.load(self, ZedPublisherConfig)
 
@@ -20,10 +20,24 @@ class ZedPublisher(Node):
         self.right_cam = self._initialize_camera(right_serial, "right")
 
         self.left_rgb_pub = self.create_publisher(Image, "/zed/left/rgb/image", 1)
-        self.left_rgbd_pub = self.create_publisher(Image, "/zed/left/rgbd/image", 1)
+        self.left_depth_pub = self.create_publisher(Image, "/zed/left/depth/image", 1)
 
         self.right_rgb_pub = self.create_publisher(Image, "/zed/right/rgb/image", 1)
-        self.right_rgbd_pub = self.create_publisher(Image, "/zed/right/rgbd/image", 1)
+        self.right_depth_pub = self.create_publisher(Image, "/zed/right/depth/image", 1)
+
+        self.bridge = CvBridge()
+
+        self.left_image = sl.Mat()
+        self.left_depth = sl.Mat()
+
+        self.right_image = sl.Mat()
+        self.right_depth = sl.Mat()
+
+        # # Publish at the configured camera FPS
+        # self.timer = self.create_timer(
+        #     1.0 / self.config.fps,
+        #     self._publish_frames,
+        # )
 
     def _initialize_camera(self, serial: int, name: str) -> sl.Camera:
         params = sl.InitParameters()
@@ -39,7 +53,7 @@ class ZedPublisher(Node):
         status = camera.open(params)
 
         if status != sl.ERROR_CODE.SUCCESS:
-            raise RuntimeError(f"[{self.node_name}] Failed to open {name} ZED (serial={serial}): {status}")
+            raise RuntimeError(f"[zed-publisher-node] Failed to open {name} ZED (serial={serial}): {status}")
 
         camera.set_camera_settings(sl.VIDEO_SETTINGS.BRIGHTNESS, self.config.brightness)
         camera.set_camera_settings(sl.VIDEO_SETTINGS.CONTRAST, self.config.contrast)
@@ -56,6 +70,6 @@ class ZedPublisher(Node):
         camera.set_camera_settings(sl.VIDEO_SETTINGS.AEC_AGC, int(self.config.auto_exposure))
         camera.set_camera_settings(sl.VIDEO_SETTINGS.WHITEBALANCE_AUTO, int(self.config.auto_white_balance))
 
-        self.get_logger().info(f"[{self.node_name}] Opened {name} ZED (serial={serial})")
+        self.get_logger().info(f"[zed-publisher-node] Opened {name} ZED (serial={serial})")
 
         return camera
