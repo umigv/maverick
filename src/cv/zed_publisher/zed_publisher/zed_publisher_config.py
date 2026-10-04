@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+import pyzed.sl as sl
+
 
 @dataclass(frozen=True)
 class ZedPublisherConfig:
