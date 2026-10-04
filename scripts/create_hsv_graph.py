@@ -155,6 +155,7 @@ def create_hsv_graph(frame: cv2.typing.MatLike, num_points: int = 50000, ref_bou
 
     output_path = Path("~/data/graph_test.html").expanduser()
     fig.write_html(output_path)
+    print(f"[create_hsv_graph.py] Graph mounted at: {output_path}")
 
     # fig.show()
 
