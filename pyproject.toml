@@ -175,6 +175,7 @@ module = [
     "maverick_msgs.*",
     "odrive.*",
     "pyubx2",
+    "sensor_msgs_py.*",
     "tf2_geometry_msgs.*",
     "tf2_ros.*",
     "pyzed.*",

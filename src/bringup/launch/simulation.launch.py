@@ -1,5 +1,7 @@
+from pathlib import Path
 from typing import Any
 
+import yaml
 from bringup.launch_utils import bringup_share, load_frames, load_gps_file
 from launch import LaunchContext, LaunchDescription, LaunchDescriptionEntity
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
@@ -52,7 +54,33 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
         ],
     )
 
-    return [sensor_simulator_node, occupancy_grid_simulator_node]
+    # One pointcloud_simulator instance per top-level key in the config, each emulating a separate lidar / depth camera
+    pointcloud_simulator_config_path = f"{share}/config/simulation/pointcloud_simulator.yaml"
+    with Path(pointcloud_simulator_config_path).open() as file:
+        pointcloud_sensor_names = list(yaml.safe_load(file))
+
+    pointcloud_simulator_nodes = [
+        Node(
+            package="pointcloud_simulator",
+            executable="pointcloud_simulator",
+            name=sensor_name,
+            output="screen",
+            parameters=[
+                pointcloud_simulator_config_path,
+                {"map_file_path": f"{share}/courses/{course}/map.json"},
+                {"map_frame_id": frames["map_frame"]},
+                {"base_frame_id": frames["base_frame"]},
+                {"ground_truth_base_frame_id": frames["ground_truth_base_frame"]},
+            ],
+            remappings=[
+                ("odom", "odom/ground_truth"),
+                ("pointcloud", f"{sensor_name}/points"),
+            ],
+        )
+        for sensor_name in pointcloud_sensor_names
+    ]
+
+    return [sensor_simulator_node, occupancy_grid_simulator_node, *pointcloud_simulator_nodes]
 
 
 def generate_launch_description() -> LaunchDescription:

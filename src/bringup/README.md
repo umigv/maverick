@@ -64,8 +64,9 @@ flowchart LR
 | `path`                        | path_planning                       | path_smoothing                                                                                 |
 | `smoothed_path`               | path_smoothing                      | path_tracking                                                                                  |
 | `mission_state`               | autonav_mission_control             | led_driver, occupancy_grid_transform, path_tracking, autonav_goal_selection, recovery_behavior |
-| `odom/ground_truth`           | sensor_simulator                    | occupancy_grid_simulator, Foxglove                                                             |
+| `odom/ground_truth`           | sensor_simulator                    | occupancy_grid_simulator, pointcloud_simulator, Foxglove                                       |
 | `occupancy_grid/ground_truth` | occupancy_grid_simulator            | Foxglove                                                                                       |
+| `<sensor>/points`             | pointcloud_simulator                | Foxglove                                                                                       |
 
 ### TF
 
@@ -77,6 +78,7 @@ flowchart LR
     odom --> |"ekf_local / enc_odom_publisher"| base_link[base_link]
     base_link --> |"robot_state_publisher"| sensors["sensor / wheel frames"]
     map --> |"sensor_simulator (sim)"| ground_truth[base_link_ground_truth]
+    base_link --> |"pointcloud_simulator (sim, static)"| sim_sensors["simulated sensor frames"]
 ```
 
 ### Services
@@ -189,6 +191,7 @@ ros2 launch bringup simulation.launch.py [course:=<course>]
 
 - [sensor_simulator](../simulation/sensor_simulator/README.md)
 - [occupancy_grid_simulator](../simulation/occupancy_grid_simulator/README.md)
+- [pointcloud_simulator](../simulation/pointcloud_simulator/README.md) - one instance per sensor in `config/simulation/pointcloud_simulator.yaml`
 
 ______________________________________________________________________
 

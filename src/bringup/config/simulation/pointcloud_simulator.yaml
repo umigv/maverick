@@ -1,0 +1,85 @@
+# One top-level key per simulated sensor. simulation.launch.py starts one pointcloud_simulator node per key, named after
+# the key and publishing on `<key>/points`. Map, frame, and odometry params are supplied by the launch file.
+
+front_lidar:
+  ros__parameters:
+    # TF frame the point cloud is stamped in. A static base_link -> sensor_frame_id transform is broadcast from the mount pose
+    sensor_frame_id: "front_lidar_link"
+
+    # Mount pose relative to base_link (meters / radians). Positive pitch tilts the sensor down
+    offset_x_m: 0.3
+    offset_y_m: 0.0
+    offset_z_m: 0.8
+    roll_rad: 0.0
+    pitch_rad: 0.0
+    yaw_rad: 0.0
+
+    # Field of view and ray spacing, centered on the sensor's +x axis (radians)
+    horizontal_fov_rad: 6.283185307179586 # 360 deg
+    vertical_fov_rad: 0.5235987755982988 # 30 deg
+    horizontal_resolution_rad: 0.008726646259971648 # 0.5 deg
+    vertical_resolution_rad: 0.03490658503988659 # 2 deg
+
+    # Valid return range (meters) and per-return Gaussian range noise
+    min_range_m: 0.2
+    max_range_m: 10.0
+    range_noise_std_m: 0.01
+
+    # Height obstacle cells are extruded to (2 ft)
+    obstacle_height_m: 0.6096
+
+    publish_period_s: 0.1
+
+left_camera:
+  ros__parameters:
+    sensor_frame_id: "left_camera_link"
+
+    # x, y, and yaw from the RANSAC tuner's live defaults (src/cv/ransac/scripts/tuner.py, serial 39394535).
+    # z and pitch are guesses: the real pipeline estimates them from the ground plane, so they were never recorded
+    offset_x_m: 0.06
+    offset_y_m: 0.11
+    offset_z_m: 0.9
+    roll_rad: 0.0
+    pitch_rad: 0.4363323129985824 # 25 deg down
+    yaw_rad: 0.52 # ~30 deg left
+
+    # ZED 2i depth FOV
+    horizontal_fov_rad: 1.9198621771937625 # 110 deg
+    vertical_fov_rad: 1.2217304763960306 # 70 deg
+    horizontal_resolution_rad: 0.008726646259971648 # 0.5 deg
+    vertical_resolution_rad: 0.008726646259971648 # 0.5 deg
+
+    min_range_m: 0.3
+    max_range_m: 10.0
+    range_noise_std_m: 0.02
+
+    obstacle_height_m: 0.6096
+
+    publish_period_s: 0.1
+
+right_camera:
+  ros__parameters:
+    sensor_frame_id: "right_camera_link"
+
+    # x, y, and yaw from the RANSAC tuner's live defaults (src/cv/ransac/scripts/tuner.py, serial 36466710).
+    # z and pitch are guesses: the real pipeline estimates them from the ground plane, so they were never recorded
+    offset_x_m: 0.06
+    offset_y_m: -0.135
+    offset_z_m: 0.9
+    roll_rad: 0.0
+    pitch_rad: 0.4363323129985824 # 25 deg down
+    yaw_rad: -0.52 # ~30 deg right
+
+    # ZED 2i depth FOV
+    horizontal_fov_rad: 1.9198621771937625 # 110 deg
+    vertical_fov_rad: 1.2217304763960306 # 70 deg
+    horizontal_resolution_rad: 0.008726646259971648 # 0.5 deg
+    vertical_resolution_rad: 0.008726646259971648 # 0.5 deg
+
+    min_range_m: 0.3
+    max_range_m: 10.0
+    range_noise_std_m: 0.02
+
+    obstacle_height_m: 0.6096
+
+    publish_period_s: 0.1
