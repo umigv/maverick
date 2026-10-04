@@ -29,6 +29,7 @@ pytest = "<8"
 pyubx2 = "*"
 # setuptools 80 removed the `develop` command that colcon's ament_python editable installs rely on
 setuptools = "<80"
+ros-lyrical-cv-bridge = "*"
 ros-lyrical-foxglove-bridge = "*"
 ros-lyrical-foxglove-msgs = "*"
 ros-lyrical-geographic-msgs = "*"
@@ -184,7 +185,9 @@ module = [
     "tf2_ros.*",
     "pyzed.*",
     "h5py",
-    "plotly.*"
+    "plotly.*",
+    "cv_bridge"
 ]
 ignore_missing_imports = true
 disable_error_code = ["attr-defined"]
+
