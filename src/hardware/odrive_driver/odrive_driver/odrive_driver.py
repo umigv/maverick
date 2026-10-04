@@ -5,6 +5,7 @@ import odrive
 import odrive.utils
 import utils.config
 import utils.lifecycle
+import utils.watchdog
 from ament_index_python.packages import get_package_share_directory
 from geometry_msgs.msg import Twist, TwistStamped, TwistWithCovariance, TwistWithCovarianceStamped, Vector3
 from odrive.enums import AxisState, ControlMode, InputMode, ODriveError
@@ -29,7 +30,7 @@ class OdriveDriver(Node):
         self.publisher = self.create_publisher(TwistWithCovarianceStamped, "enc_vel", 10)
 
         self.create_timer(self.config.publish_period_s, self.publish_enc_vel)
-        self.watchdog_timer = self.create_timer(self.config.cmd_vel_timeout_s, self.watchdog_callback)
+        self.watchdog_timer = utils.watchdog.Watchdog(self, self.config.cmd_vel_timeout_s, self.watchdog_callback)
 
         if self.config.debug:
             self.debug_publisher = self.create_publisher(Float32MultiArray, "~/debug", 10)
@@ -53,7 +54,7 @@ class OdriveDriver(Node):
             raise SystemExit(1) from None
 
     def cmd_vel_callback(self, msg: TwistStamped) -> None:
-        self.watchdog_timer.reset()
+        self.watchdog_timer.pet()
         self.watchdog_triggered = False
 
         if not self.is_robot_enabled():
