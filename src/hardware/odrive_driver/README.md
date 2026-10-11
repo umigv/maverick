@@ -4,12 +4,9 @@ Controls two ODrives (left and right) over USB. Converts `cmd_vel` twist command
 
 On startup the driver finds both ODrives by serial number, clears existing errors, and puts them in closed-loop velocity control with ramped input, writing the controller gains from config. If the DC bus is undervolted at startup (usually because the physical e-stop is engaged), it plays an audible "turn off the estop" warning and exits.
 
-## Read Files
-
-- `estop_file_path` - E-stop state written by `estop_driver`; commands zero velocity to both motors while estopped
-
 ## Subscribed Topics
 
+- `estop` (`std_msgs/Bool`) - Latched state; `true` means stopped. Starts stopped and treats missing heartbeats for `estop_timeout_s` (default 1 s) as stopped.
 - `cmd_vel` (`geometry_msgs/TwistStamped`) - Target ODrive velocity
 
 ## Published Topics

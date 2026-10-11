@@ -5,10 +5,12 @@ import serial
 import utils.config
 import utils.lifecycle
 import utils.qos
+import utils.watchdog
 from geometry_msgs.msg import TwistStamped
 from maverick_msgs.msg import MissionState
 from rclpy.node import Node
 from rclpy.time import Time
+from std_msgs.msg import Bool
 
 from .led_driver_config import LedDriverConfig
 
@@ -27,6 +29,10 @@ class LedDriver(Node):
         super().__init__("led_driver")
 
         self.config = utils.config.load(self, LedDriverConfig)
+
+        self.estopped = True
+        self.estop_watchdog = utils.watchdog.Watchdog(self, self.config.estop_timeout_s, self.estop_timeout_callback)
+        self.create_subscription(Bool, "estop", self.estop_callback, utils.qos.LATCHED)
 
         self.create_subscription(TwistStamped, "teleop_cmd_vel", self.teleop_callback, 10)
         self.create_subscription(TwistStamped, "nav_cmd_vel", self.nav_callback, 10)
@@ -69,12 +75,19 @@ class LedDriver(Node):
     def mission_state_callback(self, msg: MissionState) -> None:
         self.mission_state = msg
 
+    def estop_callback(self, msg: Bool) -> None:
+        self.estop_watchdog.pet()
+        self.estopped = msg.data
+        if self.estopped:
+            self.update()
+
+    def estop_timeout_callback(self) -> None:
+        self.get_logger().error("EStop topic timed out, stopping robot", throttle_duration_sec=2.0)
+        self.estopped = True
+        self.update()
+
     def is_robot_enabled(self) -> bool:
-        try:
-            with self.config.estop_file_path.open() as f:
-                return f.read().strip() != "1"  # only "1" stops the robot, everything else is enabled
-        except Exception:
-            return True  # if the e-stop file doesn't exist / is corrupted we assume e-stop is off
+        return not self.estopped
 
     def is_active(self, last_time: Time | None) -> bool:
         if last_time is None:

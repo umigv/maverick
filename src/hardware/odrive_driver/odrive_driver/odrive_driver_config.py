@@ -1,6 +1,5 @@
 import math
 from dataclasses import dataclass
-from pathlib import Path
 
 
 @dataclass(frozen=True)
@@ -132,7 +131,6 @@ class OdriveDriverConfig:
     """Configuration for the ODrive motor driver node.
 
     Attributes:
-        estop_file_path: Path to the e-stop flag file. A value of "1" disables motor output.
         frame_id: TF frame ID of the robot base, attached to the published twist header.
         left_odrive: Hardware identification and polarity for the left ODrive unit.
         right_odrive: Hardware identification and polarity for the right ODrive unit.
@@ -142,10 +140,10 @@ class OdriveDriverConfig:
         publish_period_s: Period of the encoder publish timer (s).
         timestamp_delay_s: Amount subtracted from the publish timestamp to compensate read and processing latency (s).
         cmd_vel_timeout_s: Maximum age of a cmd_vel command before motors are zeroed (s).
+        estop_timeout_s: Maximum interval without valid estop heartbeat (s).
         debug: Whether to publish debug motor signals
     """
 
-    estop_file_path: Path
     frame_id: str
     left_odrive: OdriveConfig = OdriveConfig(serial="002190760F3E", polarity=1)
     right_odrive: OdriveConfig = OdriveConfig(serial="384934743539", polarity=1)
@@ -171,9 +169,12 @@ class OdriveDriverConfig:
     publish_period_s: float = 0.01
     timestamp_delay_s: float = 0.0
     cmd_vel_timeout_s: float = 0.5
+    estop_timeout_s: float = 1.0
     debug: bool = False
 
     def __post_init__(self) -> None:
+        if self.estop_timeout_s <= 0:
+            raise ValueError("OdriveDriverConfig: estop_timeout_s must be > 0")
         if self.publish_period_s <= 0:
             raise ValueError("OdriveDriverConfig: publish_period_s must be > 0")
         if self.timestamp_delay_s < 0:

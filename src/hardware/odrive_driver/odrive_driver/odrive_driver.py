@@ -5,6 +5,7 @@ import odrive
 import odrive.utils
 import utils.config
 import utils.lifecycle
+import utils.qos
 import utils.watchdog
 from ament_index_python.packages import get_package_share_directory
 from geometry_msgs.msg import Twist, TwistStamped, TwistWithCovariance, TwistWithCovarianceStamped, Vector3
@@ -12,7 +13,7 @@ from odrive.enums import AxisState, ControlMode, InputMode, ODriveError
 from playsound3 import playsound
 from rclpy.duration import Duration
 from rclpy.node import Node
-from std_msgs.msg import Float32MultiArray, Header
+from std_msgs.msg import Bool, Float32MultiArray, Header
 
 from .odrive_driver_config import OdriveDriverConfig
 
@@ -22,6 +23,10 @@ class OdriveDriver(Node):
         super().__init__("odrive_driver")
 
         self.config = utils.config.load(self, OdriveDriverConfig)
+
+        self.estopped = True
+        self.estop_watchdog = utils.watchdog.Watchdog(self, self.config.estop_timeout_s, self.estop_timeout_callback)
+        self.create_subscription(Bool, "estop", self.estop_callback, utils.qos.LATCHED)
 
         self.watchdog_triggered = False
 
@@ -116,13 +121,19 @@ class OdriveDriver(Node):
     def get_motor_rps(self) -> tuple[float, float]:
         return self.odrive_left.axis0.vel_estimate, self.odrive_right.axis0.vel_estimate
 
+    def estop_callback(self, msg: Bool) -> None:
+        self.estop_watchdog.pet()
+        self.estopped = msg.data
+        if self.estopped:
+            self.set_motor_rps(0.0, 0.0)
+
+    def estop_timeout_callback(self) -> None:
+        self.get_logger().error("EStop topic timed out, stopping robot", throttle_duration_sec=2.0)
+        self.estopped = True
+        self.set_motor_rps(0.0, 0.0)
+
     def is_robot_enabled(self) -> bool:
-        try:
-            with self.config.estop_file_path.open() as f:
-                return f.read().strip() != "1"  # only "1" stops the robot, everything else is enabled
-        except Exception:
-            self.get_logger().error("EStop file not found", throttle_duration_sec=30.0)
-            return True  # if the e-stop file doesn't exist / is corrupted we assume e-stop is off
+        return not self.estopped
 
     def publish_debug_info(self) -> None:
         self.debug_publisher.publish(
