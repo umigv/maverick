@@ -154,24 +154,16 @@ class OccupancyGridSimulator(Node):
         return obstacle_grid, is_lane_line
 
     def apply_robot_blind_spot(self, grid: np.ndarray) -> None:
-        """Draws a right triangle of UNKNOWN cells in front of the robot to simulate the front blind spot."""
-        triangle_height_in_cells = round(self.config.robot_blind_spot_height_m / self.resolution_m)
-        robot_column = int(-self.config.offset_x_m / self.resolution_m)
-        center_row = int(-self.config.offset_y_m / self.resolution_m)
+        """Mark every cell nearer to the robot than the blind spot boundary as UNKNOWN."""
+        cell_forward_m = self.config.offset_x_m + (np.arange(self.width_cells) + 0.5) * self.resolution_m
+        cell_lateral_m = self.config.offset_y_m + (np.arange(self.height_cells) + 0.5) * self.resolution_m
 
-        grid_column_start = max(0, robot_column)
-        grid_column_end = min(self.width_cells, robot_column + triangle_height_in_cells)
-        if grid_column_start >= grid_column_end:
-            return
-
-        triangle_column_start = grid_column_start - robot_column
-        triangle_column_end = grid_column_end - robot_column
-
-        rows = np.arange(self.height_cells)[:, np.newaxis]
-        cols = np.arange(triangle_column_start, triangle_column_end)[np.newaxis, :]
-
-        triangle_mask = np.abs(rows - center_row) <= (triangle_height_in_cells - 1 - cols)
-        grid[:, grid_column_start:grid_column_end][triangle_mask] = self.UNKNOWN
+        boundary_forward_m = np.interp(
+            cell_lateral_m,
+            self.config.robot_blind_spot_boundary_lateral_m,
+            self.config.robot_blind_spot_boundary_forward_m,
+        )
+        grid[cell_forward_m[np.newaxis, :] < boundary_forward_m[:, np.newaxis]] = self.UNKNOWN
 
     @staticmethod
     def slab_interval(
