@@ -1,4 +1,5 @@
 import pyzed.sl as sl
+import rclpy
 import utils.config
 from cv_bridge import CvBridge
 from rclpy.node import Node
@@ -32,12 +33,6 @@ class ZedPublisher(Node):
 
         self.right_image = sl.Mat()
         self.right_depth = sl.Mat()
-
-        # # Publish at the configured camera FPS
-        # self.timer = self.create_timer(
-        #     1.0 / self.config.fps,
-        #     self._publish_frames,
-        # )
 
     def _initialize_camera(self, serial: int, name: str) -> sl.Camera:
         params = sl.InitParameters()
@@ -73,3 +68,69 @@ class ZedPublisher(Node):
         self.get_logger().info(f"[zed-publisher-node] Opened {name} ZED (serial={serial})")
 
         return camera
+
+    def _publish_frames(self) -> None:
+        if self.left_cam.grab() == sl.ERROR_CODE.SUCCESS:
+            self.left_cam.retrieve_image(self.left_image, sl.VIEW.LEFT)
+            self.left_cam.retrieve_measure(self.left_depth, sl.MEASURE.DEPTH)
+
+            left_rgb = self.left_image.get_data()[:, :, :3]
+            left_rgb_msg = self.bridge.cv2_to_imgmsg(left_rgb, encoding="rgb8")
+
+            left_depth = self.left_depth.get_data()
+            left_depth_msg = self.bridge.cv2_to_imgmsg(left_depth, encoding="32FC1")
+
+            stamp = self.get_clock().now().to_msg()
+            left_rgb_msg.header.stamp = stamp
+            left_depth_msg.header.stamp = stamp
+
+            left_rgb_msg.header.frame_id = "zed_left_camera"
+            left_depth_msg.header.frame_id = "zed_left_camera"
+
+            self.left_rgb_pub.publish(left_rgb_msg)
+            self.left_depth_pub.publish(left_depth_msg)
+
+        if self.right_cam.grab() == sl.ERROR_CODE.SUCCESS:
+            self.right_cam.retrieve_image(self.right_image, sl.VIEW.LEFT)
+            self.right_cam.retrieve_measure(self.right_depth, sl.MEASURE.DEPTH)
+
+            right_rgb = self.right_image.get_data()[:, :, :3]
+            right_rgb_msg = self.bridge.cv2_to_imgmsg(right_rgb, encoding="rgb8")
+
+            right_depth = self.right_depth.get_data()
+            right_depth_msg = self.bridge.cv2_to_imgmsg(right_depth, encoding="32FC1")
+
+            stamp = self.get_clock().now().to_msg()
+            right_rgb_msg.header.stamp = stamp
+            right_depth_msg.header.stamp = stamp
+
+            right_rgb_msg.header.frame_id = "zed_right_camera"
+            right_depth_msg.header.frame_id = "zed_right_camera"
+
+            self.right_rgb_pub.publish(right_rgb_msg)
+            self.right_depth_pub.publish(right_depth_msg)
+
+    def run(self) -> None:
+        self.create_timer(1.0 / self.config.fps, self._publish_frames)
+        rclpy.spin(self)
+
+    def destroy_node(self) -> None:
+        self.left_cam.close()
+        self.right_cam.close()
+        super().destroy_node()
+
+
+def main(args: list[str] | None = None) -> None:
+    rclpy.init(args=args)
+
+    node = ZedPublisher()
+
+    try:
+        node.run()
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
