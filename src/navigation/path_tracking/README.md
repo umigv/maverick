@@ -9,6 +9,7 @@ Path tracking for mobile robots. Subscribes to a planned path and odometry, and 
 | `pure_pursuit`       | [pure_pursuit/README.md](path_tracking/controllers/pure_pursuit/README.md)             |
 | `stanley`            | [stanley/README.md](path_tracking/controllers/stanley/README.md)                       |
 | `differential_drive` | [differential_drive/README.md](path_tracking/controllers/differential_drive/README.md) |
+| `mppi`               | [mppi/README.md](path_tracking/controllers/mppi/README.md)                             |
 
 ## Reaching the Goal
 

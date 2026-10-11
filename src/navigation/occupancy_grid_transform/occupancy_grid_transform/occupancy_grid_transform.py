@@ -3,12 +3,13 @@ import tf2_geometry_msgs  # noqa: F401 - registers PoseStamped transform handler
 import utils.config
 import utils.lifecycle
 import utils.qos
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import Pose, PoseStamped
 from maverick_msgs.msg import MissionState
 from nav_msgs.msg import MapMetaData, OccupancyGrid
 from rclpy.node import Node
+from rclpy.time import Time
 from std_msgs.msg import Header
-from tf2_ros import Buffer, TransformListener
+from tf2_ros import Buffer, TransformException, TransformListener
 
 from .occupancy_grid_transform_config import OccupancyGridTransformConfig
 from .occupancy_grid_transform_impl import add_border, inflate_grid
@@ -35,20 +36,16 @@ class OccupancyGridTransform(Node):
         self.mission_state = msg
 
     def occupancy_grid_callback(self, msg: OccupancyGrid) -> None:
-        # Drop the stamp so tf uses the latest available transform instead of looking up the exact time. If we copied
-        # msg.header.stamp, a slightly future timestamp would cause tf to throw a "requested time is in the future"
-        # error.
-        #
-        # The real fix would be adding a timeout to transform() and switching to a MultiThreadedExecutor so tf_listener
-        # can update while we block, but that introduces thread-safety concerns. Using stamp=0 is acceptable because 5ms
-        # of delay corresponds to only ~5mm of position error at 1 m/s.
-        origin_raw = PoseStamped(header=Header(frame_id=msg.header.frame_id), pose=msg.info.origin)
-
         try:
-            origin_transformed = self.tf_buffer.transform(origin_raw, self.config.frame_id).pose
-        except Exception as e:
+            origin_transformed, placed_at_stamp = transform_grid_origin(self.tf_buffer, msg, self.config.frame_id)
+        except TransformException as e:
             self.get_logger().error(f"TF {msg.header.frame_id}->{self.config.frame_id} unavailable, skipping: {e}")
             return
+        if not placed_at_stamp:
+            self.get_logger().warning(
+                "No transform near the grid's stamp, placing it with the latest transform instead",
+                throttle_duration_sec=5.0,
+            )
 
         in_no_mans_land = self.mission_state is not None and self.mission_state.in_no_mans_land
         inflation_params = (
@@ -76,6 +73,30 @@ class OccupancyGridTransform(Node):
                 data=inflated_grid.astype(np.int8).reshape(-1).tolist(),
             )
         )
+
+
+# A grid stamped at most this far ahead of the latest transform is placed with the latest one without counting as a
+# fallback: it is ordinary jitter between the grid producer and odometry, not a missing or stale stamp (s).
+FUTURE_STAMP_TOLERANCE_S = 0.05
+
+
+def transform_grid_origin(tf_buffer: Buffer, grid: OccupancyGrid, target_frame: str) -> tuple[Pose, bool]:
+    """Return the grid origin in target_frame and whether it was placed at (or just after) the grid's stamp.
+
+    Grids can arrive hundreds of milliseconds after capture. Placing one with the latest transform shifts its obstacles by
+    however far the robot moved since the capture (measured in simulation: 28-37 cm median, up to 91 cm, 3 m ahead), so
+    the transform at the stamp is used. Without blocking for it: if it is not available, the latest transform is used
+    instead, as before, and the second value is False unless the stamp is at most FUTURE_STAMP_TOLERANCE_S ahead of
+    the latest transform. A zero stamp also means latest.
+    """
+    origin = PoseStamped(header=Header(frame_id=grid.header.frame_id, stamp=grid.header.stamp), pose=grid.info.origin)
+    try:
+        return tf_buffer.transform(origin, target_frame).pose, True
+    except TransformException:
+        origin.header.stamp = Header().stamp
+        latest = tf_buffer.lookup_transform(target_frame, grid.header.frame_id, Time())
+        ahead_s = (Time.from_msg(grid.header.stamp) - Time.from_msg(latest.header.stamp)).nanoseconds * 1e-9
+        return tf_buffer.transform(origin, target_frame).pose, 0.0 <= ahead_s <= FUTURE_STAMP_TOLERANCE_S
 
 
 def main() -> None:

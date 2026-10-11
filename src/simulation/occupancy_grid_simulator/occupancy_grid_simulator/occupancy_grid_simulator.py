@@ -7,6 +7,7 @@ import utils.lifecycle
 import utils.qos
 from nav_msgs.msg import MapMetaData, OccupancyGrid, Odometry
 from rclpy.node import Node
+from rclpy.time import Time
 from std_msgs.msg import Header
 from utils.geometry import Point2d, Pose2d, Rotation2d
 
@@ -32,7 +33,8 @@ class OccupancyGridSimulator(Node):
             qos_profile=utils.qos.LATCHED,
         )
 
-        self.robot_pose: Pose2d | None = None
+        # Latest ground truth pose and its stamp; grids are stamped with the time of the pose they are computed from
+        self.robot_pose: tuple[Pose2d, Time] | None = None
 
         self.load_obstacles_and_configure_grid()
         self.publish_ground_truth_map()
@@ -50,7 +52,7 @@ class OccupancyGridSimulator(Node):
             )
             return
 
-        self.robot_pose = Pose2d.from_ros(msg.pose.pose)
+        self.robot_pose = Pose2d.from_ros(msg.pose.pose), Time.from_msg(msg.header.stamp)
 
     def load_obstacles_and_configure_grid(self) -> None:
         try:
@@ -105,15 +107,18 @@ class OccupancyGridSimulator(Node):
     def publish_occupancy_grid(self) -> None:
         if self.robot_pose is None:
             return
+        robot_pose, pose_time = self.robot_pose
 
-        grid, lane_line_mask = self.build_cell_maps(self.robot_pose)
+        grid, lane_line_mask = self.build_cell_maps(robot_pose)
         self.apply_raycasting(grid)
         grid[lane_line_mask] = self.OCCUPIED
         self.apply_robot_blind_spot(grid)
 
         self.occupancy_grid_publisher.publish(
             OccupancyGrid(
-                header=Header(stamp=self.get_clock().now().to_msg(), frame_id=self.config.base_frame_id),
+                # Stamp with the time of the pose the grid was computed from, not the publish time, so consumers can
+                # place it with the transform at that moment
+                header=Header(stamp=pose_time.to_msg(), frame_id=self.config.base_frame_id),
                 info=MapMetaData(
                     resolution=self.resolution_m,
                     width=self.width_cells,
