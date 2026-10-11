@@ -28,9 +28,6 @@ class ImageProcessor(Node):
             if self.latest_message is None:
                 continue
 
-            msg = self.latest_message
-            self.latest_message = None
-
             # do some processing here
 
 

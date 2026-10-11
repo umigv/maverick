@@ -1,3 +1,4 @@
+import cv2
 import pyzed.sl as sl
 import rclpy
 import utils.config
@@ -74,7 +75,9 @@ class ZedPublisher(Node):
             self.left_cam.retrieve_image(self.left_image, sl.VIEW.LEFT)
             self.left_cam.retrieve_measure(self.left_depth, sl.MEASURE.DEPTH)
 
-            left_rgb = self.left_image.get_data()[:, :, :3]
+            left_bgra = self.left_image.get_data()
+            left_rgb = cv2.cvtColor(left_bgra, cv2.COLOR_BGRA2RGB)
+
             left_rgb_msg = self.bridge.cv2_to_imgmsg(left_rgb, encoding="rgb8")
 
             left_depth = self.left_depth.get_data()
@@ -94,7 +97,9 @@ class ZedPublisher(Node):
             self.right_cam.retrieve_image(self.right_image, sl.VIEW.LEFT)
             self.right_cam.retrieve_measure(self.right_depth, sl.MEASURE.DEPTH)
 
-            right_rgb = self.right_image.get_data()[:, :, :3]
+            right_bgra = self.right_image.get_data()
+            right_rgb = cv2.cvtColor(right_bgra, cv2.COLOR_BGRA2RGB)
+
             right_rgb_msg = self.bridge.cv2_to_imgmsg(right_rgb, encoding="rgb8")
 
             right_depth = self.right_depth.get_data()
