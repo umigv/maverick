@@ -1,6 +1,6 @@
 # occupancy_grid_transform
 
-This package consumes the occupancy grid provided by CV, adds a 1-cell occupied border on the left, right, and far edges, applies obstacle inflation, and republishes two grids suitable for planning. The grid origin is transformed from the incoming frame to the configured output frame using TF2, with the transform at the grid's header stamp. Producers should stamp grids with the time the data was captured: grids arrive about 180 ms after capture in simulation, and placing them with the latest transform shifted obstacles by 28-37 cm (median, up to 91 cm) 3 m ahead of a moving robot, enough to send the planner toward obstacle faces. If no transform is available at the stamp (for example a stamp slightly ahead of the latest odometry), the latest transform is used and a throttled warning is logged; a zero stamp also means latest.
+This package consumes the occupancy grid provided by CV, adds a 1-cell occupied border on the left, right, and far edges, applies obstacle inflation, and republishes two grids suitable for planning. The grid origin is transformed from the incoming frame to the configured output frame using TF2, at the time in the grid's header stamp, so producers should stamp grids with the time the data was captured. If no transform is available at that time, the latest one is used and a warning is logged.
 
 ## Grid conventions
 

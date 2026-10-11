@@ -35,7 +35,7 @@ The blind spot is why [autonav_goal_selection](../../navigation/autonav_goal_sel
 
 ## Published Topics
 
-- `occupancy_grid` (`nav_msgs/OccupancyGrid`) - Robot-centric occupancy grid stamped in `base_frame_id`, published periodically. The header stamp is the time of the ground truth pose the grid was computed from, not the publish time, so `occupancy_grid_transform` can place it with the transform at that moment
+- `occupancy_grid` (`nav_msgs/OccupancyGrid`) - Robot-centric occupancy grid stamped in `base_frame_id`, published periodically and stamped with the time of the pose it was computed from
 - `occupancy_grid/ground_truth` (`nav_msgs/OccupancyGrid`) - Full static map (obstacles and lane lines) in `map` frame
 
 `occupancy_grid/ground_truth` is latched: publisher and subscribers must both use `utils.qos.LATCHED` - see the [utils README](../../core/utils/README.md#utilsqos).
