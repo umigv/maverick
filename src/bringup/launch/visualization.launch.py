@@ -1,10 +1,17 @@
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
 def generate_launch_description() -> LaunchDescription:
     return LaunchDescription(
         [
+            DeclareLaunchArgument(
+                "occupancy_grid_topic",
+                default_value="occupancy_grid/inflated",
+                description="Occupancy grid topic to convert for Foxglove",
+            ),
             Node(
                 package="foxglove_bridge",
                 executable="foxglove_bridge",
@@ -25,6 +32,7 @@ def generate_launch_description() -> LaunchDescription:
                 package="occupancy_grid_visualization",
                 executable="foxglove_voxel",
                 name="occupancy_grid_voxel_visualization",
+                remappings=[("occupancy_grid", LaunchConfiguration("occupancy_grid_topic"))],
             ),
         ]
     )
