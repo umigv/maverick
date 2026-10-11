@@ -1809,7 +1809,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/osx-arm64/spirv-tools-2026.2-h4ddebb9_1.conda
       - conda: https://prefix.dev/conda-forge/osx-arm64/sqlite-3.53.3-h85ec8f2_0.conda
       - conda: https://prefix.dev/conda-forge/osx-arm64/svt-av1-4.0.1-h0cb729a_0.conda
-      - conda: https://prefix.dev/conda-forge/osx-arm64/tapi-1600.0.11.8-h997e182_2.conda
+      - conda: https://prefix.dev/conda-forge/osx-arm64/tapi-1600.0.11.8-hb561403_4.conda
       - conda: https://prefix.dev/conda-forge/osx-arm64/tbb-2023.0.0-he0260a5_2.conda
       - conda: https://prefix.dev/conda-forge/osx-arm64/tinyxml2-11.0.0-ha1acc90_0.conda
       - conda: https://prefix.dev/conda-forge/osx-arm64/tk-8.6.13-h010d191_3.conda
@@ -17849,7 +17849,7 @@ packages:
   license: PSF-2.0
   license_family: PSF
   purls:
-  - pkg:pypi/matplotlib?source=compressed-mapping
+  - pkg:pypi/matplotlib?source=hash-mapping
   run_exports: {}
   size: 8826632
   timestamp: 1782829663874
@@ -18698,18 +18698,18 @@ packages:
     - svt-av1 >=4.0.1,<4.0.2.0a0
   size: 1456245
   timestamp: 1769664727051
-- conda: https://prefix.dev/conda-forge/osx-arm64/tapi-1600.0.11.8-h997e182_2.conda
-  sha256: de6893e53664e769c1b1c4103a666d436e3d307c0eb6a09a164e749d116e80f7
-  md5: 555070ad1e18b72de36e9ee7ed3236b3
+- conda: https://prefix.dev/conda-forge/osx-arm64/tapi-1600.0.11.8-hb561403_4.conda
+  sha256: 6effea9587f049e702c838e8e57d98ac92b89ca1f3f1edd51c78dd252d24e83b
+  md5: fdb31cc6c306f60e194f29f17397a63c
   depends:
   - libcxx >=19.0.0.a0
   - __osx >=11.0
-  - ncurses >=6.5,<7.0a0
+  - ncurses >=6.6,<7.0a0
   license: NCSA
   purls: []
   run_exports: {}
-  size: 200192
-  timestamp: 1775657222120
+  size: 202107
+  timestamp: 1789668272580
 - conda: https://prefix.dev/conda-forge/osx-arm64/tbb-2023.0.0-he0260a5_2.conda
   sha256: 6f72a2984052444b9381020fa329b83dace95f335573dc21199f1b1d1a5f5473
   md5: 440c0a36cc20db1f28877a69afbb5e88
