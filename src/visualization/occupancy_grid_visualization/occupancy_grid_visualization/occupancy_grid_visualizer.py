@@ -1,3 +1,4 @@
+from copy import deepcopy
 from math import isfinite
 
 import numpy as np
@@ -11,16 +12,21 @@ from rclpy.node import Node
 class FoxgloveOccupancyGrid(Node):
     def __init__(self) -> None:
         super().__init__("occupancy_grid_voxel_visualization")
-        self.voxel_height = float(self.declare_parameter("voxel_height", 0.1).value)
+        self.input_topic = str(self.declare_parameter("input_topic", "occupancy_grid/raw").value)
+        self.voxel_height = float(self.declare_parameter("voxel_height", 0.5).value)
+        self.z_offset = float(self.declare_parameter("z_offset", 0.2).value)
         if not isfinite(self.voxel_height) or self.voxel_height <= 0.0:
             raise ValueError("voxel_height must be finite and greater than zero")
+        if not isfinite(self.z_offset):
+            raise ValueError("z_offset must be finite")
 
-        self.create_subscription(OccupancyGrid, "occupancy_grid", self.publish_foxglove_voxel_occupancy_grid, 10)
+        self.create_subscription(OccupancyGrid, self.input_topic, self.publish_foxglove_voxel_occupancy_grid, 10)
 
         self.voxel_occupancy_grid_publisher = self.create_publisher(VoxelGrid, "occupancy_grid/voxels", 10)
         self.get_logger().info(
-            f"Converting {self.resolve_topic_name('occupancy_grid')} to "
-            f"{self.voxel_occupancy_grid_publisher.topic_name}; voxel height={self.voxel_height:.2f} m"
+            f"Converting {self.resolve_topic_name(self.input_topic)} to "
+            f"{self.voxel_occupancy_grid_publisher.topic_name}; voxel height={self.voxel_height:.2f} m, "
+            f"z offset={self.z_offset:.2f} m"
         )
 
     def publish_foxglove_voxel_occupancy_grid(self, msg: OccupancyGrid) -> None:
@@ -40,11 +46,13 @@ class FoxgloveOccupancyGrid(Node):
             )
             return
 
+        pose = deepcopy(msg.info.origin)
+        pose.position.z += self.z_offset
         self.voxel_occupancy_grid_publisher.publish(
             VoxelGrid(
                 timestamp=msg.header.stamp,
                 frame_id=msg.header.frame_id,
-                pose=msg.info.origin,
+                pose=pose,
                 row_count=msg.info.height,
                 column_count=msg.info.width,
                 cell_size=Vector3(x=msg.info.resolution, y=msg.info.resolution, z=self.voxel_height),

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from math import isfinite
 
 
 @dataclass(frozen=True)
@@ -38,6 +39,7 @@ class OccupancyGridTransformConfig:
 
     Attributes:
         frame_id: TF frame the transformed grids are published in.
+        inflated_z_offset: Vertical offset in meters added to the inflated grid origin in the output frame.
         inflation_params: Parameters controlling obstacle inflation applied to the grid prior to publishing.
         no_mans_land_inflation_params: Inflation parameters used instead of `inflation_params` while the mission
             state has `in_no_mans_land` set. Defaults to a larger fully inflated core so the robot keeps more
@@ -45,6 +47,7 @@ class OccupancyGridTransformConfig:
     """
 
     frame_id: str
+    inflated_z_offset: float = 0.2
     inflation_params: InflationParams = InflationParams(
         inflation_radius_cells=12,
         inflation_falloff_extent_cells=0,
@@ -55,3 +58,7 @@ class OccupancyGridTransformConfig:
         inflation_falloff_extent_cells=0,
         inflation_decay_factor=0.9,
     )
+
+    def __post_init__(self) -> None:
+        if not isfinite(self.inflated_z_offset):
+            raise ValueError("inflated_z_offset must be finite")

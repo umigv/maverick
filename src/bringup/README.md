@@ -284,10 +284,10 @@ ros2 launch bringup visualization.launch.py
 - `foxglove_bridge` - Foxglove bridge on `ws://localhost:8765`
 - [occupancy_grid_visualization](../visualization/occupancy_grid_visualization/README.md)
 
-The voxel converter uses `occupancy_grid/inflated` by default. Select another input with `occupancy_grid_topic`, for example:
+The voxel converter uses `occupancy_grid/raw` by default. Select another input with `occupancy_grid_topic`, for example:
 
 ```bash
-ros2 launch bringup visualization.launch.py occupancy_grid_topic:=/occupancy_grid/raw
+ros2 launch bringup visualization.launch.py occupancy_grid_topic:=/occupancy_grid/inflated
 ```
 
 ### RViz

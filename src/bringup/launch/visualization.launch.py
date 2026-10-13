@@ -9,7 +9,7 @@ def generate_launch_description() -> LaunchDescription:
         [
             DeclareLaunchArgument(
                 "occupancy_grid_topic",
-                default_value="occupancy_grid/inflated",
+                default_value="occupancy_grid/raw",
                 description="Occupancy grid topic to convert for Foxglove",
             ),
             Node(
@@ -32,7 +32,7 @@ def generate_launch_description() -> LaunchDescription:
                 package="occupancy_grid_visualization",
                 executable="foxglove_voxel",
                 name="occupancy_grid_voxel_visualization",
-                remappings=[("occupancy_grid", LaunchConfiguration("occupancy_grid_topic"))],
+                parameters=[{"input_topic": LaunchConfiguration("occupancy_grid_topic")}],
             ),
         ]
     )

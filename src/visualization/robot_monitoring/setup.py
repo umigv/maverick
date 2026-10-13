@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = "debug_tools"
+package_name = "robot_monitoring"
 
 setup(
     name=package_name,
@@ -13,14 +13,15 @@ setup(
     package_data={"": ["py.typed"]},
     install_requires=["setuptools"],
     zip_safe=True,
-    maintainer="tutu",
+    maintainer="tranbao",
     maintainer_email="tranbao@umich.edu",
     description="Robot debugging and data visualization tools",
     license="Apache-2.0",
     extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
-            "path_history = debug_tools.path_history:main",
+            "path_history = robot_monitoring.path_history:main",
+            "odom_diagnostic = robot_monitoring.odom_diagnostic:main",
         ],
     },
 )
