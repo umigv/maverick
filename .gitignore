@@ -34,6 +34,3 @@ log/
 # pixi environments
 .pixi/*
 !.pixi/config.toml
-
-# Models
-*.pt
