@@ -1,11 +1,9 @@
 # estop_driver
 
-Reads from the serial e-stop device and atomically writes its state to `estop_file_path`. All other nodes read that file directly to determine whether the robot is estopped.
+Reads from the serial e-stop device and publishes its state. Starts stopped until a valid serial state is received.
 
-Does not publish the e-stop value to a ROS topic - this ensures the e-stop still works even if there are ROS network issues.
+Valid serial lines (`0` or `1`) reset a watchdog. Missing valid serial data for `serial_timeout_s` (default 1 s) asserts estop.
 
-## Written Files
+## Published Topics
 
-- `estop_file_path` - E-stop state; `"1"` = estopped, `"0"` = safe to drive
-
-Readers fail open: only `"1"` counts as estopped - a missing or unreadable file is treated as not estopped.
+- `estop` (`std_msgs/Bool`) - E-stop state; `true` = estopped, `false` = safe to drive. Latched and publishes a heartbeat every `poll_period_s` (default 0.05 s), with immediate publication on state changes.

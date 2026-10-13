@@ -46,6 +46,7 @@ flowchart LR
 
 | Topic                         | From                                | To                                                                                             |
 | ----------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `estop`                       | estop_driver                        | odrive_driver, led_driver                                                                      |
 | `joy`                         | joy                                 | teleop_twist_joy                                                                               |
 | `teleop_cmd_vel`              | teleop_twist_joy                    | twist_mux, led_driver                                                                          |
 | `nav_cmd_vel`                 | path_tracking                       | twist_mux, led_driver                                                                          |
@@ -86,10 +87,6 @@ flowchart LR
 | `fromLL` (`robot_localization/FromLL`)   | lat_lon_converter       | autonav_mission_control at startup | `autonav` |
 | `request_recovery` (`std_srvs/Trigger`)  | autonav_mission_control | autonav_goal_selection             | `autonav` |
 | `recovery_complete` (`std_srvs/Trigger`) | autonav_mission_control | recovery_behavior                  | `autonav` |
-
-### E-stop file
-
-Besides topics, the e-stop state is wired through a file: [estop_driver](../hardware/estop_driver/README.md) writes it, [led_driver](../hardware/led_driver/README.md) and [odrive_driver](../hardware/odrive_driver/README.md) read it. The path is injected into all three as `estop_file_path`.
 
 ______________________________________________________________________
 
