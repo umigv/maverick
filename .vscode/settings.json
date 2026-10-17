@@ -31,5 +31,6 @@
         "**/.mypy_cache/**": true,
         "**/.ruff_cache/**": true,
         "**/.pytest_cache/**": true
-    }
+    },
+    "cmake.sourceDirectory": "C:/Users/andre/OneDrive/Documents/maverick/src/hardware/vectornav_driver/third_party/vectornav_sdk/src"
 }
