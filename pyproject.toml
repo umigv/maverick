@@ -40,11 +40,13 @@ ros-lyrical-twist-mux = "*"
 ros-lyrical-urdf-launch = "*"
 ros-lyrical-xacro = "*"
 types-pyyaml = "*"
+pytorch = ">=2.12.0,<3"
 
 [tool.pixi.feature.ros.pypi-dependencies]
 odrive = "*"
 playsound3 = "*"
 types-pyserial = "*"
+pytorch-mppi = ">=0.9.1, <0.10"
 
 [tool.pixi.feature.ros.activation]
 scripts = ["install/setup.bash"]
@@ -174,6 +176,7 @@ module = [
     # TODO: If one day we build before linting (i.e. introducing clang-tidy), remove this
     "maverick_msgs.*",
     "odrive.*",
+    "pytorch_mppi.*",
     "pyubx2",
     "tf2_geometry_msgs.*",
     "tf2_ros.*",
