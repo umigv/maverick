@@ -1,5 +1,6 @@
+import itertools
 import pathlib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
@@ -18,8 +19,12 @@ class OccupancyGridSimulatorConfig:
         offset_y_m: Y offset (meters) of the grid origin relative to the robot. Negative values place the
             robot above the bottom edge; -half_height centers the robot vertically.
         publish_period_s: Period (seconds) at which the occupancy grid is published.
-        robot_blind_spot_height_m: Forward extent (meters) of the triangular blind spot directly in front
-            of the robot. Must be positive.
+        robot_blind_spot_boundary_lateral_m: Lateral (y, +left) positions in meters of the vertices of the
+            blind spot's far boundary, in the robot frame. Must be strictly increasing and have at least two entries.
+        robot_blind_spot_boundary_forward_m: Forward (x) positions in meters of the same vertices. A cell is in the
+            blind spot if it is closer to the robot (smaller x) than the boundary interpolated at its lateral
+            position; outside the lateral range the nearest vertex's value is used. The defaults are fitted to
+            the merged two-camera grid recorded on the real robot.
     """
 
     map_file_path: pathlib.Path
@@ -31,8 +36,24 @@ class OccupancyGridSimulatorConfig:
     offset_x_m: float = 0.0
     offset_y_m: float = -2.5
     publish_period_s: float = 0.03
-    robot_blind_spot_height_m: float = 1.25
+    # list of x and list of y rather than list of Point2d because ROS parameters
+    # cannot hold a list of points.
+    robot_blind_spot_boundary_lateral_m: list[float] = field(default_factory=lambda: [-2.5, -1.22, -0.18, 1.45, 2.5])
+    robot_blind_spot_boundary_forward_m: list[float] = field(default_factory=lambda: [1.12, 0.49, 0.77, 0.44, 1.04])
 
     def __post_init__(self) -> None:
-        if self.robot_blind_spot_height_m <= 0:
-            raise ValueError("OccupancyGridSimulatorConfig: robot_blind_spot_height_m must be > 0")
+        lateral_m = self.robot_blind_spot_boundary_lateral_m
+        forward_m = self.robot_blind_spot_boundary_forward_m
+        if len(lateral_m) != len(forward_m):
+            raise ValueError(
+                "OccupancyGridSimulatorConfig: robot_blind_spot_boundary_lateral_m and "
+                "robot_blind_spot_boundary_forward_m must have the same length"
+            )
+        if len(lateral_m) < 2:
+            raise ValueError("OccupancyGridSimulatorConfig: robot blind spot boundary must have at least 2 vertices")
+        if any(left <= right for right, left in itertools.pairwise(lateral_m)):
+            raise ValueError(
+                "OccupancyGridSimulatorConfig: robot_blind_spot_boundary_lateral_m must be strictly increasing"
+            )
+        if any(forward < 0 for forward in forward_m):
+            raise ValueError("OccupancyGridSimulatorConfig: robot_blind_spot_boundary_forward_m must be >= 0")
