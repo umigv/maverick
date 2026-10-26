@@ -72,9 +72,9 @@ class LedDriver(Node):
     def is_robot_enabled(self) -> bool:
         try:
             with self.config.estop_file_path.open() as f:
-                return f.read().strip() != "1"  # only "1" stops the robot, everything else is enabled
+                return f.read().strip() == "0"  # only "0" enables the robot, everything else is disabled
         except Exception:
-            return True  # if the e-stop file doesn't exist / is corrupted we assume e-stop is off
+            return False
 
     def is_active(self, last_time: Time | None) -> bool:
         if last_time is None:
