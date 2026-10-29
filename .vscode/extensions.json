@@ -12,5 +12,10 @@
         "smilerobotics.urdf",
         "github.vscode-github-actions",
         "twxs.cmake"
+    ],
+    "unwantedRecommendations": [
+        // These cause issues with our environment setup
+        "ms-python.vscode-python-envs",
+        "renan-r-santos.pixi-code"
     ]
 }
