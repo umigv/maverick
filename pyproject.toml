@@ -186,7 +186,8 @@ module = [
     "tf2_ros.*",
     "pyzed.*",
     "h5py",
-    "plotly.*"
+    "plotly.*",
+    "cv_bridge"
 ]
 ignore_missing_imports = true
 disable_error_code = ["attr-defined"]

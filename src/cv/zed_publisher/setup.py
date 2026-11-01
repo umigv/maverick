@@ -15,7 +15,7 @@ setup(
     zip_safe=True,
     maintainer="Aditya Suri",
     description="Central node for publishing zed frames",
-    entry_points={"console_scripts": []},
+    entry_points={"console_scripts": ["zed_node = zed_publisher.zed_publisher:main"]},
     license="Apache-2.0",
     extras_require={"test": ["pytest"]},
 )

@@ -1,15 +1,19 @@
 If you are recording a rosbag, be very careful about including the history of this node if you do not need it, as it will likely inflate the size of the rosbag massively.
 
 # Usage
-To allow your node's main processing to run independent of the zed frame rate, add a callback that updates some sort of ```latest_message``` variable. This variable can be fetched at the beginning of each main processing loop. Your main loop would need to be structured such that it will call ```spin_once``` during each loop or ```spin``` once at startup to properly update ```latest_message```.
-``` python
+
+To allow your node's main processing to run independent of the zed frame rate, add a callback that updates some sort of `latest_message` variable. This variable can be fetched at the beginning of each main processing loop. Your main loop would need to be structured such that it will call `spin_once` during each loop or `spin` once at startup to properly update `latest_message`.
+
+```python
 def _image_callback(self, msg: Image) -> None:
     self.latest_message = msg
 ```
+
 Make sure the subscriber object for this node has a queue size of 1 so it doesn't redundantly process several backed up messages at once.
 
 ## Example Usage
-``` python
+
+```python
 class ImageProcessor(Node):
     def __init__(self) -> None:
         super().__init__("image-processor-node")
