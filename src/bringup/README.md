@@ -273,7 +273,7 @@ ______________________________________________________________________
 
 ## visualization.launch.py
 
-Launches visualization tools for Foxglove Studio.
+Launches visualization tools, path history, and topic diagnostics for Foxglove Studio. Run the robot or simulation stack separately to supply data.
 
 ```bash
 ros2 launch bringup visualization.launch.py
@@ -282,7 +282,13 @@ ros2 launch bringup visualization.launch.py
 ### Nodes
 
 - `foxglove_bridge` - Foxglove bridge on `ws://localhost:8765`
-- [occupancy_grid_visualization](../visualization/occupancy_grid_visualization/README.md)
+- [occupancy_grid_visualization](../visualization/occupancy_grid_visualization/README.md): Visualize the area seen by the robot as 3D mesh to detect the different betwene lanes markings and obstacles.
+- [robot_monitoring](../visualization/robot_monitoring/README.md) `path_history`: Publish planned path points and the recorded odometry trail
+- [robot_monitoring](../visualization/robot_monitoring/README.md) `topic_diagnostic`: Check for core topics such as `/odom/local`, `/cmd_vel`, `/gps/raw`, `/imu/raw`, `/nav_cmd_vel`, and `/path`, publishing reports on `/diagnostics`
+
+Connect Foxglove to `ws://localhost:8765`. In a 3D panel, enable `planned_path_points` and `actual_path_points` and use a display frame connected to their input frames by TF (normally `odom`). Add a `Diagnostics-Detail (ROS)` or `Diagnostics-Summary (ROS)` panel to view topic status.
+
+To monitor another topic, add a `topic_diagnostic` node with a unique name and matching `topic` and `msg_type` parameters in [visualization.launch.py](launch/visualization.launch.py). See the [robot_monitoring guide](../visualization/robot_monitoring/README.md#add-another-topic-check) for an example and rebuild instructions.
 
 The voxel converter uses `occupancy_grid/raw` by default. Select another input with `occupancy_grid_topic`, for example:
 

@@ -9,6 +9,8 @@ from visualization_msgs.msg import Marker
 
 
 class PathHistory(Node):
+    """Display the latest plan and a distance-sampled odometry trail as markers."""
+
     def __init__(self):
         super().__init__("path_history")
         self.actual_points: list[Point] = []
@@ -29,6 +31,7 @@ class PathHistory(Node):
             "Trail points are sampled every 0.5 m."
         )
 
+    # Signify it is ready to recieve data
     def log_waiting_for_inputs(self):
         missing = []
         if not self.received_path:
@@ -38,6 +41,7 @@ class PathHistory(Node):
         if missing:
             self.get_logger().info(f"Waiting for first message on: {', '.join(missing)}", throttle_duration_sec=15.0)
 
+    # Add markers each point
     def make_marker(self, header: Header, namespace: str, points: list[Point], color: ColorRGBA) -> Marker:
         marker = Marker()
         marker.header = header
@@ -47,10 +51,13 @@ class PathHistory(Node):
 
         marker.color.a = 1.0
         marker.pose.orientation.w = 1.0
+
         marker.pose.position.z = 0.2
+
         marker.scale.x = 1.0
         marker.scale.y = 1.0
         marker.scale.z = 1.0
+
         marker.id = 0
         marker.type = Marker.POINTS
         marker.action = Marker.ADD
@@ -60,17 +67,19 @@ class PathHistory(Node):
         first_message = not self.received_path
         self.received_path = True
         if first_message:
-            self.get_logger().info(
-                f"First planned path received: {len(msg.poses)} poses, frame={msg.header.frame_id!r}"
-            )
+            self.get_logger().info(f"First planned path received: {len(msg.poses)} poses, frame={msg.header.frame_id}")
+
+        # Get every current points
         points: list[Point] = []
         for pose in msg.poses:
             points.append(Point(x=pose.pose.position.x, y=pose.pose.position.y, z=pose.pose.position.z))
+
         self.planned_pub.publish(
             self.make_marker(
                 header=msg.header, namespace="planned", points=points, color=ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0)
             )
         )
+
         self.get_logger().info(
             f"Published planned path: {len(points)} points, frame={msg.header.frame_id!r}",
             throttle_duration_sec=5.0,
@@ -83,15 +92,17 @@ class PathHistory(Node):
     def on_ondom(self, msg: Odometry):
         if not self.received_odom:
             self.received_odom = True
-            self.get_logger().info(f"First odometry received: frame={msg.header.frame_id!r}")
+            self.get_logger().info(f"First odometry received: frame={msg.header.frame_id}")
+
         if msg.header.frame_id != self.cur_frame:
             if self.cur_frame is not None:
                 self.get_logger().warning(
-                    f"Odometry frame changed from {self.cur_frame!r} to {msg.header.frame_id!r}; clearing trail."
+                    f"Odometry frame changed from {self.cur_frame} to {msg.header.frame_id}; clearing trail."
                 )
             self.actual_points.clear()
             self.cur_frame = msg.header.frame_id
 
+        # Save the current point
         position: Point = msg.pose.pose.position
 
         self.get_logger().info(
@@ -105,7 +116,9 @@ class PathHistory(Node):
             if hypot(position.x - previous.x, position.y - previous.y) < 0.5:
                 return
 
+        # Report the actual position
         self.actual_points.append(position)
+
         self.actual_pub.publish(
             self.make_marker(
                 header=msg.header,
@@ -114,6 +127,7 @@ class PathHistory(Node):
                 color=ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0),
             )
         )
+
         self.get_logger().info(
             f"Published actual trail: {len(self.actual_points)} points; "
             f"marker subscribers={self.actual_pub.get_subscription_count()}",

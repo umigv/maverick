@@ -34,5 +34,42 @@ def generate_launch_description() -> LaunchDescription:
                 name="occupancy_grid_voxel_visualization",
                 parameters=[{"input_topic": LaunchConfiguration("occupancy_grid_topic")}],
             ),
+            Node(package="robot_monitoring", executable="path_history", name="path_history"),
+            Node(
+                package="robot_monitoring",
+                executable="topic_diagnostic",
+                name="odom_diagnostic",
+                parameters=[{"topic": "/odom/local"}, {"msg_type": "nav_msgs/msg/Odometry"}],
+            ),
+            Node(
+                package="robot_monitoring",
+                executable="topic_diagnostic",
+                name="vel_diagnostic",
+                parameters=[{"topic": "/cmd_vel"}, {"msg_type": "geometry_msgs/msg/TwistStamped"}],
+            ),
+            Node(
+                package="robot_monitoring",
+                executable="topic_diagnostic",
+                name="gps_diagnostic",
+                parameters=[{"topic": "/gps/raw"}, {"msg_type": "sensor_msgs/msg/NavSatFix"}],
+            ),
+            Node(
+                package="robot_monitoring",
+                executable="topic_diagnostic",
+                name="imu_diagnostic",
+                parameters=[{"topic": "/imu/raw"}, {"msg_type": "sensor_msgs/msg/Imu"}],
+            ),
+            Node(
+                package="robot_monitoring",
+                executable="topic_diagnostic",
+                name="nav_vel_diagnostic",
+                parameters=[{"topic": "/nav_cmd_vel"}, {"msg_type": "geometry_msgs/msg/TwistStamped"}],
+            ),
+            Node(
+                package="robot_monitoring",
+                executable="topic_diagnostic",
+                name="path_diagnostic",
+                parameters=[{"topic": "/path"}, {"msg_type": "nav_msgs/msg/Odometry"}],
+            ),
         ]
     )

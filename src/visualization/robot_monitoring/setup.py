@@ -21,7 +21,7 @@ setup(
     entry_points={
         "console_scripts": [
             "path_history = robot_monitoring.path_history:main",
-            "odom_diagnostic = robot_monitoring.odom_diagnostic:main",
+            "topic_diagnostic = robot_monitoring.topic_diagnostic:main",
         ],
     },
 )
