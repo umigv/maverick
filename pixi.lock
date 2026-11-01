@@ -726,6 +726,7 @@ environments:
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-std-srvs-5.9.2-np2py314hb48eaa3_22.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-stereo-msgs-5.9.2-np2py314hb48eaa3_22.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-teleop-twist-joy-2.6.5-np2py314hb48eaa3_22.conda
+      - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-teleop-twist-keyboard-2.4.1-np2py314hb48eaa3_22.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-tf2-0.45.7-np2py314hb48eaa3_22.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-tf2-bullet-0.45.7-np2py314hb48eaa3_22.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-tf2-eigen-0.45.7-np2py314hb48eaa3_22.conda
@@ -1473,6 +1474,7 @@ environments:
       - conda: https://prefix.dev/robostack-lyrical/linux-aarch64/ros-lyrical-std-srvs-5.9.2-np2py314h2824dc6_22.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-aarch64/ros-lyrical-stereo-msgs-5.9.2-np2py314h2824dc6_22.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-aarch64/ros-lyrical-teleop-twist-joy-2.6.5-np2py314h2824dc6_22.conda
+      - conda: https://prefix.dev/robostack-lyrical/linux-aarch64/ros-lyrical-teleop-twist-keyboard-2.4.1-np2py314h2824dc6_22.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-aarch64/ros-lyrical-tf2-0.45.7-np2py314h2824dc6_22.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-aarch64/ros-lyrical-tf2-bullet-0.45.7-np2py314h2824dc6_22.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-aarch64/ros-lyrical-tf2-eigen-0.45.7-np2py314h2824dc6_22.conda
@@ -2169,6 +2171,7 @@ environments:
       - conda: https://prefix.dev/robostack-lyrical/osx-arm64/ros-lyrical-std-srvs-5.9.2-np2py314h1e5664e_22.conda
       - conda: https://prefix.dev/robostack-lyrical/osx-arm64/ros-lyrical-stereo-msgs-5.9.2-np2py314h1e5664e_22.conda
       - conda: https://prefix.dev/robostack-lyrical/osx-arm64/ros-lyrical-teleop-twist-joy-2.6.5-np2py314h1e5664e_22.conda
+      - conda: https://prefix.dev/robostack-lyrical/osx-arm64/ros-lyrical-teleop-twist-keyboard-2.4.1-np2py314h1e5664e_22.conda
       - conda: https://prefix.dev/robostack-lyrical/osx-arm64/ros-lyrical-tf2-0.45.7-np2py314h1e5664e_22.conda
       - conda: https://prefix.dev/robostack-lyrical/osx-arm64/ros-lyrical-tf2-bullet-0.45.7-np2py314h1e5664e_22.conda
       - conda: https://prefix.dev/robostack-lyrical/osx-arm64/ros-lyrical-tf2-eigen-0.45.7-np2py314h1e5664e_22.conda
@@ -15086,7 +15089,7 @@ packages:
   license: MIT
   license_family: MIT
   purls:
-  - pkg:pypi/plotly?source=compressed-mapping
+  - pkg:pypi/plotly?source=hash-mapping
   run_exports: {}
   size: 4318002
   timestamp: 1788870458030
@@ -25297,6 +25300,26 @@ packages:
   run_exports: {}
   size: 229345
   timestamp: 1782788132740
+- conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-teleop-twist-keyboard-2.4.1-np2py314hb48eaa3_22.conda
+  sha256: ffbe2540c60c0781e0f0f4dad6b18a95c1b9307037ccbe72b814fda632ee4e0d
+  md5: babdb9812cff7572d7a558c43c77408d
+  depends:
+  - python
+  - ros-lyrical-geometry-msgs
+  - ros-lyrical-rcl-interfaces
+  - ros-lyrical-rclpy
+  - ros-lyrical-ros-workspace
+  - ros2-distro-mutex 0.18.* lyrical_*
+  - libgcc >=14
+  - __glibc >=2.28,<3.0.a0
+  - libstdcxx >=14
+  - ros2-distro-mutex >=0.18.0,<0.19.0a0
+  - python_abi 3.14.* *_cp314
+  - numpy >=1.25,<3
+  license: BSD-2-Clause
+  run_exports: {}
+  size: 23809
+  timestamp: 1782787626709
 - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-tf2-0.45.7-np2py314hb48eaa3_22.conda
   sha256: 1bf8b28aedaabaf656dcd24d3d4dd1eb34c2b790a4791539141be171d216795e
   md5: 98d650690a682d5b53075e9e71145820
@@ -30665,6 +30688,26 @@ packages:
   run_exports: {}
   size: 228009
   timestamp: 1782788101559
+- conda: https://prefix.dev/robostack-lyrical/linux-aarch64/ros-lyrical-teleop-twist-keyboard-2.4.1-np2py314h2824dc6_22.conda
+  sha256: 57d33891a699fabfa7f2ab71d82ffb8e76064f1c41e17e2b3938ef5a262933fc
+  md5: 661423c4ff3f04f3a7d1fab1cca35fe1
+  depends:
+  - python
+  - ros-lyrical-geometry-msgs
+  - ros-lyrical-rcl-interfaces
+  - ros-lyrical-rclpy
+  - ros-lyrical-ros-workspace
+  - ros2-distro-mutex 0.18.* lyrical_*
+  - __glibc >=2.28,<3.0.a0
+  - libstdcxx >=14
+  - libgcc >=14
+  - ros2-distro-mutex >=0.18.0,<0.19.0a0
+  - numpy >=1.25,<3
+  - python_abi 3.14.* *_cp314
+  license: BSD-2-Clause
+  run_exports: {}
+  size: 23901
+  timestamp: 1782787626839
 - conda: https://prefix.dev/robostack-lyrical/linux-aarch64/ros-lyrical-tf2-0.45.7-np2py314h2824dc6_22.conda
   sha256: 99471cb4724228d8b5dcf7875cd85f637cbe3d50ca5855ce2a37fc4b4e5607e0
   md5: 2ac91d4105f6c997f4bc6be7daebc0bb
@@ -35797,6 +35840,25 @@ packages:
   run_exports: {}
   size: 184370
   timestamp: 1782787998966
+- conda: https://prefix.dev/robostack-lyrical/osx-arm64/ros-lyrical-teleop-twist-keyboard-2.4.1-np2py314h1e5664e_22.conda
+  sha256: 0b4d2df1402199a09582889d386298dc2df31fb42f8d67f84164e0e608429e82
+  md5: 1c670e8ae1a82611c038c0f4f309664c
+  depends:
+  - python
+  - ros-lyrical-geometry-msgs
+  - ros-lyrical-rcl-interfaces
+  - ros-lyrical-rclpy
+  - ros-lyrical-ros-workspace
+  - ros2-distro-mutex 0.18.* lyrical_*
+  - __osx >=11.0
+  - libcxx >=18
+  - numpy >=1.25,<3
+  - ros2-distro-mutex >=0.18.0,<0.19.0a0
+  - python_abi 3.14.* *_cp314
+  license: BSD-2-Clause
+  run_exports: {}
+  size: 24400
+  timestamp: 1782786891878
 - conda: https://prefix.dev/robostack-lyrical/osx-arm64/ros-lyrical-tf2-0.45.7-np2py314h1e5664e_22.conda
   sha256: 419eaa6ab5f5c47e36492647d899ad42dc627d15c740267bc118ab4f6fbaa5a3
   md5: 5509224bed8a08ad566674899b7c163e
