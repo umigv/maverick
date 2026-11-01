@@ -12,7 +12,7 @@ class LedDriverConfig:
         ready_timeout_s: Seconds to wait for the READY message before giving up.
         cmd_vel_timeout_s: Seconds after the last teleop/nav command before that source is considered inactive.
         update_period_s: Period (s) at which the LED state is evaluated and sent.
-        estop_timeout_s: Maximum interval without valid estop heartbeat (s).
+        estop_timeout_s: Maximum interval without valid estop heartbeat (s) before estop is engaged by the watchdog.
     """
 
     serial_port: Path = Path("/dev/led")

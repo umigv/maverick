@@ -10,7 +10,7 @@ class EstopDriverConfig:
         serial_port: Path to the serial device.
         baud_rate: Serial baud rate for communication.
         poll_period_s: Period (s) at which the serial port is polled for new data.
-        serial_timeout_s: Maximum interval without valid serial state (s).
+        serial_timeout_s: Maximum interval without valid serial state (s) before estop is engaged by the watchdog.
     """
 
     serial_port: Path = Path("/dev/estop")

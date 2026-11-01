@@ -140,7 +140,7 @@ class OdriveDriverConfig:
         publish_period_s: Period of the encoder publish timer (s).
         timestamp_delay_s: Amount subtracted from the publish timestamp to compensate read and processing latency (s).
         cmd_vel_timeout_s: Maximum age of a cmd_vel command before motors are zeroed (s).
-        estop_timeout_s: Maximum interval without valid estop heartbeat (s).
+        estop_timeout_s: Maximum interval without valid estop heartbeat (s) before estop is engaged by the watchdog.
         debug: Whether to publish debug motor signals
     """
 
