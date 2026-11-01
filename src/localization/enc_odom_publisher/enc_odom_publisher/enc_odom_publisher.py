@@ -70,23 +70,23 @@ class EncOdomPublisher(Node):
             d_theta = angular_vel * dt
 
             if angular_vel == 0.0:
-                self.position += Point2d(x = s, y = 0.0).rotate_by(mid_rotation)
+                self.position += Point2d(x=s, y=0.0).rotate_by(mid_rotation)
                 return
 
-            # rw = v, r = v / w 
+            # rw = v, r = v / w
             radius = linear_vel / angular_vel
 
             # Split the chord into two right triangles. Hypotenuse is the radius,
             # and the angle is d_theta / 2. For each triangle, the opposite side is
             # c / 2
-            
+
             # sin(d_theta / 2) = (c / 2) / r
             # c = 2 * r * sin(d_theta / 2)
 
             chord_length = 2.0 * radius * math.sin(0.5 * d_theta)
 
             # The chord points in the direction of the mid rotation.
-            self.position += Point2d(x = chord_length, y = 0.0).rotate_by(mid_rotation)
+            self.position += Point2d(x=chord_length, y=0.0).rotate_by(mid_rotation)
             self.rotation = mid_rotation + Rotation2d(0.5 * angular_vel * dt)
         finally:
             self.twist = msg.twist
