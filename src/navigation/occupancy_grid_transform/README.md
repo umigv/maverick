@@ -22,6 +22,8 @@ The occupancy grid from CV is expected to match the convention of [`nav_msgs/Occ
 - `transformed_occupancy_grid` (`nav_msgs/OccupancyGrid`) - Bordered grid in the configured output frame
 - `inflated_occupancy_grid` (`nav_msgs/OccupancyGrid`) - Bordered and inflated grid in the configured output frame
 
+The inflated grid origin is raised by `inflated_z_offset` (default `0.2 ` m) above the transformed input origin so its flat display is separated from ground truth. This affects the published grid directly, including Foxglove and RViz displays without the voxel converter. XY coordinates and occupancy values are unchanged.
+
 ## Inflation
 
 After the grid is converted and a border is added, obstacle inflation is applied. Inflation turns the border into a soft wall that discourages planning near the grid edges. For each occupied cell, surrounding cells are inflated based on their distance:

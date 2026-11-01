@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import numpy as np
 import tf2_geometry_msgs  # noqa: F401 - registers PoseStamped transform handlers
 import utils.config
@@ -69,10 +71,12 @@ class OccupancyGridTransform(Node):
             )
         )
 
+        inflated_origin = deepcopy(origin_transformed)
+        inflated_origin.position.z += self.config.inflated_z_offset
         self.inflated_publisher.publish(
             OccupancyGrid(
                 header=Header(frame_id=self.config.frame_id),
-                info=MapMetaData(resolution=msg.info.resolution, width=width, height=height, origin=origin_transformed),
+                info=MapMetaData(resolution=msg.info.resolution, width=width, height=height, origin=inflated_origin),
                 data=inflated_grid.astype(np.int8).reshape(-1).tolist(),
             )
         )
