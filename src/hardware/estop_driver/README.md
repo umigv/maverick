@@ -2,7 +2,7 @@
 
 Reads from the serial e-stop device and publishes its state. Starts estopped until a valid serial state is received.
 
-Valid serial lines (`0` or `1`) reset a watchdog. Missing valid serial data for `serial_timeout_s` (default 1 s) asserts estop.
+Valid serial lines (`0` or `1`) reset a watchdog. Missing valid serial data for `serial_timeout_s` (default 1 s) causes the watchdog timer to expire and publish estoped true.
 
 ## Published Topics
 
