@@ -781,8 +781,6 @@ environments:
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-yaml-cpp-vendor-9.2.1-np2py314h53a0733_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-zenoh-cpp-vendor-0.10.6-np2py314hc614d3d_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-zstd-cmake-module-0.33.4-np2py314h53a0733_30.conda
-      - pypi: ./wheels/pyzed-5.4-cp314-cp314-linux_x86_64.whl
-      - pypi: https://files.pythonhosted.org/packages/07/d4/6cb0c23f8f3e7081c3af03ccf685a73cfa86af85725b9f4c44040e5f8858/cython-3.3.1-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/12/99/38461c380841e79ac0f709c1d32fa6c768f572f8ac3e3c773ec6ac7526dd/types_pyserial-3.5.0.20261030-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/17/b7/df953bacca701b498a616bd12be66876c9dac17fe0a44f9fed65a5b53f04/mdformat_gfm_alerts-2.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/22/a6/858897256d0deac81a172289110f31629fc4cee19b6f01283303e18c8db3/ptyprocess-0.7.0-py2.py3-none-any.whl
@@ -1550,7 +1548,6 @@ environments:
       - conda: https://prefix.dev/robostack-lyrical/linux-aarch64/ros2-yaml-cpp-vendor-9.2.1-np2py314h36e155a_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-aarch64/ros2-zenoh-cpp-vendor-0.10.6-np2py314h5f1962e_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-aarch64/ros2-zstd-cmake-module-0.33.4-np2py314h36e155a_30.conda
-      - pypi: ./wheels/pyzed-5.4-cp314-cp314-linux_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/12/99/38461c380841e79ac0f709c1d32fa6c768f572f8ac3e3c773ec6ac7526dd/types_pyserial-3.5.0.20261030-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/17/b7/df953bacca701b498a616bd12be66876c9dac17fe0a44f9fed65a5b53f04/mdformat_gfm_alerts-2.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/19/b0/5aa186d56ce2334dabe29b70bd99dc8ae926ee44184c0de64a53d415a4f3/aiohttp-3.14.5-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl
@@ -1566,7 +1563,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/71/43/1947f06babed6b3f1d7f38b0c767f52df66bfb2bc10b468c4a7de9eceff2/aiohappyeyeballs-2.7.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7e/ee/b3b104cd5befc802771c443a7cb79e22307f800ac1ad1c37370a6f130c78/odrive-0.6.11.post1-py37-none-manylinux_2_28_aarch64.whl
       - pypi: https://files.pythonhosted.org/packages/8b/39/93f689120673873a1328fbf94b6906a16b5ada41f33af0699f2eddc73cff/playsound3-3.3.2-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/8d/94/dad3d60dcbf22616ee6564456ffc3b6594d5cac9b91735f34ab90633326c/cython-3.3.1-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl
       - pypi: https://files.pythonhosted.org/packages/99/5d/8268b644392ee874ee82a635cd0df1773de230bde356c38de28e298392cc/parso-0.8.7-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9e/c3/059298687310d527a58bb01f3b1965787ee3b40dce76752eda8b44e9a2c5/pexpect-4.9.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ad/66/0d785f0bc5e4315a96c989bb476d0fc07ea4f85132550c7b156ca2035d52/traitlets-5.16.1-py3-none-any.whl
@@ -2239,7 +2235,6 @@ environments:
       - conda: https://prefix.dev/robostack-lyrical/osx-arm64/ros-lyrical-zenoh-cpp-vendor-0.10.4-np2py314hfaa5aa4_22.conda
       - conda: https://prefix.dev/robostack-lyrical/osx-arm64/ros-lyrical-zstd-cmake-module-0.33.3-np2py314h1e5664e_22.conda
       - conda: https://prefix.dev/robostack-lyrical/osx-arm64/ros2-distro-mutex-0.18.0-lyrical_22.conda
-      - pypi: ./wheels/pyzed-5.4-cp314-cp314-linux_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/12/99/38461c380841e79ac0f709c1d32fa6c768f572f8ac3e3c773ec6ac7526dd/types_pyserial-3.5.0.20261030-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/17/b7/df953bacca701b498a616bd12be66876c9dac17fe0a44f9fed65a5b53f04/mdformat_gfm_alerts-2.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/22/a6/858897256d0deac81a172289110f31629fc4cee19b6f01283303e18c8db3/ptyprocess-0.7.0-py2.py3-none-any.whl
@@ -2251,7 +2246,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/6d/18/83376915176eb058cb86470eb7396388a13350b09a8f233a79303bbcbc5b/pure_eval-0.2.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/bb/dda344765ffd3430afe1a1c66c866a57fae67786537d4f14607df6505ac1/yarl-1.25.1-cp314-cp314-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/71/43/1947f06babed6b3f1d7f38b0c767f52df66bfb2bc10b468c4a7de9eceff2/aiohappyeyeballs-2.7.1-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/7c/f4/2892e59c7e75e75766021c40c165a30edbbfdae4efb6e10cb3fd23486b66/cython-3.3.1-cp314-cp314-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/8b/39/93f689120673873a1328fbf94b6906a16b5ada41f33af0699f2eddc73cff/playsound3-3.3.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8b/82/8c3108410d408dbc069540242294e1570d7b5103cb6e4f1302ed2ba639e4/odrive-0.6.11.post1-py37-none-macosx_12_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/8e/3f/c014da364e2f9707945f921864a6b5c615e88a0ec0518c7999b3b2092405/multidict-7.2.1-cp314-cp314-macosx_11_0_arm64.whl
@@ -36876,20 +36870,6 @@ packages:
     - ros2-distro-mutex >=0.18.0,<0.19.0a0
   size: 2359
   timestamp: 1782731908883
-- pypi: ./wheels/pyzed-5.4-cp314-cp314-linux_x86_64.whl
-  name: pyzed
-  version: '5.4'
-  requires_dist:
-  - cython>=3.0.0
-  - numpy>=2.0,<3.0
-  - opencv-python ; extra == 'sample'
-  - pyopengl ; extra == 'sample'
-  requires_python: '>=3.8'
-- pypi: https://files.pythonhosted.org/packages/07/d4/6cb0c23f8f3e7081c3af03ccf685a73cfa86af85725b9f4c44040e5f8858/cython-3.3.1-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
-  name: cython
-  version: 3.3.1
-  sha256: 7a6c191617853f2e0d5936c73f5d5cd096548f4d9e0fa37612ef721591c42cb3
-  requires_python: '>=3.9'
 - pypi: https://files.pythonhosted.org/packages/12/99/38461c380841e79ac0f709c1d32fa6c768f572f8ac3e3c773ec6ac7526dd/types_pyserial-3.5.0.20261030-py3-none-any.whl
   name: types-pyserial
   version: 3.5.0.20261030
@@ -37049,11 +37029,6 @@ packages:
   version: 2.7.1
   sha256: 9243213661e29250eb41368e5daa826fc017156c3b8a11440826b2e3ed376472
   requires_python: '>=3.10'
-- pypi: https://files.pythonhosted.org/packages/7c/f4/2892e59c7e75e75766021c40c165a30edbbfdae4efb6e10cb3fd23486b66/cython-3.3.1-cp314-cp314-macosx_11_0_arm64.whl
-  name: cython
-  version: 3.3.1
-  sha256: 3370326802b82cc7cb7df65e605e1acfebdce193077e27ed5734b9bc3f7c6ad0
-  requires_python: '>=3.9'
 - pypi: https://files.pythonhosted.org/packages/7e/ee/b3b104cd5befc802771c443a7cb79e22307f800ac1ad1c37370a6f130c78/odrive-0.6.11.post1-py37-none-manylinux_2_28_aarch64.whl
   name: odrive
   version: 0.6.11.post1
@@ -37086,11 +37061,6 @@ packages:
   - pyusb ; extra == 'legacy-dfu'
   - pyelftools ; extra == 'legacy-dfu'
   - matplotlib ; extra == 'liveplotter'
-- pypi: https://files.pythonhosted.org/packages/8d/94/dad3d60dcbf22616ee6564456ffc3b6594d5cac9b91735f34ab90633326c/cython-3.3.1-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl
-  name: cython
-  version: 3.3.1
-  sha256: b0eac1184dd57591a8f3d25691c7a6bf7db030f515b210691bd251772a7e70a4
-  requires_python: '>=3.9'
 - pypi: https://files.pythonhosted.org/packages/8e/3f/c014da364e2f9707945f921864a6b5c615e88a0ec0518c7999b3b2092405/multidict-7.2.1-cp314-cp314-macosx_11_0_arm64.whl
   name: multidict
   version: 7.2.1
