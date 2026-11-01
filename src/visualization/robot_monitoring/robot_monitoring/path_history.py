@@ -11,10 +11,10 @@ from visualization_msgs.msg import Marker
 class PathHistory(Node):
     """Display the latest plan and a distance-sampled odometry trail as markers."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("path_history")
         self.actual_points: list[Point] = []
-        self.cur_frame = None
+        self.cur_frame: str | None = None
         self.received_path = False
         self.received_odom = False
 
@@ -32,7 +32,7 @@ class PathHistory(Node):
         )
 
     # Signify it is ready to recieve data
-    def log_waiting_for_inputs(self):
+    def log_waiting_for_inputs(self) -> None:
         missing = []
         if not self.received_path:
             missing.append(self.resolve_topic_name("smoothed_path"))
@@ -63,7 +63,7 @@ class PathHistory(Node):
         marker.action = Marker.ADD
         return marker
 
-    def on_path(self, msg: Path):
+    def on_path(self, msg: Path) -> None:
         first_message = not self.received_path
         self.received_path = True
         if first_message:
@@ -89,7 +89,7 @@ class PathHistory(Node):
                 "Planned path is empty; no planned dots will be visible.", throttle_duration_sec=5.0
             )
 
-    def on_ondom(self, msg: Odometry):
+    def on_ondom(self, msg: Odometry) -> None:
         if not self.received_odom:
             self.received_odom = True
             self.get_logger().info(f"First odometry received: frame={msg.header.frame_id}")

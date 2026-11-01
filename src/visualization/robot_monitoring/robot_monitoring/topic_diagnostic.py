@@ -9,7 +9,7 @@ from rosidl_runtime_py.utilities import get_message
 class TopicDiagnostic(Node):
     """Monitor one topic and report its status on /diagnostics."""
 
-    def __init__(self, timedout: float = 3.0, interval: float = 1.0):
+    def __init__(self, timedout: float = 3.0, interval: float = 1.0) -> None:
 
         super().__init__("topic_diagnostic")
         self.topic = self.declare_parameter("topic", "/odom/local").value
@@ -23,18 +23,18 @@ class TopicDiagnostic(Node):
         self.interval = interval
 
         self.start_at = monotonic()
-        self.last_recived = None
-        self.previous_status = None
+        self.last_recived: float | None = None
+        self.previous_status: tuple[bytes, str] | None = None
 
         self.create_subscription(msg_type, self.topic, self.on_topic, 10)
         self.publisher = self.create_publisher(DiagnosticArray, "/diagnostics", 10)
         self.create_timer(self.interval, self.diagnose)
 
-    def on_topic(self, msg):
+    def on_topic(self, msg: object) -> None:
         # Track the time since last recieved
         self.last_recived = monotonic()
 
-    def diagnose(self):
+    def diagnose(self) -> None:
         now = monotonic()
 
         # Get a topic summarized informatio
