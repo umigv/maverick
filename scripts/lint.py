@@ -2,8 +2,27 @@
 import argparse
 import os
 import shutil
+import subprocess
 
 from common import ROOT, Target, die, discover_targets, files_in, filter_targets, info, run
+
+
+def lint_ascii(files: list[str]) -> None:
+    if not files:
+        return
+
+    info("ASCII characters (check)")
+    # Reject every byte with its high bit set.
+    result = subprocess.run(
+        ["grep", "-anH", b"[\x80-\xff]", "--", *files],
+        cwd=ROOT,
+        env={**os.environ, "LC_ALL": "C"},
+        check=False,
+    )
+    if result.returncode == 0:
+        die("Non-ASCII characters found")
+    if result.returncode != 1:
+        die(f"ASCII check failed (grep exit {result.returncode})")
 
 
 def lint_python(targets: list[Target], all_targets: list[Target]) -> None:
@@ -12,6 +31,7 @@ def lint_python(targets: list[Target], all_targets: list[Target]) -> None:
         return
 
     target_strs = [str(f.relative_to(ROOT)) for f in py]
+    lint_ascii(target_strs)
 
     info("Ruff format (check)")
     run("ruff", "format", "--check", *target_strs)
@@ -31,8 +51,11 @@ def lint_cpp(targets: list[Target]) -> None:
     if not cpp:
         return
 
+    target_strs = [str(f.relative_to(ROOT)) for f in cpp]
+    lint_ascii(target_strs)
+
     info("clang-format (check)")
-    run("clang-format", "--dry-run", "--Werror", *[str(f.relative_to(ROOT)) for f in cpp])
+    run("clang-format", "--dry-run", "--Werror", *target_strs)
 
 
 def lint_rviz(targets: list[Target]) -> None:
@@ -65,7 +88,7 @@ def main() -> None:
     group.add_argument("--ignore", nargs="+", metavar="PKG")
     args = parser.parse_args()
 
-    missing = [t for t in ("ruff", "mypy", "clang-format", "mdformat") if not shutil.which(t)]
+    missing = [t for t in ("grep", "ruff", "mypy", "clang-format", "mdformat") if not shutil.which(t)]
     if missing:
         die(f"missing tools: {', '.join(missing)}. Run just setup")
 
