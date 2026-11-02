@@ -18,7 +18,10 @@ lines = content.splitlines(keepends=True)
 matches = [i for i, line in enumerate(lines) if line.lstrip().startswith("pyzed =")]
 
 if len(matches) != 1:
-    raise RuntimeError(f"Expected exactly one 'pyzed =' line in {PYPROJECT}, but found {len(matches)}")
+    raise RuntimeError(
+        f"Expected exactly one 'pyzed =' line in {PYPROJECT}, but found {len(matches)}. If 0 were found, you may need to \
+            add a dummy pyzed = {{ path = \"pyzed.whl entry to \"}} line under [tool.pixi.feature.ros.pypi-dependencies]."
+    )
 
 index = matches[0]
 ending = "\r\n" if lines[index].endswith("\r\n") else "\n"
