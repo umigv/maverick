@@ -15,7 +15,7 @@ setup(
     zip_safe=True,
     maintainer="Hardworking ARV Member",
     maintainer_email="hardworking_arv_member@umich.edu",
-    description="TODO: Package description",
+    description="FILL_IN: Package description",
     license="Apache-2.0",
     extras_require={"test": ["pytest"]},
     entry_points={

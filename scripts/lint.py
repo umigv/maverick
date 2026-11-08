@@ -58,6 +58,22 @@ def lint_md(targets: list[Target]) -> None:
     run("mdformat", "--check", *[str(f.relative_to(ROOT)) for f in md])
 
 
+def lint_template_placeholders(targets: list[Target]) -> None:
+    info("Checking for template placeholders")
+
+    template_dir = ROOT / "src" / "template"
+    marker = "FILL_IN"
+
+    for f in files_in(targets, "*"):
+        if not f.is_file() or f.is_relative_to(template_dir) or f.name == "lint.py":
+            continue
+
+        with f.open("rb") as file:
+            content = file.read()
+            if marker.encode() in content:
+                die(f"{f.relative_to(ROOT)}: contains template placeholder '{marker}'")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run all linters")
     group = parser.add_mutually_exclusive_group()
@@ -76,6 +92,7 @@ def main() -> None:
     lint_cpp(targets)
     lint_rviz(targets)
     lint_md(targets)
+    lint_template_placeholders(targets)
 
     info("All checks passed!")
 

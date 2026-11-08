@@ -1,10 +1,10 @@
 # template_python
 
-TODO: One or two sentences on what the node does and how it fits into the system.
+FILL_IN: One or two sentences on what the node does and how it fits into the system.
 
 <!-- Fill in the sections below and delete the ones that don't apply, keeping this order. -->
 
-## TODO: Behavior
+## FILL_IN: Behavior
 
 Free-form sections describing behavior/algorithms come first, before the interface sections. Add as many as needed.
 
