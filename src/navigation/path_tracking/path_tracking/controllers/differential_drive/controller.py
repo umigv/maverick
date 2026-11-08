@@ -14,12 +14,14 @@ class DifferentialDriveController:
         self.logger = logger
         self.path: Path2d | None = None
         self.projection_index: int = 0
+        self.target_heading: Rotation2d | None = None
 
     def set_path(self, path: Path2d) -> None:
         self.path = path
         self.projection_index = 0
 
     def compute_command(self, pose: Pose2d, speed: float) -> Twist | None:
+        self.target_heading = None
         if self.path is None:
             return None
 
@@ -53,9 +55,10 @@ class DifferentialDriveController:
         effective_lookahead = max(0.0, self.config.heading_lookahead_m - min(distance_to_corner, distance_past_corner))
         if effective_lookahead > 0.0:
             lookahead_point = self.path.advance(new_projection_index, effective_lookahead)
-            heading_error = Rotation2d.from_vector(lookahead_point - pose.point) - pose.rotation
+            self.target_heading = Rotation2d.from_vector(lookahead_point - pose.point)
         else:
-            heading_error = Rotation2d.from_vector(segment) - pose.rotation
+            self.target_heading = Rotation2d.from_vector(segment)
+        heading_error = self.target_heading - pose.rotation
 
         # cos(heading_error) fades the cross-track term to zero as the robot turns away from the path. Without it, both
         # terms apply at full strength at large heading errors, causing them to fight. With it, heading correction

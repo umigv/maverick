@@ -15,6 +15,7 @@ from .controllers.controller import Controller
 from .controllers.differential_drive.controller import DifferentialDriveController
 from .controllers.pure_pursuit.controller import PurePursuitController
 from .controllers.stanley.controller import StanleyController
+from .metrics import PathTrackingMetrics
 from .path_tracking_config import PathTrackingConfig
 
 
@@ -37,6 +38,10 @@ class PathTracking(Node):
         self.pose: Pose2d | None = None
         self.current_speed: float = 0.0
         self.mission_state: MissionState | None = None
+
+        self.metrics = PathTrackingMetrics(
+            self.get_logger(), self.config.metrics_output_dir if self.config.metrics_csv_enabled else None
+        )
 
         self.create_subscription(Odometry, "odom", self.odom_callback, 10)
         self.create_subscription(Path, "path", self.path_callback, 10)
@@ -64,6 +69,8 @@ class PathTracking(Node):
 
     def mission_state_callback(self, msg: MissionState) -> None:
         self.mission_state = msg
+        if msg.mission_complete and self.pose is not None:
+            self.metrics.on_goal_reached(self.pose, self.current_time_seconds())
 
     def path_callback(self, path_msg: Path) -> None:
         if path_msg.header.frame_id != self.config.odom_frame_id:
@@ -80,6 +87,7 @@ class PathTracking(Node):
 
         self.get_logger().info("Received a new path from subscription.")
         self.controller.set_path(path)
+        self.metrics.on_path(path, self.current_time_seconds())
 
     def control_loop(self) -> None:
         if self.pose is None:
@@ -88,7 +96,15 @@ class PathTracking(Node):
         if self.mission_state is not None and self.mission_state.mission_complete:
             return
 
+        had_path = self.controller.path is not None
         cmd = self.controller.compute_command(self.pose, self.current_speed)
+
+        if had_path and cmd is not None:
+            if self.controller.path is None:
+                # HACK: The path planner publishes None once the goal is reached
+                self.metrics.on_goal_reached(self.pose, self.current_time_seconds())
+            else:
+                self.metrics.on_control(self.pose, self.controller.target_heading, cmd, self.current_time_seconds())
 
         if cmd is not None:
             if self.mission_state is not None and self.mission_state.in_ramp_approach:
@@ -99,6 +115,13 @@ class PathTracking(Node):
                     twist=cmd,
                 )
             )
+
+    def current_time_seconds(self) -> float:
+        return self.get_clock().now().nanoseconds / 1e9
+
+    def destroy_node(self) -> None:
+        self.metrics.end_run()
+        super().destroy_node()
 
 
 def main() -> None:
