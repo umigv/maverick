@@ -2,7 +2,7 @@ import numpy as np
 import numpy.typing as npt
 from geometry_msgs.msg import Twist, Vector3
 from rclpy.impl.rcutils_logger import RcutilsLogger
-from utils.geometry import Path2d, Pose2d
+from utils.geometry import Path2d, Point2d, Pose2d, Rotation2d
 
 from .config import MPPIConfig
 
@@ -49,6 +49,8 @@ class MPPIController:
         self.half_track_m = config.limits.track_width_m / 2.0
 
         self.path: Path2d | None = None
+        # Direction from the robot to the end of the optimized plan, reported to the path tracking metrics
+        self.target_heading: Rotation2d | None = None
         # Segment of the original path the robot was last matched to, so projection only searches forward from there
         self.projection_index: int = 0
         self.points = np.zeros((0, 2))  # evenly spaced path points dimension (N, 2)
@@ -94,6 +96,7 @@ class MPPIController:
         self.nominal = np.tile(self.last_command, (self.config.sampling.horizon_steps, 1))
 
     def compute_command(self, pose: Pose2d, speed: float) -> Twist | None:
+        self.target_heading = None
         if self.path is None:
             return None
 
@@ -134,6 +137,7 @@ class MPPIController:
             self.last_command[0] = speed
 
         self.optimize(pose.point.x, pose.point.y, pose.rotation.angle, start_arc_m)
+        self.target_heading = self.plan_end_heading(pose)
 
         # The plan was built with timestep_s steps, but we send commands every control_period_s, so clamp the first command again
         dt = self.control_period_s
@@ -151,6 +155,16 @@ class MPPIController:
         )
 
         return Twist(linear=Vector3(x=self.last_command[0]), angular=Vector3(z=self.last_command[1]))
+
+    def plan_end_heading(self, pose: Pose2d) -> Rotation2d:
+        """Direction from the robot to where the nominal plan ends, MPPI's counterpart of a lookahead point."""
+        dt = self.config.sampling.timestep_s
+        x, y, yaw = pose.point.x, pose.point.y, pose.rotation.angle
+        for v, omega in self.nominal:
+            x += v * np.cos(yaw) * dt
+            y += v * np.sin(yaw) * dt
+            yaw += omega * dt
+        return Rotation2d.from_vector(Point2d(x=float(x), y=float(y)) - pose.point)
 
     def reset(self) -> None:
         self.path = None

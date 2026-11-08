@@ -114,6 +114,18 @@ def test_offset_path_steers_toward_path(offset_m: float) -> None:
     assert abs(robot.point.y - offset_m) < 0.3
 
 
+@pytest.mark.parametrize("offset_m", [1.0, -1.0])
+def test_target_heading_points_toward_path(offset_m: float) -> None:
+    # The metrics' target heading is the direction to the end of the plan, which should lead ahead toward the path
+    controller = make_controller()
+    controller.set_path(Path2d([Point2d(x=0.0, y=offset_m), Point2d(x=10.0, y=offset_m)]))
+
+    run_closed_loop(controller, pose(0.0, 0.0, 0.0), 30)
+
+    assert controller.target_heading is not None
+    assert 0.0 < controller.target_heading.angle * math.copysign(1.0, offset_m) < math.pi / 2
+
+
 def test_curved_path_turns_left() -> None:
     # Half circle bending left (counter-clockwise), starting at the robot and heading along +x
     controller = make_controller()
@@ -136,6 +148,7 @@ def test_goal_returns_one_zero_command_then_none() -> None:
 
     # One stop command, then the controller forgets the path and the plan is cleared
     assert cmd == Twist()
+    assert controller.target_heading is None
     assert controller.compute_command(pose(0.9, 0.0, 0.0), 0.0) is None
     np.testing.assert_array_equal(controller.nominal, 0.0)
 
