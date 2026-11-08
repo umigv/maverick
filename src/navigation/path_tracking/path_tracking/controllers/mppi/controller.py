@@ -40,31 +40,31 @@ class MPPIController:
         self.config = config
         self.control_period_s = control_period_s
         self.logger = logger
-        self.rng = np.random.default_rng(None if config.seed < 0 else config.seed)
+        self.rng = np.random.default_rng(None if config.noise.seed < 0 else config.noise.seed)
         # [v, omega] noise scale; the noise is drawn with std 1 and multiplied by this
-        self.noise_std = np.array([config.linear_noise_std_mps, config.angular_noise_std_radps])
+        self.noise_std = np.array([config.noise.linear_noise_std_mps, config.noise.angular_noise_std_radps])
         # Cannot go faster than either the speed limit / what a single wheel can do driving straight
-        self.max_speed_mps = min(config.max_linear_speed_mps, config.max_wheel_speed_mps)
+        self.max_speed_mps = min(config.limits.max_linear_speed_mps, config.limits.max_wheel_speed_mps)
         # Distance from the robot center to each wheel
-        self.half_track_m = config.track_width_m / 2.0
+        self.half_track_m = config.limits.track_width_m / 2.0
 
         self.path: Path2d | None = None
         # Segment of the original path the robot was last matched to, so projection only searches forward from there
         self.projection_index: int = 0
-        self.points = np.zeros((0, 2)) # evenly spaced path points dimension (N, 2)
-        self.segments = np.zeros((0, 2)) # (N - 1, 2) segments from each point to the next
-        self.segment_headings = np.zeros(0) # (N - 1,) direction of each segment
-        self.inv_segment_length_sq = np.zeros(0) # (N - 1,) 1 / |segment|^2, to avoid division in projection
-        self.cumulative_length = np.zeros(0) # (N,) arc length to each point
-        self.original_cumulative_length = np.zeros(0)  
+        self.points = np.zeros((0, 2))  # evenly spaced path points dimension (N, 2)
+        self.segments = np.zeros((0, 2))  # (N - 1, 2) segments from each point to the next
+        self.segment_headings = np.zeros(0)  # (N - 1,) direction of each segment
+        self.inv_segment_length_sq = np.zeros(0)  # (N - 1,) 1 / |segment|^2, to avoid division in projection
+        self.cumulative_length = np.zeros(0)  # (N,) arc length to each point
+        self.original_cumulative_length = np.zeros(0)
 
-        # Unit-variance exploration noise kept between calls when config.reuse_noise is set
+        # Unit-variance exploration noise for the first half of the samples, kept between calls
         self.reused_noise: FloatArray | None = None
         # Index of the noise pair we refreshed last, so we cycle through all of them in turn
         self.next_noise_refresh = 0
 
         self.last_command = np.zeros(2)
-        self.nominal = np.zeros((config.horizon_steps, 2))
+        self.nominal = np.zeros((config.sampling.horizon_steps, 2))
 
     def set_path(self, path: Path2d) -> None:
         self.path = path
@@ -75,7 +75,7 @@ class MPPIController:
         original_lengths = np.hypot(*np.diff(original, axis=0).T)
         self.original_cumulative_length = np.concatenate([[0.0], np.cumsum(original_lengths)])
         total_length = self.original_cumulative_length[-1]
-        num_points = max(2, int(np.ceil(total_length / self.config.path_resolution_m)) + 1)
+        num_points = max(2, int(np.ceil(total_length / self.config.cost.path_resolution_m)) + 1)
         arc = np.linspace(0.0, total_length, num_points)
         self.points = np.stack(
             [
@@ -91,7 +91,7 @@ class MPPIController:
         self.cumulative_length = arc
 
         # Restart the nominal sequence from the last applied command, therefore that replanning does not violate rate limits is ensured.
-        self.nominal = np.tile(self.last_command, (self.config.horizon_steps, 1))
+        self.nominal = np.tile(self.last_command, (self.config.sampling.horizon_steps, 1))
 
     def compute_command(self, pose: Pose2d, speed: float) -> Twist | None:
         if self.path is None:
@@ -102,7 +102,7 @@ class MPPIController:
             self.reset()
             return Twist()
 
-        # Fractional segment index: e.g. 3.25 means a quarter of the way along segment 3 of the original path 
+        # Fractional segment index: e.g. 3.25 means a quarter of the way along segment 3 of the original path
         new_projection_index = self.path.project(pose.point, self.projection_index)
         if new_projection_index is None:
             self.logger.warning("MPPI: no valid projection segment - stopping")
@@ -137,14 +137,15 @@ class MPPIController:
 
         # The plan was built with timestep_s steps, but we send commands every control_period_s, so clamp the first command again
         dt = self.control_period_s
-        max_dv, max_domega = self.config.max_linear_accel_mps2 * dt, self.config.max_angular_accel_radps2 * dt
+        limits = self.config.limits
+        max_dv, max_domega = limits.max_linear_accel_mps2 * dt, limits.max_angular_accel_radps2 * dt
         v, omega = self.limit_controls(
             self.nominal[0, 0], self.nominal[0, 1], self.last_command[0], self.last_command[1], max_dv, max_domega
         )
         self.last_command = np.array([float(v), float(omega)])
 
         # Advance the nominal sequence by one control period, holding the final control
-        horizon_times = np.arange(self.config.horizon_steps) * self.config.timestep_s
+        horizon_times = np.arange(self.config.sampling.horizon_steps) * self.config.sampling.timestep_s
         self.nominal = np.stack(
             [np.interp(horizon_times + dt, horizon_times, self.nominal[:, i]) for i in range(2)], axis=1
         )
@@ -155,7 +156,7 @@ class MPPIController:
         self.path = None
         self.projection_index = 0
         self.last_command = np.zeros(2)
-        self.nominal = np.zeros((self.config.horizon_steps, 2))
+        self.nominal = np.zeros((self.config.sampling.horizon_steps, 2))
 
     # To ensure that all samples matches the robot's physical constraints, we project the sampled controls onto the feasible set given the previous control
     def limit_controls(
@@ -175,16 +176,16 @@ class MPPIController:
 
         max_dv and max_domega are the most v and omega may change in one step. Works on single values or whole arrays.
         """
-        cfg = self.config
+        limits = self.config.limits
         prev_v = np.asarray(prev_v)
         prev_omega = np.asarray(prev_omega)
         # The slowest we can possibly be turning this step, given how fast we were turning and the rate limit
         min_reachable_omega = np.maximum(np.abs(prev_omega) - max_domega, 0.0)
         # Leave enough wheel speed for that turn, so the outer wheel doesn't go over its limit
-        v_max = np.minimum(self.max_speed_mps, cfg.max_wheel_speed_mps - self.half_track_m * min_reachable_omega)
+        v_max = np.minimum(self.max_speed_mps, limits.max_wheel_speed_mps - self.half_track_m * min_reachable_omega)
         v_out = np.clip(v, np.maximum(prev_v - max_dv, 0.0), np.minimum(prev_v + max_dv, v_max))
         # Now that v is fixed, this is how fast we can turn before the outer wheel goes over its limit
-        omega_max = np.minimum(cfg.max_angular_speed_radps, (cfg.max_wheel_speed_mps - v_out) / self.half_track_m)
+        omega_max = np.minimum(limits.max_angular_speed_radps, (limits.max_wheel_speed_mps - v_out) / self.half_track_m)
         omega_out = np.clip(
             omega, np.maximum(prev_omega - max_domega, -omega_max), np.minimum(prev_omega + max_domega, omega_max)
         )
@@ -194,11 +195,11 @@ class MPPIController:
     def optimize(self, x: float, y: float, yaw: float, start_arc_m: float) -> None:
         """Run one MPPI update of self.nominal from the given robot state."""
         cfg = self.config
-        num_samples, horizon, dt = cfg.num_samples, cfg.horizon_steps, cfg.timestep_s
+        num_samples, horizon, dt = cfg.sampling.num_samples, cfg.sampling.horizon_steps, cfg.sampling.timestep_s
 
         # (K, T, 2) candidate plans: the current plan plus some random wiggle
         noise = self.exploration_noise() * self.noise_std
-        noise[0] = 0.0 
+        noise[0] = 0.0
         sampled = self.nominal + noise
 
         # Simulate all K candidates at once, one step at a time. The *_k variables hold the state of every candidate at
@@ -212,7 +213,7 @@ class MPPIController:
         yaw_k = np.full(num_samples, yaw)
         v_k = np.full(num_samples, self.last_command[0])
         omega_k = np.full(num_samples, self.last_command[1])
-        max_dv, max_domega = cfg.max_linear_accel_mps2 * dt, cfg.max_angular_accel_radps2 * dt
+        max_dv, max_domega = cfg.limits.max_linear_accel_mps2 * dt, cfg.limits.max_angular_accel_radps2 * dt
         for t in range(horizon):
             # Clamp the candidate's control to what the robot can actually do, then drive one step
             v_k, omega_k = self.limit_controls(sampled[:, t, 0], sampled[:, t, 1], v_k, omega_k, max_dv, max_domega)
@@ -223,7 +224,8 @@ class MPPIController:
             xs[:, t], ys[:, t], yaws[:, t] = x_k, y_k, yaw_k
 
         costs = self.rollout_costs(xs, ys, yaws, controls, start_arc_m)
-        weights = np.exp(-(costs - costs.min()) / cfg.temperature) # subtract the min cost first; temperature controls how picky we are
+        # Subtract the min cost first; temperature controls how picky we are
+        weights = np.exp(-(costs - costs.min()) / cfg.sampling.temperature)
         weights /= weights.sum()
         # Every sampled sequence is feasible from the same initial control and the constraints are convex, so their
         # weighted average is feasible too. The einsum is just sum over k of weights[k] * controls[k].
@@ -231,30 +233,24 @@ class MPPIController:
 
     # Noise generation and reuse for exploration
     def exploration_noise(self) -> FloatArray:
-        """Return unit-variance noise of shape (K, T, 2), fresh or reused according to config.reuse_noise.
+        """Return unit-variance noise of shape (K, T, 2).
 
-        Reuse keeps the sample set between calls and replaces noise_refresh_pairs_per_call samples (and their mirrors)
-        per call, round-robin, so the whole set renews every num_samples / (2 * noise_refresh_pairs_per_call) calls.
-        Consecutive updates then see almost the same samples and the weighted average no longer jumps from call to
-        call. The second half of the samples mirrors the first, so the samples sum to exactly zero and a kept set cannot
-        bias the update in one direction.
+        The noise is kept between calls and only one sample (and its mirror) is redrawn per call, round-robin.
+        Consecutive updates then see almost the same samples, so the weighted average does not jump from call to call
+        (fresh noise every call makes the command jitter). The second half of the samples mirrors the first, so the
+        samples sum to exactly zero and the kept set cannot bias the update in one direction.
         """
-        cfg = self.config
-        if not cfg.reuse_noise:
-            return self.rng.standard_normal((cfg.num_samples, cfg.horizon_steps, 2))
-        # The second half is the same noise flipped (-noise), so we only need to generate half of the samples and mirror them
-        half = cfg.num_samples // 2
+        horizon = self.config.sampling.horizon_steps
         if self.reused_noise is None:
-            self.reused_noise = self.rng.standard_normal((half, cfg.horizon_steps, 2))
+            half = self.config.sampling.num_samples // 2
+            self.reused_noise = self.rng.standard_normal((half, horizon, 2))
             self.reused_noise[0] = 0.0  # sample 0 is the unperturbed nominal; keep its mirror unperturbed too
         else:
-            for _ in range(cfg.noise_refresh_pairs_per_call):
-                self.next_noise_refresh = self.next_noise_refresh % (half - 1) + 1  # cycles 1 .. half - 1
-                self.reused_noise[self.next_noise_refresh] = self.rng.standard_normal((cfg.horizon_steps, 2))
-        noise = np.zeros((cfg.num_samples, cfg.horizon_steps, 2))
-        noise[:half] = self.reused_noise
-        noise[half : 2 * half] = -self.reused_noise
-        return noise
+            # Cycles 1 .. half - 1, skipping the nominal
+            self.next_noise_refresh = self.next_noise_refresh % (len(self.reused_noise) - 1) + 1
+            self.reused_noise[self.next_noise_refresh] = self.rng.standard_normal((horizon, 2))
+        # The second half is the same noise flipped (-noise)
+        return np.concatenate([self.reused_noise, -self.reused_noise])
 
     # Compute the cost of each rollout
     def rollout_costs(
@@ -264,14 +260,14 @@ class MPPIController:
         cfg = self.config
         # Only look at the stretch of path the robot could reach this horizon: resampled segments [first, last).
         # reach_m is the farthest we could drive at full speed, plus some margin.
-        reach_m = self.max_speed_mps * cfg.horizon_steps * cfg.timestep_s + WINDOW_MARGIN_M
+        reach_m = self.max_speed_mps * cfg.sampling.horizon_steps * cfg.sampling.timestep_s + WINDOW_MARGIN_M
         first = int(np.searchsorted(self.cumulative_length, start_arc_m, side="right")) - 1
         first = min(max(first, 0), len(self.segments) - 1)
         last = int(np.searchsorted(self.cumulative_length, start_arc_m + reach_m)) + 1
         last = min(max(last, first + 1), len(self.segments))
 
         # How far each rollout has driven by each step
-        traveled_m = np.cumsum(controls[:, :, 0], axis=1) * cfg.timestep_s
+        traveled_m = np.cumsum(controls[:, :, 0], axis=1) * cfg.sampling.timestep_s
         max_arc_m = start_arc_m + traveled_m + PROJECTION_ARC_MARGIN_M
         # For each rollout point: squared distance to the path, which resampled segment it's closest to, and where that is along the path.
         distance_sq, segment, arc_m = self.project(xs, ys, first, last, max_arc_m)
@@ -281,7 +277,7 @@ class MPPIController:
         # Reference speed tapers so the robot can decelerate to zero at max_linear_accel_mps2 by the point where it stops:
         # goal_tolerance_m before the end of the path
         stopping_m = np.maximum(remaining_m - cfg.goal_tolerance_m, 0.0)
-        reference_speed = np.minimum(cfg.target_speed_mps, np.sqrt(2.0 * cfg.max_linear_accel_mps2 * stopping_m))
+        reference_speed = np.minimum(cfg.target_speed_mps, np.sqrt(2.0 * cfg.limits.max_linear_accel_mps2 * stopping_m))
         # The control one step earlier (the published command for step 0), so rate is how much the control changed each step. Penalizing it keeps the commands smooth
         previous = np.concatenate(
             [np.broadcast_to(self.last_command, (controls.shape[0], 1, 2)), controls[:, :-1]], axis=1
@@ -290,17 +286,17 @@ class MPPIController:
 
         # Cost paid at every step
         running = (
-            cfg.cross_track_weight * distance_sq # be close to the path
-            + cfg.heading_weight * heading_error**2 # point along it
-            + cfg.speed_weight * (controls[:, :, 0] - reference_speed) ** 2 # drive at the reference speed
-            + cfg.linear_rate_weight * rate[:, :, 0] ** 2 # smooth?
-            + cfg.angular_rate_weight * rate[:, :, 1] ** 2 # smooth?
+            cfg.cost.cross_track_weight * distance_sq  # be close to the path
+            + cfg.cost.heading_weight * heading_error**2  # point along it
+            + cfg.cost.speed_weight * (controls[:, :, 0] - reference_speed) ** 2  # drive at the reference speed
+            + cfg.cost.linear_rate_weight * rate[:, :, 0] ** 2  # smooth?
+            + cfg.cost.angular_rate_weight * rate[:, :, 1] ** 2  # smooth?
         )
         # Cost paid once at the end of the rollout
-        terminal = cfg.terminal_cross_track_weight * distance_sq[:, -1] - cfg.progress_weight * (
+        terminal = cfg.cost.terminal_cross_track_weight * distance_sq[:, -1] - cfg.cost.progress_weight * (
             arc_m[:, -1] - start_arc_m
-        ) # end up near the path, minus a reward for how far along it we got
-        return np.asarray(running.sum(axis=1) * cfg.timestep_s + terminal, dtype=np.float64)
+        )  # end up near the path, minus a reward for how far along it we got
+        return np.asarray(running.sum(axis=1) * cfg.sampling.timestep_s + terminal, dtype=np.float64)
 
     def project(
         self, xs: FloatArray, ys: FloatArray, first: int, last: int, max_arc_m: FloatArray

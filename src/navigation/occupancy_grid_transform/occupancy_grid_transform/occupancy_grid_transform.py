@@ -83,11 +83,10 @@ FUTURE_STAMP_TOLERANCE_S = 0.05
 def transform_grid_origin(tf_buffer: Buffer, grid: OccupancyGrid, target_frame: str) -> tuple[Pose, bool]:
     """Return the grid origin in target_frame and whether it was placed at (or just after) the grid's stamp.
 
-    Grids can arrive hundreds of milliseconds after capture. Placing one with the latest transform shifts its obstacles by
-    however far the robot moved since the capture (measured in simulation: 28-37 cm median, up to 91 cm, 3 m ahead), so
-    the transform at the stamp is used. Without blocking for it: if it is not available, the latest transform is used
-    instead, as before, and the second value is False unless the stamp is at most FUTURE_STAMP_TOLERANCE_S ahead of
-    the latest transform. A zero stamp also means latest.
+    Grids can arrive hundreds of milliseconds after capture, and placing one with the latest transform would shift its
+    obstacles by however far the robot moved since. If the transform at the stamp is not available, the latest one is
+    used and the second value is False, unless the stamp is at most FUTURE_STAMP_TOLERANCE_S ahead of the latest
+    transform. A zero stamp also means latest.
     """
     origin = PoseStamped(header=Header(frame_id=grid.header.frame_id, stamp=grid.header.stamp), pose=grid.info.origin)
     try:

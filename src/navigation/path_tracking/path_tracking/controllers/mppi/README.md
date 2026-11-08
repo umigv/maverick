@@ -12,6 +12,6 @@ v_ref = min(target_speed_mps, sqrt(2 * max_linear_accel_mps2 * (remaining_arc - 
 
 Each rollout state is matched only to the part of the path it could have reached by then.
 
-**Noise reuse:** (Because drawing fresh noises cause a very heavy jitter problem) With `reuse_noise`, the samples are kept between steps and only `noise_refresh_pairs_per_call` of them are replaced each step. Samples come in mirrored pairs, so their average stays zero.
+**Noise reuse:** The samples are kept between steps and only one mirrored pair is redrawn each step, so the plan does not jump from step to step and the command does not jitter. Mirrored pairs keep the average noise at zero.
 
 **Speed resync:** If the measured speed is more than `speed_resync_threshold_mps` below the last command (for example while the ramp speed cap is active, or another source has control), planning restarts from the measured speed instead.

@@ -4,13 +4,10 @@ Brings up base.launch.py (simulation:=true) and navigation.launch.py unchanged, 
 include. Each overridden name is declared by exactly one node (path_tracking, occupancy_grid_simulator or
 occupancy_grid_transform); other nodes ignore them.
 
-The perception overrides adapt the scaled-down simulation courses so the planner can see a collision-free route on test3
-(goal 7.5, 1.5): a smaller blind spot (default 1.25 m hides nearby obstacles, which the planner treats as traversable),
-inflation reduced from 12 to 8 cells (0.40 m, just above the ~0.38 m robot half width), and a 9 m wide grid (default 5 m)
-so the gap around the middle obstacle is in view. Pass an empty value to keep a node's default.
+The grid width and inflation overrides are empty by default, which keeps the production values.
 
 Usage:
-    pixi run ros2 launch src/navigation/path_tracking/benchmark/sim_trial.launch.py course:=test3 algorithm:=mppi
+    pixi run ros2 launch src/navigation/path_tracking/benchmark/sim_trial.launch.py course:=test2 algorithm:=mppi
     pixi run ros2 launch src/navigation/path_tracking/benchmark/sim_trial.launch.py algorithm:=differential_drive \
         target_speed_mps:=2.0
 """
@@ -28,14 +25,11 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
     course = LaunchConfiguration("course").perform(context)
     algorithm = LaunchConfiguration("algorithm").perform(context)
     target_speed = LaunchConfiguration("target_speed_mps").perform(context)
-    blind_spot = LaunchConfiguration("blind_spot_m").perform(context)
     grid_height = LaunchConfiguration("grid_height_m").perform(context)
     inflation = LaunchConfiguration("inflation_radius_cells").perform(context)
     launch_dir = FindPackageShare("bringup").perform(context) + "/launch"
 
     simulation_overrides: list[Action] = []
-    if blind_spot:
-        simulation_overrides.append(SetParameter(name="robot_blind_spot_height_m", value=float(blind_spot)))
     if grid_height:
         simulation_overrides.append(SetParameter(name="height_m", value=float(grid_height)))
         simulation_overrides.append(SetParameter(name="offset_y_m", value=-float(grid_height) / 2))
@@ -74,17 +68,14 @@ def generate_launch_description() -> LaunchDescription:
     return LaunchDescription(
         [
             DeclareLaunchArgument("mode", default_value="nav_test"),
-            DeclareLaunchArgument("course", default_value="test3"),
+            DeclareLaunchArgument("course", default_value="test2"),
             DeclareLaunchArgument("algorithm", default_value="differential_drive"),
             DeclareLaunchArgument(
                 "target_speed_mps", default_value="", description="Override <algorithm>.target_speed_mps if set"
             ),
+            DeclareLaunchArgument("grid_height_m", default_value="", description="occupancy_grid_simulator width"),
             DeclareLaunchArgument(
-                "blind_spot_m", default_value="0.5", description="occupancy_grid_simulator blind spot"
-            ),
-            DeclareLaunchArgument("grid_height_m", default_value="9.0", description="occupancy_grid_simulator width"),
-            DeclareLaunchArgument(
-                "inflation_radius_cells", default_value="8", description="occupancy_grid_transform inflation core"
+                "inflation_radius_cells", default_value="", description="occupancy_grid_transform inflation core"
             ),
             OpaqueFunction(function=launch_setup),
         ]

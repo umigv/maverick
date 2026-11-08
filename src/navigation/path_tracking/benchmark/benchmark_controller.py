@@ -2,8 +2,7 @@
 """Offline compute benchmark for path tracking controllers.
 
 Runs a controller in closed loop on a synthetic S-curve with an ideal unicycle model stepped at the control period, and
-times each compute_command call. Not a real-time test: results depend on the machine and its load.
-
+times each compute_command call.
 Usage: pixi run python3 src/navigation/path_tracking/benchmark/benchmark_controller.py --algorithm mppi [--samples K]
 """
 
@@ -37,9 +36,7 @@ def percentile(sorted_values: list[float], q: float) -> float:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--algorithm", choices=["mppi", "differential_drive"], default="mppi")
-    parser.add_argument("--samples", type=int, help="override mppi.num_samples")
-    parser.add_argument("--horizon-steps", type=int, help="override mppi.horizon_steps")
-    parser.add_argument("--timestep", type=float, help="override mppi.timestep_s")
+    parser.add_argument("--samples", type=int, help="override mppi.sampling.num_samples")
     parser.add_argument("--calls", type=int, default=1000, help="measured calls (loops over the path as needed)")
     parser.add_argument("--warmup", type=int, default=20)
     parser.add_argument("--seed", type=int, default=0)
@@ -49,14 +46,12 @@ def main() -> None:
     logger = get_logger("benchmark_controller")
     controller: Controller
     if args.algorithm == "mppi":
-        overrides = {
-            "num_samples": args.samples,
-            "horizon_steps": args.horizon_steps,
-            "timestep_s": args.timestep,
-            "seed": args.seed,
-        }
+        default = PathTrackingConfig.mppi
+        num_samples = default.sampling.num_samples if args.samples is None else args.samples
         mppi_config = dataclasses.replace(
-            PathTrackingConfig.mppi, **{k: v for k, v in overrides.items() if v is not None}
+            default,
+            sampling=dataclasses.replace(default.sampling, num_samples=num_samples),
+            noise=dataclasses.replace(default.noise, seed=args.seed),
         )
         controller = MPPIController(mppi_config, period_s, logger)
         config_summary = dataclasses.asdict(mppi_config)
