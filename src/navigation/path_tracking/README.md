@@ -24,6 +24,10 @@ The node reads the latched `mission_state` topic published by `autonav_mission_c
 
 If no mission state has been received (e.g. in modes where mission control is not running), commands are published unmodified.
 
+## Metrics (WIP)
+
+**TODO:** document
+
 ## Subscribed Topics
 
 - `odom` (`nav_msgs/Odometry`) - Robot pose and velocity in the odometry frame

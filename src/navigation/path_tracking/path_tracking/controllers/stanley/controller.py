@@ -14,12 +14,14 @@ class StanleyController:
         self.logger = logger
         self.path: Path2d | None = None
         self.projection_index: int = 0
+        self.target_heading: Rotation2d | None = None
 
     def set_path(self, path: Path2d) -> None:
         self.path = path
         self.projection_index = 0
 
     def compute_command(self, pose: Pose2d, speed: float) -> Twist | None:
+        self.target_heading = None
         if self.path is None:
             return None
 
@@ -53,6 +55,8 @@ class StanleyController:
             min=-self.config.max_steer_rad,
             max=self.config.max_steer_rad,
         )
+
+        self.target_heading = pose.rotation + Rotation2d(steering_angle)
 
         # Bicycle model: omega = v*tan(steering_angle)/L, using front_offset_m as wheelbase (unicycle approximation for
         # diff drive)
