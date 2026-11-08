@@ -1,0 +1,19 @@
+{
+    "datum": {
+        "latitude": 42.294621,
+        "longitude": -83.708112,
+        "altitude": 270.0
+    },
+    "waypoints": [
+        {
+            "x": 18.0,
+            "y": 33.0,
+            "no_mans_land_enter": true
+        },
+        {
+            "x": 18.0,
+            "y": 40.0,
+            "no_mans_land_exit": true
+        }
+    ]
+}
