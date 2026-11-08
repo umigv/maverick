@@ -10,6 +10,7 @@ from launch_ros.actions import Node
 def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[LaunchDescriptionEntity]:
     frames = load_frames()
     course = LaunchConfiguration("course").perform(context)
+    is_semi_simulation = LaunchConfiguration("is_semi_simulation").perform(context) == "true"
     share = bringup_share()
     gps_file = load_gps_file(course)
 
@@ -34,6 +35,26 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
             ("odom", "odom/global"),
         ],
     )
+
+    if is_semi_simulation:
+        occupancy_grid_simulator_node = Node(
+            package="occupancy_grid_simulator",
+            executable="occupancy_grid_simulator",
+            name="occupancy_grid_simulator",
+            output="screen",
+            parameters=[
+                {"map_file_path": f"{share}/courses/{course}/map.json"},
+                {"map_frame_id": frames["odom_frame"]},
+                {"base_frame_id": frames["base_frame"]},
+                {"ground_truth_base_frame_id": frames["base_frame"]},
+            ],
+            remappings=[
+                ("odom", "odom/local"),
+                ("occupancy_grid", "occupancy_grid/raw"),
+            ],
+        )
+
+        return [occupancy_grid_simulator_node]
 
     occupancy_grid_simulator_node = Node(
         package="occupancy_grid_simulator",

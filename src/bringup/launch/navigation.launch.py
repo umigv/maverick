@@ -14,6 +14,9 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
     mode: Mode = cast(Mode, LaunchConfiguration("mode").perform(context))
     course = LaunchConfiguration("course").perform(context)
 
+    mission_frame = frames["odom_frame"] if mode == "nav_test" else frames["map_frame"]
+    mission_odom_topic = "odom/local" if mode == "nav_test" else "odom/global"
+
     occupancy_grid_transform_node = Node(
         package="occupancy_grid_transform",
         executable="occupancy_grid_transform",
@@ -34,10 +37,10 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
         name="autonav_mission_control",
         parameters=[
             {"waypoints_file_path": gps_file_path(course)},
-            {"map_frame_id": frames["map_frame"]},
+            {"map_frame_id": mission_frame},
         ],
         remappings=[
-            ("odom", "odom/global"),
+            ("odom", mission_odom_topic),
         ],
     )
 
@@ -102,7 +105,7 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
     )
 
     match mode:
-        case "autonav":
+        case "autonav" | "nav_test":
             return [
                 occupancy_grid_transform_node,
                 path_planning_node,
@@ -113,7 +116,7 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
                 recovery_behavior_node,
                 shutdown_on_completion,
             ]
-        case "self_drive" | "nav_test":
+        case "self_drive":
             return [
                 occupancy_grid_transform_node,
                 path_planning_node,

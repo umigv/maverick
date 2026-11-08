@@ -16,6 +16,7 @@ def generate_launch_description() -> LaunchDescription:
         [
             DeclareLaunchArgument("mode", choices=cast(list[str], MODES)),
             DeclareLaunchArgument("simulation", default_value="false", choices=["true", "false"]),
+            DeclareLaunchArgument("semi_simulation", default_value="false", choices=["true", "false"]),
             DeclareLaunchArgument("course", default_value="default"),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(PathJoinSubstitution([bringup_share, "launch", "core.launch.py"])),
@@ -28,10 +29,21 @@ def generate_launch_description() -> LaunchDescription:
                     ("course", LaunchConfiguration("course")),
                 ],
             ),
+            # semi_simulation := true
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(PathJoinSubstitution([bringup_share, "launch", "simulation.launch.py"])),
+                condition=IfCondition(LaunchConfiguration("semi_simulation")),
+                launch_arguments=[
+                    ("is_semi_simulation", LaunchConfiguration("semi_simulation")),
+                    ("course", LaunchConfiguration("course")),
+                ],
+            ),
+            # simulation := true
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(PathJoinSubstitution([bringup_share, "launch", "simulation.launch.py"])),
                 condition=IfCondition(LaunchConfiguration("simulation")),
                 launch_arguments=[
+                    ("is_semi_simulation", LaunchConfiguration("semi_simulation")),
                     ("course", LaunchConfiguration("course")),
                 ],
             ),
