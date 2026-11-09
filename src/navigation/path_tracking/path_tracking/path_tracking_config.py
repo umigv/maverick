@@ -73,16 +73,16 @@ class PathTrackingConfig:
     # Limits follow odrive_driver: track_width_m=0.764, accel_limit_mps2=3.0, and vel_limit_mps=2.2 (hard trip, so the
     # wheel limit keeps a margin). Angular accel is the wheel accel limit expressed as a pure rotation: 2 * 3.0 / 0.764.
     mppi: MPPIConfig = MPPIConfig(  # noqa: RUF009
-        target_speed_mps=2.0,
+        target_speed_mps=1.0,
         goal_tolerance_m=0.3,
         speed_resync_threshold_mps=0.3,
         limits=MPPILimitsConfig(
-            max_linear_speed_mps=2.0,
+            max_linear_speed_mps=1.0,
             max_angular_speed_radps=1.5,
             max_linear_accel_mps2=3.0,
             max_angular_accel_radps2=7.85,
             track_width_m=0.764,
-            max_wheel_speed_mps=2.0,
+            max_wheel_speed_mps=1.0,
         ),
         sampling=MPPISamplingConfig(horizon_steps=20, timestep_s=0.1, num_samples=500, temperature=1.0),
         noise=MPPINoiseConfig(linear_noise_std_mps=0.2, angular_noise_std_radps=0.4, seed=-1),
@@ -97,7 +97,7 @@ class PathTrackingConfig:
             terminal_cross_track_weight=20.0,
         ),
     )
-    algorithm: Algorithm = "differential_drive"
+    algorithm: Algorithm = "mppi"
     control_period_s: float = 0.01
     ramp_max_speed_mps: float = 1.0
     metrics_csv_enabled: bool = True
