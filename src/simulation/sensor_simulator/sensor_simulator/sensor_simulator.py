@@ -98,8 +98,21 @@ class SensorSimulator(Node):
             self.cmd_vel = Twist()
 
         dt = self.config.update_period_s
-        self.position += Point2d(x=self.cmd_vel.linear.x * dt, y=0.0).rotate_by(self.rotation)
-        self.rotation = Rotation2d(self.rotation.angle + self.cmd_vel.angular.z * dt)
+        linear_vel = self.cmd_vel.linear.x
+        angular_vel = self.cmd_vel.angular.z
+
+        arc_length = linear_vel * dt
+        d_theta = angular_vel * dt
+        mid_rotation = self.rotation + Rotation2d(0.5 * d_theta)
+
+        if d_theta == 0.0:
+            chord_length = arc_length
+        else:
+            radius = arc_length / d_theta
+            chord_length = 2.0 * radius * math.sin(0.5 * d_theta)
+
+        self.position += Point2d(x=chord_length, y=0.0).rotate_by(mid_rotation)
+        self.rotation = Rotation2d(self.rotation.angle + angular_vel * dt)
 
         # fmt: off
         enc = self.config.enc_vel
