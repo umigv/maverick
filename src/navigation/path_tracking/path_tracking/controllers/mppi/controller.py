@@ -2,7 +2,7 @@ import torch
 from geometry_msgs.msg import Twist
 from pytorch_mppi import MPPI
 from rclpy.impl.rcutils_logger import RcutilsLogger
-from utils.geometry import Path2d, Pose2d
+from utils.geometry import Path2d, Pose2d, Rotation2d
 
 from .config import MPPIConfig
 
@@ -33,6 +33,7 @@ class MPPIController:
             u_min=torch.tensor([self.config.min_speed_mps, -self.config.max_angular_speed_radps]),
             u_max=torch.tensor([self.config.max_speed_mps, self.config.max_angular_speed_radps]),
         )
+        self.target_heading: Rotation2d | None = None
 
     def set_path(self, path: Path2d) -> None:
         points = torch.tensor(
@@ -62,6 +63,7 @@ class MPPIController:
         self.ctrl.reset()
 
     def compute_command(self, pose: Pose2d, speed: float) -> Twist | None:
+        self.target_heading = None
         if self.path is None:
             return None
 
@@ -78,6 +80,8 @@ class MPPIController:
 
         with torch.no_grad():
             action = self.ctrl.command(state)
+
+        self.target_heading = Rotation2d(pose.rotation.angle + action[1].item() * self.config.dt)
 
         cmd = Twist()
         cmd.linear.x = float(action[0].item())
