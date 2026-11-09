@@ -106,9 +106,9 @@ class SensorSimulator(Node):
         d_theta = angular_vel * dt
         mid_rotation = self.rotation + Rotation2d(0.5 * d_theta)
 
-        # chord length = 2 * r * sin(theta / 2)
-        # = 2 (arclength / theta) * sin(theta / 2)
-        # = arclength * sin(theta / 2) / (theta / 2)
+        # chord length = 2 * r * sin(d_theta / 2)
+        # = 2 (arc_length / d_theta) * sin(d_theta / 2)
+        # = arc_length * sin(d_theta / 2) / (d_theta / 2)
         # which equals the below formula, as np.sinc(x) = sin(pi * x) / (pi * x),
         # so we divide by pi. we prefer sinc because it is numerically stable around 0.
         chord_length = arc_length * np.sinc(d_theta / (2.0 * math.pi))
