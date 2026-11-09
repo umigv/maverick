@@ -35,7 +35,7 @@ def git_config(key: str, default: str) -> str:
 
 def set_maintainer(pkg_dir: Path) -> None:
     name = git_config("user.name", "TEMPLATE_FILL_IN")
-    email = git_config("user.email", "TEMPLATE_FILL_IN@todo.todo")
+    email = git_config("user.email", "TEMPLATE_FILL_IN@umich.edu")
 
     for filename in ("package.xml", "setup.py"):
         path = pkg_dir / filename

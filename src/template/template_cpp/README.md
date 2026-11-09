@@ -2,7 +2,7 @@
 
 TEMPLATE_FILL_IN: One or two sentences on what the node does and how it fits into the system.
 
-<!-- Fill in the sections below and delete the ones that don't apply, keeping this order. -->
+<!-- TEMPLATE_DELETE_ME: Fill in the sections below and delete the ones that don't apply, keeping this order. -->
 
 ## TEMPLATE_FILL_IN: Behavior
 

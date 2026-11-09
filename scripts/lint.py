@@ -61,28 +61,27 @@ def lint_md(targets: list[Target]) -> None:
 def lint_template_placeholders(targets: list[Target]) -> None:
     info("Checking for template placeholders")
 
-    template_dir = ROOT / "src" / "template"
     markers = ["TEMPLATE_FILL_IN", "TEMPLATE_DELETE_ME"]
 
-    bad_files = []
-    safe_files = [
+    exempt_files = []
+    safe_paths = [
         ROOT / "scripts" / "lint.py",
         ROOT / "docs" / "DEVELOPMENT.md",
         ROOT / "scripts" / "create_package.py",
+        *(ROOT / "src" / "template").rglob("*"),
     ]
 
     for f in files_in(targets, "*"):
-        if not f.is_file() or f.is_relative_to(template_dir) or f in safe_files:
+        if f in safe_paths:
             continue
 
-        for marker in markers:
-            if marker.encode() in f.read_bytes():
-                bad_files.append(f)
-                break
+        content = f.read_bytes()
+        if any(marker.encode() in content for marker in markers):
+            exempt_files.append(f)
 
-    if bad_files:
-        bad_str = "\n".join(str(f.relative_to(ROOT)) for f in bad_files)
-        die(f"One of: {markers} found in the following files:\n{bad_str}")
+    if exempt_files:
+        bad_str = "\n".join(str(f.relative_to(ROOT)) for f in exempt_files)
+        die(f"One of: {', '.join(markers)} found in the following files:\n{bad_str}")
 
 
 def main() -> None:
