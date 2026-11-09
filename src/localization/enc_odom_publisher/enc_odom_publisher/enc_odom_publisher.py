@@ -64,10 +64,10 @@ class EncOdomPublisher(Node):
 
             linear_vel = msg.twist.twist.linear.x
             angular_vel = msg.twist.twist.angular.z
-            mid_rotation = self.rotation + Rotation2d(0.5 * angular_vel * dt)
 
             arc_length = linear_vel * dt
             d_theta = angular_vel * dt
+            mid_rotation = self.rotation + Rotation2d(0.5 * d_theta)
 
             if d_theta == 0.0:
                 chord_length = arc_length
@@ -77,7 +77,7 @@ class EncOdomPublisher(Node):
 
             # The chord points in the direction of the mid rotation.
             self.position += Point2d(x=chord_length, y=0.0).rotate_by(mid_rotation)
-            self.rotation = mid_rotation + Rotation2d(0.5 * angular_vel * dt)
+            self.rotation += Rotation2d(d_theta)
         finally:
             self.twist = msg.twist
             self.prev_time = current_time

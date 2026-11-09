@@ -111,8 +111,9 @@ class SensorSimulator(Node):
             radius = arc_length / d_theta
             chord_length = 2.0 * radius * math.sin(0.5 * d_theta)
 
+        # The chord points in the direction of the mid rotation.
         self.position += Point2d(x=chord_length, y=0.0).rotate_by(mid_rotation)
-        self.rotation = Rotation2d(self.rotation.angle + angular_vel * dt)
+        self.rotation = Rotation2d(self.rotation.angle + d_theta)
 
         # fmt: off
         enc = self.config.enc_vel
