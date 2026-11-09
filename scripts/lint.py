@@ -63,8 +63,8 @@ def lint_template_placeholders(targets: list[Target]) -> None:
 
     markers = ["TEMPLATE_FILL_IN", "TEMPLATE_DELETE_ME"]
 
-    exempt_files = []
-    safe_paths = [
+    bad_files = []
+    exempt_paths = [
         ROOT / "scripts" / "lint.py",
         ROOT / "docs" / "DEVELOPMENT.md",
         ROOT / "scripts" / "create_package.py",
@@ -72,15 +72,15 @@ def lint_template_placeholders(targets: list[Target]) -> None:
     ]
 
     for f in files_in(targets, "*"):
-        if f in safe_paths:
+        if f in exempt_paths:
             continue
 
         content = f.read_bytes()
         if any(marker.encode() in content for marker in markers):
-            exempt_files.append(f)
+            bad_files.append(f)
 
-    if exempt_files:
-        bad_str = "\n".join(str(f.relative_to(ROOT)) for f in exempt_files)
+    if bad_files:
+        bad_str = "\n".join(str(f.relative_to(ROOT)) for f in bad_files)
         die(f"One of: {', '.join(markers)} found in the following files:\n{bad_str}")
 
 
