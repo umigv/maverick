@@ -1,10 +1,10 @@
 # template_cpp
 
-FILL_IN: One or two sentences on what the node does and how it fits into the system.
+TEMPLATE_FILL_IN: One or two sentences on what the node does and how it fits into the system.
 
 <!-- Fill in the sections below and delete the ones that don't apply, keeping this order. -->
 
-## FILL_IN: Behavior
+## TEMPLATE_FILL_IN: Behavior
 
 Free-form sections describing behavior/algorithms come first, before the interface sections. Add as many as needed.
 

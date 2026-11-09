@@ -97,7 +97,7 @@ As we use pixi to manage external dependencies, only declare dependencies on oth
 just create-package <dir> <package> [--type python|cpp]
 ```
 
-Copies [`template_python`](../src/template/template_python) or [`template_cpp`](../src/template/template_cpp) into `<dir>/<package>`.
+Copies [`template_python`](../src/template/template_python) or [`template_cpp`](../src/template/template_cpp) into `<dir>/<package>`. The new files will contain TEMPLATE_FILL_IN comments, which you should resolve and delete.
 
 ## Node Configuration
 
