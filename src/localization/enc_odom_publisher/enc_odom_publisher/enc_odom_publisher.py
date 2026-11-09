@@ -1,3 +1,6 @@
+import math
+
+import numpy as np
 import utils.config
 import utils.lifecycle
 from geometry_msgs.msg import (
@@ -60,13 +63,23 @@ class EncOdomPublisher(Node):
             if dt <= 0.0 or dt > self.config.max_dt_s:
                 return
 
-            # Use midpoint method for higher numerical accuracy: https://en.wikipedia.org/wiki/Midpoint_method
             linear_vel = msg.twist.twist.linear.x
             angular_vel = msg.twist.twist.angular.z
-            mid_rotation = self.rotation + Rotation2d(0.5 * angular_vel * dt)
 
-            self.position += Point2d(x=linear_vel * dt, y=0.0).rotate_by(mid_rotation)
-            self.rotation = mid_rotation + Rotation2d(0.5 * angular_vel * dt)
+            arc_length = linear_vel * dt
+            d_theta = angular_vel * dt
+            mid_rotation = self.rotation + Rotation2d(0.5 * d_theta)
+
+            # chord length = 2 * r * sin(d_theta / 2)
+            # = 2 (arc_length / d_theta) * sin(d_theta / 2)
+            # = arc_length * sin(d_theta / 2) / (d_theta / 2)
+            # which equals the below formula, as np.sinc(x) = sin(pi * x) / (pi * x),
+            # so we divide by pi. we prefer sinc because it is numerically stable around 0.
+            chord_length = arc_length * np.sinc(d_theta / (2.0 * math.pi))
+
+            # The chord points in the direction of the mid rotation.
+            self.position += Point2d(x=chord_length, y=0.0).rotate_by(mid_rotation)
+            self.rotation += Rotation2d(d_theta)
         finally:
             self.twist = msg.twist
             self.prev_time = current_time
