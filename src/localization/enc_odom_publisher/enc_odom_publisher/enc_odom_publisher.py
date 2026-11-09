@@ -1,4 +1,5 @@
 import math
+import numpy
 
 import utils.config
 import utils.lifecycle
@@ -69,11 +70,7 @@ class EncOdomPublisher(Node):
             d_theta = angular_vel * dt
             mid_rotation = self.rotation + Rotation2d(0.5 * d_theta)
 
-            if d_theta == 0.0:
-                chord_length = arc_length
-            else:
-                radius = arc_length / d_theta
-                chord_length = 2.0 * radius * math.sin(0.5 * d_theta)
+            chord_length = arc_length * numpy.sinc(d_theta / (2.0 * math.pi))
 
             # The chord points in the direction of the mid rotation.
             self.position += Point2d(x=chord_length, y=0.0).rotate_by(mid_rotation)
