@@ -70,6 +70,11 @@ class EncOdomPublisher(Node):
             d_theta = angular_vel * dt
             mid_rotation = self.rotation + Rotation2d(0.5 * d_theta)
 
+            # chord length = 2 * r * sin(theta / 2)
+            # = 2 (arclength / theta) * sin(theta / 2)
+            # = arclength * sin(theta / 2) / (theta / 2)
+            # which equals the below formula, as np.sinc(x) = sin(pi * x) / (pi * x),
+            # so we divide by pi. we prefer sinc because it is numerically stable around 0.
             chord_length = arc_length * np.sinc(d_theta / (2.0 * math.pi))
 
             # The chord points in the direction of the mid rotation.
