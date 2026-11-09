@@ -62,7 +62,7 @@ def lint_template_placeholders(targets: list[Target]) -> None:
     info("Checking for template placeholders")
 
     template_dir = ROOT / "src" / "template"
-    marker = "TEMPLATE_FILL_IN"
+    markers = ["TEMPLATE_FILL_IN", "TEMPLATE_DELETE_ME"]
 
     bad_files = []
     safe_files = [
@@ -75,12 +75,14 @@ def lint_template_placeholders(targets: list[Target]) -> None:
         if not f.is_file() or f.is_relative_to(template_dir) or f in safe_files:
             continue
 
-        if marker.encode() in f.read_bytes():
-            bad_files.append(f)
+        for marker in markers:
+            if marker.encode() in f.read_bytes():
+                bad_files.append(f)
+                break
 
     if bad_files:
         bad_str = "\n".join(str(f.relative_to(ROOT)) for f in bad_files)
-        die(f"Template placeholder {marker} found in the following files:\n{bad_str}")
+        die(f"One of: {markers} found in the following files:\n{bad_str}")
 
 
 def main() -> None:

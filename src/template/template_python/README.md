@@ -1,6 +1,6 @@
 # template_python
 
-TEMPLATE_FILL_IN: One or two sentences on what the node does and how it fits into the system.
+TEMPLATE_DELETE_ME: One or two sentences on what the node does and how it fits into the system.
 
 <!-- Fill in the sections below and delete the ones that don't apply, keeping this order. -->
 
