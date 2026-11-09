@@ -58,6 +58,32 @@ def lint_md(targets: list[Target]) -> None:
     run("mdformat", "--check", *[str(f.relative_to(ROOT)) for f in md])
 
 
+def lint_template_placeholders(targets: list[Target]) -> None:
+    info("Checking for template placeholders")
+
+    markers = ["TEMPLATE_FILL_IN", "TEMPLATE_DELETE_ME"]
+
+    bad_files = []
+    exempt_paths = [
+        ROOT / "scripts" / "lint.py",
+        ROOT / "docs" / "DEVELOPMENT.md",
+        ROOT / "scripts" / "create_package.py",
+        *(ROOT / "src" / "template").rglob("*"),
+    ]
+
+    for f in files_in(targets, "*"):
+        if f in exempt_paths:
+            continue
+
+        content = f.read_bytes()
+        if any(marker.encode() in content for marker in markers):
+            bad_files.append(f)
+
+    if bad_files:
+        bad_str = "\n".join(str(f.relative_to(ROOT)) for f in bad_files)
+        die(f"One of: {', '.join(markers)} found in the following files:\n{bad_str}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run all linters")
     group = parser.add_mutually_exclusive_group()
@@ -76,6 +102,7 @@ def main() -> None:
     lint_cpp(targets)
     lint_rviz(targets)
     lint_md(targets)
+    lint_template_placeholders(targets)
 
     info("All checks passed!")
 

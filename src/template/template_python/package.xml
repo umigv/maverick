@@ -3,7 +3,7 @@
 <package format="3">
   <name>template_python</name>
   <version>0.1.0</version>
-  <description>TODO: Package description</description>
+  <description>TEMPLATE_FILL_IN: Package description</description>
   <maintainer email="hardworking_arv_member@umich.edu">Hardworking ARV Member</maintainer>
   <license>Apache-2.0</license>
 
