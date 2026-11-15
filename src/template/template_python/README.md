@@ -1,10 +1,10 @@
 # template_python
 
-TODO: One or two sentences on what the node does and how it fits into the system.
+TEMPLATE_DELETE_ME: One or two sentences on what the node does and how it fits into the system.
 
-<!-- Fill in the sections below and delete the ones that don't apply, keeping this order. -->
+<!-- TEMPLATE_DELETE_ME: Fill in the sections below and delete the ones that don't apply, keeping this order. -->
 
-## TODO: Behavior
+## TEMPLATE_FILL_IN: Behavior
 
 Free-form sections describing behavior/algorithms come first, before the interface sections. Add as many as needed.
 

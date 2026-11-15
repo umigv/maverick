@@ -168,4 +168,5 @@ def files_in(targets: list[Target], *patterns: str) -> list[Path]:
         for t in targets
         for pattern in patterns
         for f in (ROOT / t.path).glob(("**/" if t.recursive else "") + pattern)
+        if f.is_file()
     ]
