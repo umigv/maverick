@@ -1,9 +1,17 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from pathlib import Path
 
 from .controllers.controller import Algorithm
 from .controllers.differential_drive.config import DifferentialDriveConfig
 from .controllers.pure_pursuit.config import PurePursuitConfig
 from .controllers.stanley.config import StanleyConfig
+
+
+def _repo_root() -> Path:
+    for parent in Path(__file__).resolve().parents:
+        if (parent / ".git").exists():
+            return parent
+    raise RuntimeError("Cannot locate repository root!")
 
 
 @dataclass(frozen=True)
@@ -19,6 +27,8 @@ class PathTrackingConfig:
         algorithm: Which controller to run. One of "pure_pursuit", "stanley", "differential_drive".
         control_period_s: Period of the control loop timer (s).
         ramp_max_speed_mps: Maximum forward speed (m/s) while the mission state has in_ramp_approach set.
+        metrics_csv_enabled: Write waypoint and heading error CSVs.
+        metrics_output_dir: Directory for the metrics CSV files.
     """
 
     base_frame_id: str
@@ -55,6 +65,8 @@ class PathTrackingConfig:
     algorithm: Algorithm = "differential_drive"
     control_period_s: float = 0.01
     ramp_max_speed_mps: float = 1.0
+    metrics_csv_enabled: bool = True
+    metrics_output_dir: Path = field(default_factory=lambda: _repo_root() / "path_tracking_metrics")
 
     def __post_init__(self) -> None:
         if self.control_period_s <= 0:

@@ -2,7 +2,7 @@ import math
 
 from geometry_msgs.msg import Twist, Vector3
 from rclpy.impl.rcutils_logger import RcutilsLogger
-from utils.geometry import Path2d, Point2d, Pose2d
+from utils.geometry import Path2d, Point2d, Pose2d, Rotation2d
 from utils.math import clamp
 
 from .config import PurePursuitConfig
@@ -14,12 +14,14 @@ class PurePursuitController:
         self.logger = logger
         self.path: Path2d | None = None
         self.lookahead_fractional_index: float = 0.0
+        self.target_heading: Rotation2d | None = None
 
     def set_path(self, path: Path2d) -> None:
         self.path = path
         self.lookahead_fractional_index = 0.0
 
     def compute_command(self, pose: Pose2d, speed: float) -> Twist | None:
+        self.target_heading = None
         if self.path is None:
             return None
 
@@ -37,6 +39,7 @@ class PurePursuitController:
             self.logger.warning("No valid lookahead point found - stopping")
             return Twist()
 
+        self.target_heading = Rotation2d.from_vector(lookahead_point - pose.point)
         local_lookahead = pose.world_to_local(lookahead_point)
         curvature = 2 * local_lookahead.y / local_lookahead.dot(local_lookahead)
         linear = lookahead_distance * self.config.linear_speed_gain
