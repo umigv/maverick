@@ -29,6 +29,7 @@ pytest = "<8"
 pyubx2 = "*"
 # setuptools 80 removed the `develop` command that colcon's ament_python editable installs rely on
 setuptools = "<80"
+ros-lyrical-cv-bridge = "*"
 ros-lyrical-foxglove-bridge = "*"
 ros-lyrical-foxglove-msgs = "*"
 ros-lyrical-geographic-msgs = "*"
@@ -50,12 +51,20 @@ ultralytics = "*"
 odrive = "*"
 playsound3 = "*"
 types-pyserial = "*"
+# pyzed = { path = "./wheels/pyzed-5.4-cp314-cp314-linux_x86_64.whl" }
 
 [tool.pixi.feature.ros.activation]
 scripts = ["install/setup.bash"]
 
 [tool.pixi.feature.ros.activation.env]
 RCUTILS_COLORIZED_OUTPUT = "1"
+
+[tool.pixi.feature.ros.target.linux-64.dependencies]
+nlohmann_json = "*"
+ros-lyrical-backward-ros = "*"
+ros-lyrical-nmea-msgs = "*"
+ros-lyrical-zed-description = "*"
+ros-lyrical-zed-msgs = "*"
 
 [tool.pixi.feature.ros.target.linux-64.activation.env]
 # OGRE's GLX renderer can't parent into a Wayland surface. Under WSLg (and native Wayland sessions), Qt6 defaults to
@@ -70,6 +79,8 @@ QT_QPA_PLATFORM = "xcb"
 # to detect XWayland-vs-bare-X11 at activation time, so this stays Linux-only rather than global.
 # TODO: See https://github.com/ros2/rviz/issues/1079 and https://github.com/ros2/rviz/issues/1052.
 QT_ENABLE_HIGHDPI_SCALING = "0"
+ZED_DIR = "/usr/local/zed"
+CUDAToolkit_ROOT = "/usr/local/cuda"
 
 [tool.pixi.feature.ros.target.linux-aarch64.activation.env]
 QT_QPA_PLATFORM = "xcb"
@@ -184,7 +195,8 @@ module = [
     "tf2_ros.*",
     "pyzed.*",
     "h5py",
-    "plotly.*"
+    "plotly.*",
+    "cv_bridge"
 ]
 ignore_missing_imports = true
 disable_error_code = ["attr-defined"]

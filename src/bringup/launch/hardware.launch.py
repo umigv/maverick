@@ -2,7 +2,8 @@ from typing import Any, assert_never, cast
 
 from bringup.launch_utils import MODES, Mode, bringup_share, load_frames, load_gps_file
 from launch import LaunchContext, LaunchDescription, LaunchDescriptionEntity
-from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
@@ -77,6 +78,9 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
             ]
             if vectornav_params is not None
             else []
+        ),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(f"{bringup_share()}/launch/zed.launch.py"),
         ),
     ]
 
