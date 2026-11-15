@@ -11,7 +11,7 @@ build:
     - zed_debug
     - zed_ros2
 test:
-  packages-skip:
+  packages-ignore:
     - zed_debug
     - zed_ros2
     - zed_components
