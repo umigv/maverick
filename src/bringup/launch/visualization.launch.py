@@ -1,10 +1,17 @@
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
 def generate_launch_description() -> LaunchDescription:
     return LaunchDescription(
         [
+            DeclareLaunchArgument(
+                "occupancy_grid_topic",
+                default_value="occupancy_grid/raw",
+                description="Occupancy grid topic to convert for Foxglove",
+            ),
             Node(
                 package="foxglove_bridge",
                 executable="foxglove_bridge",
@@ -25,6 +32,44 @@ def generate_launch_description() -> LaunchDescription:
                 package="occupancy_grid_visualization",
                 executable="foxglove_voxel",
                 name="occupancy_grid_voxel_visualization",
+                parameters=[{"input_topic": LaunchConfiguration("occupancy_grid_topic")}],
+            ),
+            Node(package="robot_monitoring", executable="path_history", name="path_history"),
+            Node(
+                package="robot_monitoring",
+                executable="topic_diagnostic",
+                name="odom_diagnostic",
+                parameters=[{"topic": "/odom/local"}, {"msg_type": "nav_msgs/msg/Odometry"}],
+            ),
+            Node(
+                package="robot_monitoring",
+                executable="topic_diagnostic",
+                name="vel_diagnostic",
+                parameters=[{"topic": "/cmd_vel"}, {"msg_type": "geometry_msgs/msg/TwistStamped"}],
+            ),
+            Node(
+                package="robot_monitoring",
+                executable="topic_diagnostic",
+                name="gps_diagnostic",
+                parameters=[{"topic": "/gps/raw"}, {"msg_type": "sensor_msgs/msg/NavSatFix"}],
+            ),
+            Node(
+                package="robot_monitoring",
+                executable="topic_diagnostic",
+                name="imu_diagnostic",
+                parameters=[{"topic": "/imu/raw"}, {"msg_type": "sensor_msgs/msg/Imu"}],
+            ),
+            Node(
+                package="robot_monitoring",
+                executable="topic_diagnostic",
+                name="nav_vel_diagnostic",
+                parameters=[{"topic": "/nav_cmd_vel"}, {"msg_type": "geometry_msgs/msg/TwistStamped"}],
+            ),
+            Node(
+                package="robot_monitoring",
+                executable="topic_diagnostic",
+                name="path_diagnostic",
+                parameters=[{"topic": "/path"}, {"msg_type": "nav_msgs/msg/Odometry"}],
             ),
         ]
     )

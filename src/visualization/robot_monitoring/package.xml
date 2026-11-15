@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<package format="3">
+  <name>robot_monitoring</name>
+  <version>0.1.0</version>
+  <description>Robot debugging and data visualization tools</description>
+  <maintainer email="tranbao@umich.edu">Quoc Gia Bao Tran</maintainer>
+  <license>Apache-2.0</license>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>utils</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>diagnostic_msgs</exec_depend>
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
