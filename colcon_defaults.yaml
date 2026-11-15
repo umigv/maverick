@@ -7,3 +7,12 @@ build:
     - -DCMAKE_C_COMPILER_LAUNCHER=ccache
     - -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
     - -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+  packages-skip:
+    - zed_debug
+    - zed_ros2
+test:
+  packages-skip:
+    - zed_debug
+    - zed_ros2
+    - zed_components
+    - zed_wrapper

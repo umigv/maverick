@@ -59,6 +59,13 @@ scripts = ["install/setup.bash"]
 [tool.pixi.feature.ros.activation.env]
 RCUTILS_COLORIZED_OUTPUT = "1"
 
+[tool.pixi.feature.ros.target.linux-64.dependencies]
+nlohmann_json = "*"
+ros-lyrical-backward-ros = "*"
+ros-lyrical-nmea-msgs = "*"
+ros-lyrical-zed-description = "*"
+ros-lyrical-zed-msgs = "*"
+
 [tool.pixi.feature.ros.target.linux-64.activation.env]
 # OGRE's GLX renderer can't parent into a Wayland surface. Under WSLg (and native Wayland sessions), Qt6 defaults to
 # the wayland platform plugin since both sockets are present, which breaks rviz2's render window entirely. macOS has
@@ -72,6 +79,8 @@ QT_QPA_PLATFORM = "xcb"
 # to detect XWayland-vs-bare-X11 at activation time, so this stays Linux-only rather than global.
 # TODO: See https://github.com/ros2/rviz/issues/1079 and https://github.com/ros2/rviz/issues/1052.
 QT_ENABLE_HIGHDPI_SCALING = "0"
+ZED_DIR = "/usr/local/zed"
+CUDAToolkit_ROOT = "/usr/local/cuda"
 
 [tool.pixi.feature.ros.target.linux-aarch64.activation.env]
 QT_QPA_PLATFORM = "xcb"

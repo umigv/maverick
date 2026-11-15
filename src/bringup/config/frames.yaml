@@ -5,3 +5,5 @@ gnss_a_frame: gnss_a_link
 gnss_b_frame: gnss_b_link
 odom_frame: odom
 map_frame: map
+zed_left_frame: zed_left_camera_link
+zed_right_frame: zed_right_camera_link

@@ -83,6 +83,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/linux-64/eigen-5.0.1-hc65338a_0.conda
       - conda: https://prefix.dev/conda-forge/linux-64/eigen-abi-5.0.1.80-hf414acd_0.conda
       - conda: https://prefix.dev/conda-forge/linux-64/eigen-abi-devel-5.0.1.100-h2fbfb1f_3.conda
+      - conda: https://prefix.dev/conda-forge/linux-64/elfutils-0.196-h03e2bf6_0.conda
       - conda: https://prefix.dev/conda-forge/linux-64/epoxy-1.5.10-hb03c661_2.conda
       - conda: https://prefix.dev/conda-forge/linux-64/ffmpeg-8.1.2-gpl_h1bf8424_901.conda
       - conda: https://prefix.dev/conda-forge/linux-64/fmt-12.1.0-hff5e90c_0.conda
@@ -144,6 +145,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/linux-64/libabseil-20260107.1-cxx17_h7b12aa8_0.conda
       - conda: https://prefix.dev/conda-forge/linux-64/libacl-2.4.0-h1b0031e_2.conda
       - conda: https://prefix.dev/conda-forge/linux-64/libaec-1.1.5-h088129d_0.conda
+      - conda: https://prefix.dev/conda-forge/linux-64/libarchive-3.8.9-gpl_h3152399_101.conda
       - conda: https://prefix.dev/conda-forge/linux-64/libasprintf-0.25.1-h3f43e3d_1.conda
       - conda: https://prefix.dev/conda-forge/linux-64/libasprintf-devel-0.25.1-h3f43e3d_1.conda
       - conda: https://prefix.dev/conda-forge/linux-64/libass-0.17.4-h96ad9f0_0.conda
@@ -278,6 +280,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/linux-64/lxml-6.1.1-py314hae3bed6_0.conda
       - conda: https://prefix.dev/conda-forge/linux-64/lz4-4.4.5-py314hd4c109c_1.conda
       - conda: https://prefix.dev/conda-forge/linux-64/lz4-c-1.10.0-h5888daf_1.conda
+      - conda: https://prefix.dev/conda-forge/linux-64/lzo-2.10-hebe6cf0_1003.conda
       - conda: https://prefix.dev/conda-forge/linux-64/markupsafe-3.0.3-py314h67df5f8_1.conda
       - conda: https://prefix.dev/conda-forge/linux-64/matplotlib-base-3.11.0-py314had63eae_1.conda
       - conda: https://prefix.dev/conda-forge/linux-64/mkl-2026.1.0-hecca717_243.conda
@@ -287,6 +290,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/linux-64/mypy-2.1.0-py314h518bba1_0.conda
       - conda: https://prefix.dev/conda-forge/linux-64/ncurses-6.6-hdb14827_0.conda
       - conda: https://prefix.dev/conda-forge/linux-64/ninja-1.13.2-h171cf75_0.conda
+      - conda: https://prefix.dev/conda-forge/linux-64/nlohmann_json-3.12.0-h54a6638_2.conda
       - conda: https://prefix.dev/conda-forge/linux-64/numpy-2.5.1-py314h2b28147_0.conda
       - conda: https://prefix.dev/conda-forge/linux-64/ocl-icd-2.3.4-hb03c661_1.conda
       - conda: https://prefix.dev/conda-forge/linux-64/onednn-3.12-omp_h83de36e_0.conda
@@ -521,12 +525,14 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/urllib3-2.7.0-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/wayland-protocols-1.49-hd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/wcwidth-0.8.2-pyhd8ed1ab_0.conda
+      - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-backward-ros-1.0.8-hb0f4dca_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-cv-bridge-4.1.0-hb0f4dca_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-foxglove-bridge-3.6.0-hb0f4dca_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-foxglove-msgs-3.6.0-hb0f4dca_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-geographic-msgs-1.0.6-hb0f4dca_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-joint-state-publisher-2.4.3-hb0f4dca_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-joy-3.3.0-hb0f4dca_30.conda
+      - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-nmea-msgs-2.1.0-hb0f4dca_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-robot-localization-3.10.0-hb0f4dca_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-robot-state-publisher-3.5.6-hb0f4dca_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-ros-base-0.13.0-hb0f4dca_30.conda
@@ -535,6 +541,8 @@ environments:
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-twist-mux-4.5.1-hb0f4dca_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-urdf-launch-0.1.2-hb0f4dca_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-xacro-2.1.1-hb0f4dca_30.conda
+      - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-zed-description-0.1.5-hb0f4dca_30.conda
+      - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-zed-msgs-5.3.0-hb0f4dca_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-action-msgs-2.4.5-np2py314h53a0733_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-ament-cmake-2.8.8-np2py314h53a0733_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-ament-cmake-auto-2.8.8-np2py314h53a0733_30.conda
@@ -582,6 +590,7 @@ environments:
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-ament-uncrustify-0.20.6-np2py314h53a0733_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-ament-xmllint-0.20.6-np2py314h53a0733_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-angles-1.16.1-np2py314h53a0733_30.conda
+      - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-backward-ros-1.0.8-np2py314h7efcf88_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-builtin-interfaces-2.4.5-np2py314h53a0733_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-class-loader-2.9.4-np2py314hac0c0d2_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-common-interfaces-5.9.3-np2py314h53a0733_30.conda
@@ -630,6 +639,7 @@ environments:
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-mcap-vendor-0.33.4-np2py314h53a0733_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-message-filters-7.4.2-np2py314h53a0733_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-nav-msgs-5.9.3-np2py314h53a0733_30.conda
+      - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-nmea-msgs-2.1.0-np2py314h53a0733_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-pluginlib-5.8.5-np2py314hc703c99_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-point-cloud-transport-5.4.3-np2py314hc703c99_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-python-qt-binding-2.5.5-np2py314h9c28e93_30.conda
@@ -779,6 +789,8 @@ environments:
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-visualization-msgs-5.9.3-np2py314h53a0733_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-xacro-2.1.1-np2py314h53a0733_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-yaml-cpp-vendor-9.2.1-np2py314h53a0733_30.conda
+      - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-zed-description-0.1.5-np2py314h53a0733_30.conda
+      - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-zed-msgs-5.3.0-np2py314h53a0733_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-zenoh-cpp-vendor-0.10.6-np2py314hc614d3d_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-zstd-cmake-module-0.33.4-np2py314h53a0733_30.conda
       - pypi: https://files.pythonhosted.org/packages/12/99/38461c380841e79ac0f709c1d32fa6c768f572f8ac3e3c773ec6ac7526dd/types_pyserial-3.5.0.20261030-py3-none-any.whl
@@ -3189,6 +3201,26 @@ packages:
     - eigen-abi >=5.0.1.80,<5.0.1.81.0a0
   size: 14683
   timestamp: 1788951264833
+- conda: https://prefix.dev/conda-forge/linux-64/elfutils-0.196-h03e2bf6_0.conda
+  sha256: 075378fb752fa7d15c3d913fe4d30ea4049308b6b88dfba1ce0fda2870ce18f6
+  md5: 24717939d024efa3e042e52e8c279328
+  depends:
+  - libgcc >=15
+  - __glibc >=2.17,<3.0.a0
+  - libstdcxx >=15
+  - zstd >=1.5.7,<1.6.0a0
+  - libarchive >=3.8.9,<3.9.0a0
+  - bzip2 >=1.0.8,<2.0a0
+  - libzlib >=1.3.2,<2.0a0
+  - liblzma >=5.8.3,<6.0a0
+  license: LGPL-3.0-only
+  license_family: LGPL
+  purls: []
+  run_exports:
+    weak:
+    - elfutils >=0.196,<0.197.0a0
+  size: 1356621
+  timestamp: 1787399685716
 - conda: https://prefix.dev/conda-forge/linux-64/epoxy-1.5.10-hb03c661_2.conda
   sha256: a5b51e491fec22bcc1765f5b2c8fff8a97428e9a5a7ee6730095fb9d091b0747
   md5: 057083b06ccf1c2778344b6dabace38b
@@ -4251,6 +4283,29 @@ packages:
     - libaec >=1.1.5,<2.0a0
   size: 36544
   timestamp: 1769221884824
+- conda: https://prefix.dev/conda-forge/linux-64/libarchive-3.8.9-gpl_h3152399_101.conda
+  sha256: bfae027a67d02325cd6b75edd60beb67cf24483af9df0ae9ef74d4438e41c806
+  md5: 680520cff78a974d564cd99cdf5ec0b5
+  depends:
+  - __glibc >=2.17,<3.0.a0
+  - bzip2 >=1.0.8,<2.0a0
+  - libgcc >=15
+  - liblzma >=5.8.3,<6.0a0
+  - libxml2
+  - libxml2-16 >=2.15.3
+  - libzlib >=1.3.2,<2.0a0
+  - lz4-c >=1.10.0,<1.11.0a0
+  - lzo >=2.10,<3.0a0
+  - openssl >=3.5.7,<4.0a0
+  - zstd >=1.5.7,<1.6.0a0
+  license: BSD-2-Clause
+  license_family: BSD
+  purls: []
+  run_exports:
+    weak:
+    - libarchive >=3.8.9,<3.9.0a0
+  size: 875346
+  timestamp: 1787292369121
 - conda: https://prefix.dev/conda-forge/linux-64/libasprintf-0.25.1-h3f43e3d_1.conda
   sha256: cb728a2a95557bb6a5184be2b8be83a6f2083000d0c7eff4ad5bbe5792133541
   md5: 3b0d184bc9404516d418d4509e418bdc
@@ -6465,6 +6520,20 @@ packages:
     - lz4-c >=1.10.0,<1.11.0a0
   size: 167055
   timestamp: 1733741040117
+- conda: https://prefix.dev/conda-forge/linux-64/lzo-2.10-hebe6cf0_1003.conda
+  sha256: a0a1400198e5302d8367f2ed53437ee3cc41dbc463cb481921ce765578780b7a
+  md5: 10e0aa58ed390ba598b728badf9eb1b7
+  depends:
+  - __glibc >=2.17,<3.0.a0
+  - libgcc >=15
+  license: GPL-2.0-or-later
+  license_family: GPL
+  purls: []
+  run_exports:
+    weak:
+    - lzo >=2.10,<3.0a0
+  size: 191573
+  timestamp: 1787049167898
 - conda: https://prefix.dev/conda-forge/linux-64/markupsafe-3.0.3-py314h67df5f8_1.conda
   sha256: c279be85b59a62d5c52f5dd9a4cd43ebd08933809a8416c22c3131595607d4cf
   md5: 9a17c4307d23318476d7fbf0fedc0cde
@@ -6625,6 +6694,17 @@ packages:
   run_exports: {}
   size: 186323
   timestamp: 1763688260928
+- conda: https://prefix.dev/conda-forge/linux-64/nlohmann_json-3.12.0-h54a6638_2.conda
+  sha256: 8f8b554c74b032b3e63a8828fb0ecc7ae4f5c5a6bd0afcf75423d5ff79290cb0
+  md5: fe93be7dd9209e6ae673962e3031ff51
+  constrains:
+  - nlohmann_json-abi ==3.12.0
+  license: MIT
+  license_family: MIT
+  purls: []
+  run_exports: {}
+  size: 136372
+  timestamp: 1785920438981
 - conda: https://prefix.dev/conda-forge/linux-64/numpy-2.5.1-py314h2b28147_0.conda
   sha256: fb665b7e30f9472c58098983f614598cfcf34e7a26b6c419648803095c390aa7
   md5: 59044905d27ba41bfb280ed4692c15e2
@@ -20689,6 +20769,15 @@ packages:
     - zziplib >=0.13.69,<0.14.0a0
   size: 99425
   timestamp: 1719242141755
+- conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-backward-ros-1.0.8-hb0f4dca_30.conda
+  sha256: 5f048674b2fe4a44c8874eb7626f5eff55e96b9d5f287c801f5ef172709467b5
+  md5: 6bff4fcdfb71fc13c563aff40c7cd3d5
+  depends:
+  - ros2-backward-ros ==1.0.8
+  - ros2-distro-mutex 0.22.* lyrical_*
+  run_exports: {}
+  size: 2070
+  timestamp: 1792750634683
 - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-cv-bridge-4.1.0-hb0f4dca_30.conda
   sha256: 3e2aa8db9e36320e3197eb692c493d508eeae394689a477f4a6dd150559acce1
   md5: 0e6252d3e985fb26bbe31252a3684be2
@@ -20743,6 +20832,15 @@ packages:
   run_exports: {}
   size: 2030
   timestamp: 1792759697227
+- conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-nmea-msgs-2.1.0-hb0f4dca_30.conda
+  sha256: 66d1f9c9be074329f2c628acd43325bb62f49717c26dd9093973e795918a7618
+  md5: cd408847716d310e2023cd0a90190729
+  depends:
+  - ros2-nmea-msgs ==2.1.0
+  - ros2-distro-mutex 0.22.* lyrical_*
+  run_exports: {}
+  size: 2065
+  timestamp: 1792758050290
 - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-robot-localization-3.10.0-hb0f4dca_30.conda
   sha256: be003db7caf6764ad3d67d6b5bfe681543c83a806632a4404344f4db350830b7
   md5: 2acd163c811ea3183acda26212a008f6
@@ -20815,6 +20913,24 @@ packages:
   run_exports: {}
   size: 2039
   timestamp: 1792752791636
+- conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-zed-description-0.1.5-hb0f4dca_30.conda
+  sha256: 82b11c26a511fd23c6e8b73fb51b8adc1e8fd14b8d44cee85018c6478c5220e6
+  md5: 16c088a8474d54f36d4aaa854737de75
+  depends:
+  - ros2-zed-description ==0.1.5
+  - ros2-distro-mutex 0.22.* lyrical_*
+  run_exports: {}
+  size: 2085
+  timestamp: 1792765097599
+- conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-zed-msgs-5.3.0-hb0f4dca_30.conda
+  sha256: 660932a9c87a0afcd3b3f6ab931ff5d429b2880c432863f96758565e07251c03
+  md5: 8b197ac9d961e6eccc30f14a044a2198
+  depends:
+  - ros2-zed-msgs ==5.3.0
+  - ros2-distro-mutex 0.22.* lyrical_*
+  run_exports: {}
+  size: 2060
+  timestamp: 1792759197086
 - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-action-msgs-2.4.5-np2py314h53a0733_30.conda
   sha256: aec1ad5f96541a9fe01b431abec4dab4ec86c3c70b1377f83415808524282537
   md5: 36d4dec7a21bd9a0c4401092c13edfc0
@@ -21715,6 +21831,25 @@ packages:
   run_exports: {}
   size: 35304
   timestamp: 1792751850500
+- conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-backward-ros-1.0.8-np2py314h7efcf88_30.conda
+  sha256: 6a4de80b45add0ab27e176491ab9b6878558b0b7ca2b18d1c05aeef06d6219c5
+  md5: f4efe5324a0a8e7a4852e47e74e150b9
+  depends:
+  - elfutils
+  - python
+  - ros2-distro-mutex 0.22.* lyrical_*
+  - ros2-ros-workspace
+  - __glibc >=2.28,<3.0.a0
+  - libstdcxx >=15
+  - libgcc >=15
+  - ros2-distro-mutex >=0.22.0,<0.23.0a0
+  - numpy >=1.25,<3
+  - elfutils >=0.196,<0.197.0a0
+  - python_abi 3.14.* *_cp314
+  license: MIT
+  run_exports: {}
+  size: 317895
+  timestamp: 1792750626744
 - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-builtin-interfaces-2.4.5-np2py314h53a0733_30.conda
   sha256: 527143b068b7d44a8f2bae16a4852befb2ef34503e46b64df6a347a03847d95b
   md5: 3ce80e2b96d2c2bb6104fe125b13be7b
@@ -22716,6 +22851,26 @@ packages:
   run_exports: {}
   size: 386168
   timestamp: 1792758310511
+- conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-nmea-msgs-2.1.0-np2py314h53a0733_30.conda
+  sha256: 0126ca0d21a8d98d6c3edd4b9f518790a5279cc05f619703e121a0eae22919a8
+  md5: d5ef3e3c85335a52bf9499f28fa26a96
+  depends:
+  - python
+  - ros2-builtin-interfaces
+  - ros2-distro-mutex 0.22.* lyrical_*
+  - ros2-ros-workspace
+  - ros2-rosidl-default-runtime
+  - ros2-std-msgs
+  - __glibc >=2.28,<3.0.a0
+  - libgcc >=15
+  - libstdcxx >=15
+  - python_abi 3.14.* *_cp314
+  - ros2-distro-mutex >=0.22.0,<0.23.0a0
+  - numpy >=1.25,<3
+  license: BSD-3-Clause
+  run_exports: {}
+  size: 270952
+  timestamp: 1792758023200
 - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-pluginlib-5.8.5-np2py314hc703c99_30.conda
   sha256: 303ec278502241760bbb1165788e8986cba074c38235fef9d886b0a3661d8012
   md5: bab6f0f02ba2d4257e791eea7f5aca40
@@ -26177,6 +26332,46 @@ packages:
   run_exports: {}
   size: 25085
   timestamp: 1792751846470
+- conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-zed-description-0.1.5-np2py314h53a0733_30.conda
+  sha256: 6925b250b06a4a61d19bdeadf95b53f6b71360baa1b41542f3cf8c05c2ba7233
+  md5: ed1859c7b5da8772de6a0a54210c0a07
+  depends:
+  - python
+  - ros2-distro-mutex 0.22.* lyrical_*
+  - ros2-ros-workspace
+  - ros2-rviz2
+  - ros2-xacro
+  - libstdcxx >=15
+  - libgcc >=15
+  - __glibc >=2.28,<3.0.a0
+  - numpy >=1.25,<3
+  - python_abi 3.14.* *_cp314
+  - ros2-distro-mutex >=0.22.0,<0.23.0a0
+  license: Apache-2.0
+  run_exports: {}
+  size: 2679707
+  timestamp: 1792765092238
+- conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-zed-msgs-5.3.0-np2py314h53a0733_30.conda
+  sha256: 1a727c36011286d2c6f6697092cfcfdc3d203e1e9e943d9a3ac029a5b79c039f
+  md5: 33e2bd69649d2690f5abfa4ceecedb5b
+  depends:
+  - python
+  - ros2-distro-mutex 0.22.* lyrical_*
+  - ros2-geometry-msgs
+  - ros2-ros-workspace
+  - ros2-rosidl-default-runtime
+  - ros2-shape-msgs
+  - ros2-std-msgs
+  - __glibc >=2.28,<3.0.a0
+  - libgcc >=15
+  - libstdcxx >=15
+  - python_abi 3.14.* *_cp314
+  - ros2-distro-mutex >=0.22.0,<0.23.0a0
+  - numpy >=1.25,<3
+  license: Apache-2.0
+  run_exports: {}
+  size: 549205
+  timestamp: 1792759166437
 - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-zenoh-cpp-vendor-0.10.6-np2py314hc614d3d_30.conda
   sha256: 3aa3c03ebed78aeca0782ef2de87a150f6486969c43d8f6edd9b68e24424e82e
   md5: 83889f7ec6efe9d46a5cd6a8bf620fec
