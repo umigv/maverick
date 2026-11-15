@@ -3,7 +3,19 @@ import argparse
 import os
 import shutil
 
-from common import ROOT, Target, die, discover_targets, files_in, filter_targets, info, run
+from common import ROOT, Target, die, discover_targets, files_in, filter_targets, info, run, text_files_in
+
+
+def lint_ascii(targets: list[Target]) -> None:
+    files = text_files_in(targets, "*")
+    if not files:
+        return
+
+    info("ASCII characters (check)")
+    for f in files:
+        for line_number, line in enumerate(f.read_bytes().splitlines(), 1):
+            if not line.isascii():
+                die(f"{f.relative_to(ROOT)}:{line_number}: Non-ASCII character {line.decode(errors='replace')}")
 
 
 def lint_python(targets: list[Target], all_targets: list[Target]) -> None:
@@ -31,8 +43,10 @@ def lint_cpp(targets: list[Target]) -> None:
     if not cpp:
         return
 
+    target_strs = [str(f.relative_to(ROOT)) for f in cpp]
+
     info("clang-format (check)")
-    run("clang-format", "--dry-run", "--Werror", *[str(f.relative_to(ROOT)) for f in cpp])
+    run("clang-format", "--dry-run", "--Werror", *target_strs)
 
 
 def lint_rviz(targets: list[Target]) -> None:
@@ -91,7 +105,7 @@ def main() -> None:
     group.add_argument("--ignore", nargs="+", metavar="PKG")
     args = parser.parse_args()
 
-    missing = [t for t in ("ruff", "mypy", "clang-format", "mdformat") if not shutil.which(t)]
+    missing = [t for t in ("grep", "ruff", "mypy", "clang-format", "mdformat") if not shutil.which(t)]
     if missing:
         die(f"missing tools: {', '.join(missing)}. Run just setup")
 
@@ -102,6 +116,7 @@ def main() -> None:
     lint_cpp(targets)
     lint_rviz(targets)
     lint_md(targets)
+    lint_ascii(targets)
     lint_template_placeholders(targets)
 
     info("All checks passed!")

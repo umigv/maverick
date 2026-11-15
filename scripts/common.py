@@ -162,11 +162,29 @@ def filter_targets(targets: list[Target], *, only: list[str] | None, ignore: lis
 
 
 def files_in(targets: list[Target], *patterns: str) -> list[Path]:
-    """Return all files matching any of the given glob patterns within the given targets."""
+    """Return all files tracked by git matching any of the given glob patterns within the given targets."""
+    tracked_files = [
+        ROOT / f
+        for f in (
+            subprocess.run(
+                ["git", "ls-files"],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=True,
+            ).stdout.splitlines()
+        )
+    ]
     return [
         f
         for t in targets
         for pattern in patterns
         for f in (ROOT / t.path).glob(("**/" if t.recursive else "") + pattern)
-        if f.is_file()
+        if f.is_file() and f in tracked_files
     ]
+
+
+def text_files_in(targets: list[Target], *patterns: str) -> list[Path]:
+    """Return all text files (excludes binaries) tracked by git matching any of the given glob patterns within the given targets."""
+    binary_exts = {".jpg", ".wav"}
+    return [f for f in files_in(targets, *patterns) if f.suffix.lower() not in binary_exts]
