@@ -5,7 +5,12 @@ default:
 
 # Install dependencies and configure the dev environment
 setup:
-    pixi run python3 scripts/setup_environment.py
+    mkdir -p wheels
+    rm -f wheels/pyzed-*.whl
+    pixi exec --spec python=3.14 --spec requests -- python scripts/get_python_api.py --path wheels
+    pixi exec --spec python=3.14 -- python scripts/update_pyzed_path.py
+    pixi install
+    pixi run python scripts/setup_environment.py
 
 # Regenerate pyrightconfig.json from packages in src/
 generate-pyrightconfig:
