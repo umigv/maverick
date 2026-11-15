@@ -2,27 +2,20 @@
 import argparse
 import os
 import shutil
-import subprocess
 
-from common import ROOT, Target, die, discover_targets, files_in, filter_targets, info, run
+from common import ROOT, Target, die, discover_targets, files_in, filter_targets, info, run, text_files_in
 
 
-def lint_ascii(files: list[str]) -> None:
+def lint_ascii(targets: list[Target]) -> None:
+    files = text_files_in(targets, "*")
     if not files:
         return
 
     info("ASCII characters (check)")
-    # Reject every byte with its high bit set.
-    result = subprocess.run(
-        ["grep", "-anH", b"[\x80-\xff]", "--", *files],
-        cwd=ROOT,
-        env={**os.environ, "LC_ALL": "C"},
-        check=False,
-    )
-    if result.returncode == 0:
-        die("Non-ASCII characters found")
-    if result.returncode != 1:
-        die(f"ASCII check failed (grep exit {result.returncode})")
+    for f in files:
+        for line_number, line in enumerate(f.read_bytes().splitlines(), 1):
+            if not line.isascii():
+                die(f"{f.relative_to(ROOT)}:{line_number}: Non-ASCII character {line.decode(errors='replace')}")
 
 
 def lint_python(targets: list[Target], all_targets: list[Target]) -> None:
@@ -31,7 +24,6 @@ def lint_python(targets: list[Target], all_targets: list[Target]) -> None:
         return
 
     target_strs = [str(f.relative_to(ROOT)) for f in py]
-    lint_ascii(target_strs)
 
     info("Ruff format (check)")
     run("ruff", "format", "--check", *target_strs)
@@ -52,7 +44,6 @@ def lint_cpp(targets: list[Target]) -> None:
         return
 
     target_strs = [str(f.relative_to(ROOT)) for f in cpp]
-    lint_ascii(target_strs)
 
     info("clang-format (check)")
     run("clang-format", "--dry-run", "--Werror", *target_strs)
@@ -99,6 +90,7 @@ def main() -> None:
     lint_cpp(targets)
     lint_rviz(targets)
     lint_md(targets)
+    lint_ascii(targets)
 
     info("All checks passed!")
 
