@@ -34,6 +34,13 @@ and / or
 ros2 launch bringup navigation.launch.py mode:=<mode> [course:=<course>]
 ```
 
+To use teleop control from your keyboard, run the following in a new terminal instead of launching teleop
+
+```bash
+ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args --remap cmd_vel:=teleop_cmd_vel -p "stamped:=true" -p "frame_id:=base_frame"
+
+```
+
 See [bringup/README.md](src/bringup/README.md) for what each mode does and how courses are configured.
 
 ## Visualization
