@@ -12,10 +12,21 @@ def lint_ascii(targets: list[Target]) -> None:
         return
 
     info("ASCII characters (check)")
+
+    bad_lines = []
+    max_lines_to_show = 20
+
     for f in files:
         for line_number, line in enumerate(f.read_bytes().splitlines(), 1):
             if not line.isascii():
-                die(f"{f.relative_to(ROOT)}:{line_number}: Non-ASCII character {line.decode(errors='replace')}")
+                bad_lines.append(f"{f.relative_to(ROOT)}:{line_number}")
+
+    if bad_lines:
+        bad_str = "\n".join(bad_lines[:max_lines_to_show])
+        if len(bad_lines) > max_lines_to_show:
+            bad_str += f"\n...\nFirst {max_lines_to_show} of {len(bad_lines)} failures shown"
+        bad_str += "\nIf you see a binary file that shouldn't have this lint, add it to binary_exts in text_files_in in scripts/common.py."
+        die(f"Non-ASCII characters found in the following lines:\n{bad_str}")
 
 
 def lint_python(targets: list[Target], all_targets: list[Target]) -> None:
@@ -43,10 +54,8 @@ def lint_cpp(targets: list[Target]) -> None:
     if not cpp:
         return
 
-    target_strs = [str(f.relative_to(ROOT)) for f in cpp]
-
     info("clang-format (check)")
-    run("clang-format", "--dry-run", "--Werror", *target_strs)
+    run("clang-format", "--dry-run", "--Werror", *[str(f.relative_to(ROOT)) for f in cpp])
 
 
 def lint_rviz(targets: list[Target]) -> None:
@@ -105,7 +114,7 @@ def main() -> None:
     group.add_argument("--ignore", nargs="+", metavar="PKG")
     args = parser.parse_args()
 
-    missing = [t for t in ("grep", "ruff", "mypy", "clang-format", "mdformat") if not shutil.which(t)]
+    missing = [t for t in ("ruff", "mypy", "clang-format", "mdformat") if not shutil.which(t)]
     if missing:
         die(f"missing tools: {', '.join(missing)}. Run just setup")
 
