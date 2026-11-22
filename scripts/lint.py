@@ -3,7 +3,30 @@ import argparse
 import os
 import shutil
 
-from common import ROOT, Target, die, discover_targets, files_in, filter_targets, info, run
+from common import ROOT, Target, die, discover_targets, files_in, filter_targets, info, run, text_files_in
+
+
+def lint_ascii(targets: list[Target]) -> None:
+    files = text_files_in(targets, "*")
+    if not files:
+        return
+
+    info("ASCII characters (check)")
+
+    bad_lines = []
+    max_lines_to_show = 20
+
+    for f in files:
+        for line_number, line in enumerate(f.read_bytes().splitlines(), 1):
+            if not line.isascii():
+                bad_lines.append(f"{f.relative_to(ROOT)}:{line_number}")
+
+    if bad_lines:
+        bad_str = "\n".join(bad_lines[:max_lines_to_show])
+        if len(bad_lines) > max_lines_to_show:
+            bad_str += f"\n...\nFirst {max_lines_to_show} of {len(bad_lines)} failures shown"
+        bad_str += "\nIf you see a binary file that shouldn't have this lint, add it to binary_exts in text_files_in in scripts/common.py."
+        die(f"Non-ASCII characters found in the following lines:\n{bad_str}")
 
 
 def lint_python(targets: list[Target], all_targets: list[Target]) -> None:
@@ -102,6 +125,7 @@ def main() -> None:
     lint_cpp(targets)
     lint_rviz(targets)
     lint_md(targets)
+    lint_ascii(targets)
     lint_template_placeholders(targets)
 
     info("All checks passed!")
