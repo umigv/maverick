@@ -163,7 +163,7 @@ def filter_targets(targets: list[Target], *, only: list[str] | None, ignore: lis
 
 def files_in(targets: list[Target], *patterns: str) -> list[Path]:
     """Return all files tracked by git matching any of the given glob patterns within the given targets."""
-    tracked_files = [
+    tracked_files = {
         ROOT / f
         for f in (
             subprocess.run(
@@ -174,7 +174,7 @@ def files_in(targets: list[Target], *patterns: str) -> list[Path]:
                 check=True,
             ).stdout.splitlines()
         )
-    ]
+    }
     return [
         f
         for t in targets
