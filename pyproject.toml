@@ -16,6 +16,7 @@ python = "3.14*"
 geographiclib-cpp = "*"
 h5py = "*"
 matplotlib-base = "*"
+nlohmann_json = "*"
 numpy = "*"
 opencv = "*"
 pandas = "*"
@@ -29,12 +30,14 @@ pytest = "<8"
 pyubx2 = "*"
 # setuptools 80 removed the `develop` command that colcon's ament_python editable installs rely on
 setuptools = "<80"
+ros-lyrical-backward-ros = "*"
 ros-lyrical-cv-bridge = "*"
 ros-lyrical-foxglove-bridge = "*"
 ros-lyrical-foxglove-msgs = "*"
 ros-lyrical-geographic-msgs = "*"
 ros-lyrical-joint-state-publisher = "*"
 ros-lyrical-joy = "*"
+ros-lyrical-nmea-msgs = "*"
 ros-lyrical-robot-localization = "*"
 ros-lyrical-robot-state-publisher = "*"
 ros-lyrical-ros-base = "*"
@@ -58,10 +61,12 @@ scripts = ["install/setup.bash"]
 [tool.pixi.feature.ros.activation.env]
 RCUTILS_COLORIZED_OUTPUT = "1"
 
+# robostack's osx-arm64 builds of the zed packages require macOS >= 14
 [tool.pixi.feature.ros.target.linux-64.dependencies]
-nlohmann_json = "*"
-ros-lyrical-backward-ros = "*"
-ros-lyrical-nmea-msgs = "*"
+ros-lyrical-zed-description = "*"
+ros-lyrical-zed-msgs = "*"
+
+[tool.pixi.feature.ros.target.linux-aarch64.dependencies]
 ros-lyrical-zed-description = "*"
 ros-lyrical-zed-msgs = "*"
 
