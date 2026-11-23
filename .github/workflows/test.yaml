@@ -46,7 +46,6 @@ jobs:
 
       - name: Build
         # ZED SDK/CUDA aren't installed on GitHub runners, so skip the zed-ros2-wrapper packages.
-        # --packages-skip on the command line replaces colcon_defaults.yaml's build list, so zed_debug/zed_ros2 are repeated.
         run: just build --packages-ignore zed_debug zed_ros2 zed_components zed_wrapper
 
       - name: Test
