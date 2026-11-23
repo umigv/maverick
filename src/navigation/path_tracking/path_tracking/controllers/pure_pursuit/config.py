@@ -16,6 +16,7 @@ class PurePursuitConfig:
     """
 
     max_angular_speed_radps: float
+    max_angular_accel_radps2: float
     base_lookahead_distance_m: float
     min_lookahead_distance_m: float
     max_lookahead_distance_m: float

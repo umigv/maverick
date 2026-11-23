@@ -27,7 +27,7 @@ class PathTracking(Node):
 
         match self.config.algorithm:
             case "pure_pursuit":
-                self.controller: Controller = PurePursuitController(self.config.pure_pursuit, self.get_logger())
+                self.controller: Controller = PurePursuitController(self.config.pure_pursuit, self.get_logger(), control_period_s=self.config.control_period_s)
             case "stanley":
                 self.controller = StanleyController(self.config.stanley, self.get_logger())
             case "differential_drive":

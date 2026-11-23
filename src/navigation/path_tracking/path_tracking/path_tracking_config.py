@@ -37,6 +37,7 @@ class PathTrackingConfig:
     # because it cannot verify immutability across modules.
     pure_pursuit: PurePursuitConfig = PurePursuitConfig(  # noqa: RUF009
         max_angular_speed_radps=0.6,
+        max_angular_accel_radps2=1.5,
         base_lookahead_distance_m=0.8,
         min_lookahead_distance_m=0.8,
         max_lookahead_distance_m=1.5,

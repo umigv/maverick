@@ -9,12 +9,14 @@ from .config import PurePursuitConfig
 
 
 class PurePursuitController:
-    def __init__(self, config: PurePursuitConfig, logger: RcutilsLogger) -> None:
+    def __init__(self, config: PurePursuitConfig, logger: RcutilsLogger, control_period_s: float) -> None:
         self.config = config
         self.logger = logger
         self.path: Path2d | None = None
         self.lookahead_fractional_index: float = 0.0
         self.target_heading: Rotation2d | None = None
+        self.control_period_s = control_period_s
+        self.last_angular_speed: float = 0.0
 
     def set_path(self, path: Path2d) -> None:
         self.path = path
@@ -29,6 +31,7 @@ class PurePursuitController:
         if pose.point.distance(self.path[-1]) < lookahead_distance:
             self.logger.info("Reached goal - stopping")
             self.path = None
+            self.last_angular_speed = 0.0
             return Twist()
 
         # fmt: off
@@ -37,6 +40,7 @@ class PurePursuitController:
         # fmt: on
         if lookahead_point is None:
             self.logger.warning("No valid lookahead point found - stopping")
+            self.last_angular_speed = 0.0
             return Twist()
 
         self.target_heading = Rotation2d.from_vector(lookahead_point - pose.point)
@@ -45,7 +49,12 @@ class PurePursuitController:
         linear = lookahead_distance * self.config.linear_speed_gain
         angular = linear * curvature
         scale = min(1.0, self.config.max_angular_speed_radps / abs(angular)) if angular != 0.0 else 1.0
-        return Twist(linear=Vector3(x=linear * scale), angular=Vector3(z=angular * scale))
+
+        angular = angular * scale
+        angular = clamp(angular, min=self.last_angular_speed - self.config.max_angular_accel_radps2 * self.control_period_s,
+                        max=self.last_angular_speed + self.config.max_angular_accel_radps2 * self.control_period_s)
+        self.last_angular_speed = angular
+        return Twist(linear=Vector3(x=linear * scale), angular=Vector3(z=angular))
 
     def compute_lookahead_distance(self, speed: float) -> float:
         lookahead = self.config.base_lookahead_distance_m + self.config.lookahead_speed_gain * speed
