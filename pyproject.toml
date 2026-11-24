@@ -1,7 +1,14 @@
 [tool.pixi.workspace]
 name = "maverick"
-channels = ["https://prefix.dev/robostack-lyrical", "https://prefix.dev/conda-forge"]
-platforms = ["linux-64", "linux-aarch64", "osx-arm64"]
+channels = [
+    "https://prefix.dev/robostack-lyrical",
+    "https://prefix.dev/conda-forge",
+]
+platforms = [
+    "linux-64",
+    "linux-aarch64",
+    { platform = "osx-arm64", macos = "14" },
+]
 
 [tool.pixi.feature.ros.dependencies]
 # Build toolchain
@@ -46,6 +53,8 @@ ros-lyrical-teleop-twist-joy = "*"
 ros-lyrical-twist-mux = "*"
 ros-lyrical-urdf-launch = "*"
 ros-lyrical-xacro = "*"
+ros-lyrical-zed-description = "*"
+ros-lyrical-zed-msgs = "*"
 torchvision = "*"
 types-pyyaml = "*"
 ultralytics = "*"
@@ -60,15 +69,6 @@ scripts = ["install/setup.bash"]
 
 [tool.pixi.feature.ros.activation.env]
 RCUTILS_COLORIZED_OUTPUT = "1"
-
-# robostack's osx-arm64 builds of the zed packages require macOS >= 14
-[tool.pixi.feature.ros.target.linux-64.dependencies]
-ros-lyrical-zed-description = "*"
-ros-lyrical-zed-msgs = "*"
-
-[tool.pixi.feature.ros.target.linux-aarch64.dependencies]
-ros-lyrical-zed-description = "*"
-ros-lyrical-zed-msgs = "*"
 
 [tool.pixi.feature.ros.target.linux-64.activation.env]
 # OGRE's GLX renderer can't parent into a Wayland surface. Under WSLg (and native Wayland sessions), Qt6 defaults to
