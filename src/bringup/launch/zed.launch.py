@@ -56,9 +56,8 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Laun
 def generate_launch_description() -> LaunchDescription:
     return LaunchDescription(
         [
-            # TODO: fill in with real serial numbers
-            DeclareLaunchArgument("left_serial", default_value="0"),
-            DeclareLaunchArgument("right_serial", default_value="0"),
+            DeclareLaunchArgument("left_serial", default_value="39394535"),
+            DeclareLaunchArgument("right_serial", default_value="36466710"),
             OpaqueFunction(function=launch_setup),
         ]
     )
