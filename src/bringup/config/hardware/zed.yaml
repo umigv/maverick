@@ -15,11 +15,11 @@
       publish_stereo: false
 
     depth:
-      depth_mode: "NEURAL_LIGHT"
-      publish_depth_map: true
-      publish_depth_info: false
-      publish_point_cloud: false
-      publish_depth_confidence: false
+      depth_mode: "NEURAL"
+      publish_depth_map: false
+      publish_depth_info: true
+      publish_point_cloud: true
+      publish_depth_confidence: true
       publish_disparity: false
 
     pos_tracking:
