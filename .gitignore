@@ -38,4 +38,5 @@ log/
 # Models
 *.pt
 
-pyzed-*
+# Wheels
+wheels/*
