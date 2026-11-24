@@ -8,6 +8,7 @@ platforms = [
     "linux-64",
     "linux-aarch64",
     { platform = "osx-arm64", macos = "14" },
+    { name = "linux-64-cuda", platform = "linux-64", cuda = "13.4" },
 ]
 
 [tool.pixi.feature.ros.dependencies]
@@ -29,7 +30,7 @@ opencv = "*"
 pandas = "*"
 plotly = "*"
 pyproj = "*"
-pytorch ="*"
+pytorch = "*"
 pyserial = "*"
 # ROS 2 launch_testing's pytest plugin uses the pre-8.0 pytest_pycollect_makemodule(path, ...)
 # hook signature; pytest 8 removed the `path` arg, breaking pytest collection entirely.
@@ -104,21 +105,22 @@ clang-format = "22.*"
 # Keeps mdformat from reflowing GitHub [!WARNING]-style alerts; not on conda-forge
 mdformat-gfm-alerts = "*"
 
+# The feature enabling ZED camera nodes (not just messages) exists only on a platform with CUDA
+[tool.pixi.feature.zed.target.linux-64-cuda.dependencies]
+ros-lyrical-cuda-buffer = "*"
+ros-lyrical-cuda-buffer-backend = "*"
+
 [tool.pixi.environments]
-default = { features = ["ros", "tooling"], solve-group = "default" }
+default = { features = ["ros", "tooling", "zed"], solve-group = "default" }
 
 [tool.mdformat]
-wrap = "no"         # one line makes prs easier to read on github
-number = true       # 1. 2. 3. is more clear than 1. 1. 1.
+wrap = "no"   # one line makes prs easier to read on github
+number = true # 1. 2. 3. is more clear than 1. 1. 1.
 
 [tool.ruff]
 target-version = "py314"
 line-length = 120
-extend-exclude = [
-    "build",
-    "install",
-    "log",
-]
+extend-exclude = ["build", "install", "log"]
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -181,10 +183,7 @@ enable_error_code = [
 namespace_packages = true
 explicit_package_bases = true
 ignore_missing_imports = false
-exclude = [
-    "(^|/)(build|install|log)/",
-    "(^|/)setup\\.py$",
-]
+exclude = ["(^|/)(build|install|log)/", "(^|/)setup\\.py$"]
 
 [[tool.mypy.overrides]]
 # Dependencies that ship no type information (no py.typed marker, no stubs). Without this, mypy raises import-untyped
@@ -200,7 +199,16 @@ module = [
     "pyzed.*",
     "h5py",
     "plotly.*",
-    "cv_bridge"
+    "cv_bridge",
 ]
 ignore_missing_imports = true
 disable_error_code = ["attr-defined"]
+
+[tool.pixi.tasks.build]
+cmd = "colcon build --packages-skip zed_components zed_debug"
+
+[tool.pixi.target.linux-64-cuda.tasks.build]
+cmd = "colcon build"
+
+[tool.pixi.tasks.test]
+cmd = "colcon test"

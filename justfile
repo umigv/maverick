@@ -15,20 +15,20 @@ generate-pyrightconfig:
 
 # Build the entire workspace
 build *args:
-    pixi run colcon build {{args}}
+    pixi run build -- {{args}}
 
 # Run all tests
 test *args:
-    pixi run colcon test {{args}}
+    pixi run test {{args}}
     pixi run colcon test-result --verbose
 
 # Build a single package and its dependencies
 build-package package *args:
-    pixi run colcon build --packages-up-to {{package}} {{args}}
+    pixi run build -- --packages-up-to {{package}} {{args}}
 
 # Run tests for a single package
 test-package package *args:
-    pixi run colcon test --packages-select {{package}} {{args}}
+    pixi run test -- --packages-select {{package}} {{args}}
     pixi run colcon test-result --verbose
 
 # Delete build, install, and log directories
@@ -39,11 +39,24 @@ clean:
 
 # Auto-format all source files
 format *args:
+    @if [ -z "{{args}}" ]; then just _format-default; else just _format-with-args {{args}}; fi
+
+_format-default:
+    pixi run python3 scripts/format.py --ignore zed_debug zed_wrapper zed_ros2 zed_components
+
+_format-with-args *args:
     pixi run python3 scripts/format.py {{args}}
 
 # Run all linters
 lint *args:
+    @if [ -z "{{args}}" ]; then just _lint-default; else just _lint-with-args {{args}}; fi
+
+_lint-default:
+    pixi run python3 scripts/lint.py --ignore zed_debug zed_wrapper zed_ros2 zed_components
+
+_lint-with-args *args:
     pixi run python3 scripts/lint.py {{args}}
+
 
 # -- Packages ----------------------------------------------------------------------------------------------------------
 
