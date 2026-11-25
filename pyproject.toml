@@ -54,8 +54,6 @@ ros-lyrical-teleop-twist-joy = "*"
 ros-lyrical-twist-mux = "*"
 ros-lyrical-urdf-launch = "*"
 ros-lyrical-xacro = "*"
-ros-lyrical-zed-description = "*"
-ros-lyrical-zed-msgs = "*"
 torchvision = "*"
 types-pyyaml = "*"
 ultralytics = "*"
@@ -104,6 +102,10 @@ clang-format = "22.*"
 [tool.pixi.feature.tooling.pypi-dependencies]
 # Keeps mdformat from reflowing GitHub [!WARNING]-style alerts; not on conda-forge
 mdformat-gfm-alerts = "*"
+
+[tool.pixi.feature.zed.dependencies]
+ros-lyrical-zed-description = "*"
+ros-lyrical-zed-msgs = "*"
 
 # The feature enabling ZED camera nodes (not just messages) exists only on a platform with CUDA
 [tool.pixi.feature.zed.target.linux-64-cuda.dependencies]
