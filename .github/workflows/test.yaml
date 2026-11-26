@@ -45,8 +45,7 @@ jobs:
           restore-keys: ccache-${{ runner.os }}-
 
       - name: Build
-        # ZED SDK/CUDA aren't installed on GitHub runners, so skip the zed-ros2-wrapper packages.
-        run: just build --packages-ignore zed_debug zed_ros2 zed_components zed_wrapper
+        run: just build
 
       - name: Test
         run: just test
