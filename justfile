@@ -39,22 +39,10 @@ clean:
 
 # Auto-format all source files
 format *args:
-    @if [ -z "{{args}}" ]; then just _format-default; else just _format-with-args {{args}}; fi
-
-_format-default:
-    pixi run python3 scripts/format.py --ignore zed_debug zed_wrapper zed_ros2 zed_components
-
-_format-with-args *args:
     pixi run python3 scripts/format.py {{args}}
 
 # Run all linters
 lint *args:
-    @if [ -z "{{args}}" ]; then just _lint-default; else just _lint-with-args {{args}}; fi
-
-_lint-default:
-    pixi run python3 scripts/lint.py --ignore zed_debug zed_wrapper zed_ros2 zed_components
-
-_lint-with-args *args:
     pixi run python3 scripts/lint.py {{args}}
 
 
