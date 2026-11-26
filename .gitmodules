@@ -4,3 +4,7 @@
 [submodule "third_party/zed-ros2-wrapper"]
 	path = third-party/zed-ros2-wrapper
 	url = https://github.com/stereolabs/zed-ros2-wrapper.git
+[submodule "third-party/zed-ros2-wrapper"]
+	path = third-party/zed-ros2-wrapper
+	url = https://github.com/stereolabs/zed-ros2-wrapper.git
+	branch = 5.6.0
