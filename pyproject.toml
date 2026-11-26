@@ -213,4 +213,7 @@ cmd = "colcon build --packages-skip zed_components zed_debug zed_ros2 zed_wrappe
 cmd = "colcon build"
 
 [tool.pixi.tasks.test]
+cmd = "colcon test --packages-skip zed_components zed_debug zed_ros2 zed_wrapper"
+
+[tool.pixi.target.linux-64-cuda.tasks.test]
 cmd = "colcon test"
