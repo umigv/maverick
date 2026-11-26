@@ -207,7 +207,7 @@ ignore_missing_imports = true
 disable_error_code = ["attr-defined"]
 
 [tool.pixi.tasks.build]
-cmd = "colcon build --packages-skip zed_components zed_debug"
+cmd = "colcon build --packages-skip zed_components zed_debug zed_ros2 zed_wrapper"
 
 [tool.pixi.target.linux-64-cuda.tasks.build]
 cmd = "colcon build"
