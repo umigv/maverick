@@ -19,7 +19,7 @@ build *args:
 
 # Run all tests
 test *args:
-    pixi run test {{args}}
+    pixi run test -- {{args}}
     pixi run colcon test-result --verbose
 
 # Build a single package and its dependencies
