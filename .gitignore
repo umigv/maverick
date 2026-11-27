@@ -37,3 +37,6 @@ log/
 
 # Models
 *.pt
+
+# Wheels
+wheels/*

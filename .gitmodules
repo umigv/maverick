@@ -1,3 +1,7 @@
 [submodule "src/hardware/vectornav_driver/third_party/vectornav_sdk"]
 	path = src/hardware/vectornav_driver/third_party/vectornav_sdk
 	url = git@github.com:umigv/vectornav_sdk.git
+[submodule "third-party/zed-ros2-wrapper"]
+	path = third-party/zed-ros2-wrapper
+	url = https://github.com/stereolabs/zed-ros2-wrapper.git
+	branch = 5.6.0

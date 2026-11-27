@@ -1,7 +1,15 @@
 [tool.pixi.workspace]
 name = "maverick"
-channels = ["https://prefix.dev/robostack-lyrical", "https://prefix.dev/conda-forge"]
-platforms = ["linux-64", "linux-aarch64", "osx-arm64"]
+channels = [
+    "https://prefix.dev/robostack-lyrical",
+    "https://prefix.dev/conda-forge",
+]
+platforms = [
+    { name = "linux-64-cuda", platform = "linux-64", cuda = "13.4" },
+    "linux-64",
+    "linux-aarch64",
+    { platform = "osx-arm64", macos = "14" },
+]
 
 [tool.pixi.feature.ros.dependencies]
 # Build toolchain
@@ -16,12 +24,13 @@ python = "3.14*"
 geographiclib-cpp = "*"
 h5py = "*"
 matplotlib-base = "*"
+nlohmann_json = "*"
 numpy = "*"
 opencv = "*"
 pandas = "*"
 plotly = "*"
 pyproj = "*"
-pytorch ="*"
+pytorch = "*"
 pyserial = "*"
 # ROS 2 launch_testing's pytest plugin uses the pre-8.0 pytest_pycollect_makemodule(path, ...)
 # hook signature; pytest 8 removed the `path` arg, breaking pytest collection entirely.
@@ -29,11 +38,14 @@ pytest = "<8"
 pyubx2 = "*"
 # setuptools 80 removed the `develop` command that colcon's ament_python editable installs rely on
 setuptools = "<80"
+ros-lyrical-backward-ros = "*"
+ros-lyrical-cv-bridge = "*"
 ros-lyrical-foxglove-bridge = "*"
 ros-lyrical-foxglove-msgs = "*"
 ros-lyrical-geographic-msgs = "*"
 ros-lyrical-joint-state-publisher = "*"
 ros-lyrical-joy = "*"
+ros-lyrical-nmea-msgs = "*"
 ros-lyrical-robot-localization = "*"
 ros-lyrical-robot-state-publisher = "*"
 ros-lyrical-ros-base = "*"
@@ -89,21 +101,38 @@ clang-format = "22.*"
 # Keeps mdformat from reflowing GitHub [!WARNING]-style alerts; not on conda-forge
 mdformat-gfm-alerts = "*"
 
+[tool.pixi.feature.zed.dependencies]
+ros-lyrical-zed-description = "*"
+ros-lyrical-zed-msgs = "*"
+
+# The feature enabling ZED camera nodes (not just messages) exists only on a platform with CUDA
+[tool.pixi.feature.zed.target.linux-64-cuda.dependencies]
+sysroot_linux-64 = ">=2.38" # libsl_zed.so requirement
+ros-lyrical-cuda-buffer = "*"
+ros-lyrical-cuda-buffer-backend = "*"
+ros-lyrical-compressed-image-transport = "*"       # for IPC type-adapted zero-copy of images
+ros-lyrical-compressed-depth-image-transport = "*" # for IPC type-adapted zero-copy of measures
+
+[tool.pixi.feature.zed.target.linux-64-cuda.activation.env]
+# ZED SDK's libsl_zed.so and symlinked libraries from GPU drivers
+LD_LIBRARY_PATH = "/usr/local/zed/lib:$CONDA_PREFIX/lib/nvidia:$LD_LIBRARY_PATH"
+ZED_DIR = "/usr/local/zed"
+CUDAToolkit_ROOT = "/usr/local/cuda"
+
+[tool.pixi.feature.zed.target.linux-64-cuda.activation]
+scripts = ["scripts/fix_zed_linker_issues.sh"]
+
 [tool.pixi.environments]
-default = { features = ["ros", "tooling"], solve-group = "default" }
+default = { features = ["ros", "tooling", "zed"], solve-group = "default" }
 
 [tool.mdformat]
-wrap = "no"         # one line makes prs easier to read on github
-number = true       # 1. 2. 3. is more clear than 1. 1. 1.
+wrap = "no"   # one line makes prs easier to read on github
+number = true # 1. 2. 3. is more clear than 1. 1. 1.
 
 [tool.ruff]
 target-version = "py314"
 line-length = 120
-extend-exclude = [
-    "build",
-    "install",
-    "log",
-]
+extend-exclude = ["build", "install", "log"]
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -166,10 +195,7 @@ enable_error_code = [
 namespace_packages = true
 explicit_package_bases = true
 ignore_missing_imports = false
-exclude = [
-    "(^|/)(build|install|log)/",
-    "(^|/)setup\\.py$",
-]
+exclude = ["(^|/)(build|install|log)/", "(^|/)setup\\.py$"]
 
 [[tool.mypy.overrides]]
 # Dependencies that ship no type information (no py.typed marker, no stubs). Without this, mypy raises import-untyped
@@ -184,7 +210,20 @@ module = [
     "tf2_ros.*",
     "pyzed.*",
     "h5py",
-    "plotly.*"
+    "plotly.*",
+    "cv_bridge",
 ]
 ignore_missing_imports = true
 disable_error_code = ["attr-defined"]
+
+[tool.pixi.tasks.build]
+cmd = "colcon build --packages-skip zed_components zed_debug zed_ros2 zed_wrapper"
+
+[tool.pixi.target.linux-64-cuda.tasks.build]
+cmd = "colcon build"
+
+[tool.pixi.tasks.test]
+cmd = "colcon test --packages-skip zed_components zed_debug zed_ros2 zed_wrapper"
+
+[tool.pixi.target.linux-64-cuda.tasks.test]
+cmd = "colcon test"
