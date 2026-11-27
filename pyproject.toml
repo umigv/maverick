@@ -82,8 +82,6 @@ QT_QPA_PLATFORM = "xcb"
 # to detect XWayland-vs-bare-X11 at activation time, so this stays Linux-only rather than global.
 # TODO: See https://github.com/ros2/rviz/issues/1079 and https://github.com/ros2/rviz/issues/1052.
 QT_ENABLE_HIGHDPI_SCALING = "0"
-ZED_DIR = "/usr/local/zed"
-CUDAToolkit_ROOT = "/usr/local/cuda"
 
 [tool.pixi.feature.ros.target.linux-aarch64.activation.env]
 QT_QPA_PLATFORM = "xcb"
@@ -109,8 +107,18 @@ ros-lyrical-zed-msgs = "*"
 
 # The feature enabling ZED camera nodes (not just messages) exists only on a platform with CUDA
 [tool.pixi.feature.zed.target.linux-64-cuda.dependencies]
+sysroot_linux-64 = ">=2.38" # libsl_zed.so requirement
 ros-lyrical-cuda-buffer = "*"
 ros-lyrical-cuda-buffer-backend = "*"
+
+[tool.pixi.feature.zed.target.linux-64-cuda.activation.env]
+# ZED SDK's libsl_zed.so and symlinked libraries from GPU drivers
+LD_LIBRARY_PATH = "/usr/local/zed/lib:$CONDA_PREFIX/lib/nvidia:$LD_LIBRARY_PATH"
+ZED_DIR = "/usr/local/zed"
+CUDAToolkit_ROOT = "/usr/local/cuda"
+
+[tool.pixi.feature.zed.target.linux-64-cuda.activation]
+scripts = ["scripts/fix_zed_linker_issues.sh"]
 
 [tool.pixi.environments]
 default = { features = ["ros", "tooling", "zed"], solve-group = "default" }
