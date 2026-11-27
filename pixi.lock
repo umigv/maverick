@@ -1318,6 +1318,8 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/urllib3-2.8.0-pyh5ded981_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/wayland-protocols-1.50-hd8ed1ab_0.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-backward-ros-1.0.8-hb0f4dca_30.conda
+      - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-compressed-depth-image-transport-6.2.6-hb0f4dca_30.conda
+      - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-compressed-image-transport-6.2.6-hb0f4dca_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-cuda-buffer-0.1.2-hb0f4dca_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-cuda-buffer-backend-0.1.2-hb0f4dca_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-cv-bridge-4.1.0-hb0f4dca_30.conda
@@ -1389,6 +1391,8 @@ environments:
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-class-loader-2.9.4-np2py314hac0c0d2_31.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-common-interfaces-5.9.3-np2py314h53a0733_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-composition-interfaces-2.4.5-np2py314h53a0733_30.conda
+      - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-compressed-depth-image-transport-6.2.6-np2py314hb935b5b_30.conda
+      - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-compressed-image-transport-6.2.6-np2py314h53a0733_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-console-bridge-vendor-1.9.1-np2py314hac0c0d2_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-cuda-buffer-0.1.2-np2py314h53a0733_30.conda
       - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-cuda-buffer-backend-0.1.2-np2py314h53a0733_30.conda
@@ -23281,6 +23285,24 @@ packages:
   run_exports: {}
   size: 2070
   timestamp: 1792750634683
+- conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-compressed-depth-image-transport-6.2.6-hb0f4dca_30.conda
+  sha256: 13ff154df2e2f2d6533a4fa7a9d65f034103b943d50efe355c4506fd21c07451
+  md5: d89ccc29696067a886ce0974b39b774f
+  depends:
+  - ros2-compressed-depth-image-transport ==6.2.6
+  - ros2-distro-mutex 0.22.* lyrical_*
+  run_exports: {}
+  size: 2171
+  timestamp: 1792762143778
+- conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-compressed-image-transport-6.2.6-hb0f4dca_30.conda
+  sha256: 426919449fb1abd7a92fe57f126147749ab08ca80d213728f52c92fb3f00c6dd
+  md5: d0528621a23f1e3c8b6e942a2de52874
+  depends:
+  - ros2-compressed-image-transport ==6.2.6
+  - ros2-distro-mutex 0.22.* lyrical_*
+  run_exports: {}
+  size: 2141
+  timestamp: 1792761817205
 - conda: https://prefix.dev/robostack-lyrical/linux-64/ros-lyrical-cuda-buffer-0.1.2-hb0f4dca_30.conda
   sha256: 83b9af03e2fa23188d0a1daff9f75709361902b6230b9263119ead5adac7b522
   md5: f3968c89db56ca372a8054a163884d5f
@@ -24457,6 +24479,56 @@ packages:
   run_exports: {}
   size: 262049
   timestamp: 1792757008661
+- conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-compressed-depth-image-transport-6.2.6-np2py314hb935b5b_30.conda
+  sha256: a9d937a47dc1a2ceadeea5caef5789058d39c1bbab638d10ceb9b32d447dc212
+  md5: 43f3387323ad8adcc76af7c698d8f70e
+  depends:
+  - libgl-devel
+  - libopencv
+  - libopengl-devel
+  - py-opencv
+  - python
+  - ros2-cv-bridge
+  - ros2-distro-mutex 0.22.* lyrical_*
+  - ros2-image-transport
+  - ros2-pluginlib
+  - ros2-rcl-interfaces
+  - ros2-rclcpp
+  - ros2-ros-workspace
+  - ros2-sensor-msgs
+  - libstdcxx >=15
+  - libgcc >=15
+  - __glibc >=2.28,<3.0.a0
+  - libgl >=1.7.0,<2.0a0
+  - py-opencv >=5.0.0,<6.0a0
+  - python_abi 3.14.* *_cp314
+  - numpy >=1.25,<3
+  - libopengl >=1.7.0,<2.0a0
+  - ros2-distro-mutex >=0.22.0,<0.23.0a0
+  - libopencv >=5.0.0,<5.0.1.0a0
+  license: BSD-3-Clause OR MIT
+  run_exports: {}
+  size: 324069
+  timestamp: 1792762112129
+- conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-compressed-image-transport-6.2.6-np2py314h53a0733_30.conda
+  sha256: 36a27338850acf3199f775874efcabd8af4d1e5717675a7a59bb3c718587868e
+  md5: 1861e150b2d95babf170d4b4e8161f48
+  depends:
+  - python
+  - ros2-cv-bridge
+  - ros2-distro-mutex 0.22.* lyrical_*
+  - ros2-image-transport
+  - ros2-ros-workspace
+  - libstdcxx >=15
+  - libgcc >=15
+  - __glibc >=2.28,<3.0.a0
+  - numpy >=1.25,<3
+  - ros2-distro-mutex >=0.22.0,<0.23.0a0
+  - python_abi 3.14.* *_cp314
+  license: BSD-3-Clause
+  run_exports: {}
+  size: 299972
+  timestamp: 1792761794456
 - conda: https://prefix.dev/robostack-lyrical/linux-64/ros2-console-bridge-vendor-1.9.1-np2py314hac0c0d2_30.conda
   sha256: 67762d22e1f2bff0af263b3408a6a630e7594e644b760790050c7b0627113750
   md5: 455112885463cd3ec10d2ff7b0751da4

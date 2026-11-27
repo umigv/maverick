@@ -110,6 +110,8 @@ ros-lyrical-zed-msgs = "*"
 sysroot_linux-64 = ">=2.38" # libsl_zed.so requirement
 ros-lyrical-cuda-buffer = "*"
 ros-lyrical-cuda-buffer-backend = "*"
+ros-lyrical-compressed-image-transport = "*"       # for IPC type-adapted zero-copy of images
+ros-lyrical-compressed-depth-image-transport = "*" # for IPC type-adapted zero-copy of measures
 
 [tool.pixi.feature.zed.target.linux-64-cuda.activation.env]
 # ZED SDK's libsl_zed.so and symlinked libraries from GPU drivers
