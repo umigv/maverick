@@ -95,7 +95,7 @@ class DataSource(IntEnum):
 # LittleEndian* pins LSB-first packing, so decoding the wire value is identical on big-endian hosts.
 class InsStatusReg(ctypes.LittleEndianUnion):
     class _Bits(ctypes.LittleEndianStructure):
-        _fields_ = [  # noqa: RUF012 (ctypes requires _fields_ as a plain list)
+        _fields_ = [
             ("mode", ctypes.c_uint16, 2),  # 0-1
             ("gnss_fix", ctypes.c_uint16, 1),  # 2
             ("_reserved3", ctypes.c_uint16, 1),  # 3
@@ -108,13 +108,13 @@ class InsStatusReg(ctypes.LittleEndianUnion):
         ]
 
     _anonymous_ = ("bits",)
-    _fields_ = [("bits", _Bits), ("value", ctypes.c_uint16)]  # noqa: RUF012
+    _fields_ = [("bits", _Bits), ("value", ctypes.c_uint16)]
 
 
 # GNSS Status bitfield - VectorNav VN300 ICD section 2.5.17.
 class GnssStatusReg(ctypes.LittleEndianUnion):
     class _Bits(ctypes.LittleEndianStructure):
-        _fields_ = [  # noqa: RUF012 (ctypes requires _fields_ as a plain list)
+        _fields_ = [
             ("enabled", ctypes.c_uint16, 1),  # 0
             ("operational", ctypes.c_uint16, 1),  # 1
             ("fix", ctypes.c_uint16, 1),  # 2
@@ -130,7 +130,7 @@ class GnssStatusReg(ctypes.LittleEndianUnion):
         ]
 
     _anonymous_ = ("bits",)
-    _fields_ = [("bits", _Bits), ("value", ctypes.c_uint16)]  # noqa: RUF012
+    _fields_ = [("bits", _Bits), ("value", ctypes.c_uint16)]
 
 
 # Field order matches the GnssCompassSignalHealthStatus array packed by the driver - VectorNav VN300 ICD section 4.8.1.
