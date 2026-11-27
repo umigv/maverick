@@ -5,10 +5,10 @@ channels = [
     "https://prefix.dev/conda-forge",
 ]
 platforms = [
+    { name = "linux-64-cuda", platform = "linux-64", cuda = "13.4" },
     "linux-64",
     "linux-aarch64",
     { platform = "osx-arm64", macos = "14" },
-    { name = "linux-64-cuda", platform = "linux-64", cuda = "13.4" },
 ]
 
 [tool.pixi.feature.ros.dependencies]
